@@ -29,7 +29,7 @@ async function sendTokenResponse(user, res, message) {
 export async function register(req, res) {
   const { fullname, email, password, contact, isSeller } = req.body;
   try {
-    const existingUser = userModel.findOne({
+    const existingUser = await userModel.findOne({
       $or: [{ email }, { contact }],
     });
 

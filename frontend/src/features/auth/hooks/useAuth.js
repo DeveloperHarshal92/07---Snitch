@@ -19,12 +19,17 @@ export const useAuth = () => {
       fullname,
       isSeller,
     });
-    dispatch(setUser(data.user));
+    console.log(data);
+    if (data?.user) {
+      dispatch(setUser(data.user));
+    }
   }
 
   async function handleLogin({ email, password }) {
     const data = await login({ email, password });
-    dispatch(setUser(data.user));
+    if (data?.user) {
+      dispatch(setUser(data.user));
+    }
   }
 
   return { handleRegister, handleLogin };

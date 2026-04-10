@@ -24,14 +24,19 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleRegister({
-      email: formData.email,
-      contact: formData.contactNumber,
-      password: formData.password,
-      isSeller: formData.isSeller,
-      fullname: formData.fullName,
-    });
-    navigate("/");
+    try {
+      await handleRegister({
+        email: formData.email,
+        contact: formData.contactNumber,
+        password: formData.password,
+        isSeller: formData.isSeller,
+        fullname: formData.fullName,
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert(error.message || "Registration failed");
+    }
   };
 
   return (
