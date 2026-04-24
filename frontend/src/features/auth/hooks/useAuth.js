@@ -29,6 +29,7 @@ export const useAuth = () => {
     if (data?.user) {
       dispatch(setUser(data.user));
     }
+    return data?.user;
   }
 
   return { handleRegister, handleLogin };

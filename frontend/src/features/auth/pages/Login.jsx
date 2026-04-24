@@ -24,10 +24,11 @@ const Login = () => {
         email: formData.email,
         password: formData.password,
       });
-      if (user.role == "buyer") {
-        navigate("/");
-      } else if (user.role == "seller") {
+      if (!user) return;                        // login API returned nothing
+      if (user.role === "seller") {
         navigate("/seller/dashboard");
+      } else {
+        navigate("/");                          // buyer or any other role
       }
     } catch (error) {
       console.error("Login failed", error);
