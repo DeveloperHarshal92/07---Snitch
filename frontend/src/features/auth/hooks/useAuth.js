@@ -19,7 +19,6 @@ export const useAuth = () => {
       fullname,
       isSeller,
     });
-    console.log(data);
     if (data?.user) {
       dispatch(setUser(data.user));
     }
