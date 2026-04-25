@@ -5,6 +5,7 @@ import {
   getAllProducts,
   getSellerProducts,
   getProductDetails,
+  addProductVariant,
 } from "../controllers/product.controller.js";
 import multer from "multer";
 import { createProductValidator } from "../validator/product.validator.js";
@@ -43,12 +44,23 @@ router.get("/seller", authenticateSeller, getSellerProducts);
  */
 router.get("/", getAllProducts);
 
-
 /**
  * @route GET /api/products/:id
  * @desc Get a product by ID
  * @access Public
  */
 router.get("/detail/:id", getProductDetails);
- 
+
+/**
+ * @route POST /api/products/:productId/variants
+ * @desc Add a new variant to an existing product
+ * @access Private (Sellers only)
+ */
+router.post(
+  "/:productId/variants",
+  authenticateSeller,
+  upload.array("images", 7),
+  addProductVariant,
+);
+
 export default router;

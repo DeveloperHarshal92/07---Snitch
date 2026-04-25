@@ -32,12 +32,19 @@ const ProductDetail = () => {
 
   const { handleGetProductDetails } = useProduct();
 
+  // null = "Main" (product itself), string = variant._id
+  const [selectedVariantId, setSelectedVariantId] = useState(null);
+  // Tracks each attr key the user has explicitly chosen, persists across Main toggle
+  const [chosenAttrs, setChosenAttrs] = useState({});
+
   useEffect(() => {
     setIsLoading(true);
     handleGetProductDetails(productId)
       .then((data) => {
         setProduct(data);
         setActiveImg(0);
+        setSelectedVariantId(null);
+        setChosenAttrs({});
       })
       .finally(() => {
         setIsLoading(false);
@@ -45,7 +52,51 @@ const ProductDetail = () => {
       });
   }, [productId]);
 
-  const images = product?.images ?? [];
+  const selectedVariant =
+    selectedVariantId === null
+      ? null
+      : (product?.variants ?? []).find((v) => v._id === selectedVariantId) ?? null;
+
+  // Fall back to product-level values when Main is active
+  const displayImages =
+    selectedVariant?.images?.length ? selectedVariant.images : product?.images ?? [];
+  const displayPrice = {
+    amount: selectedVariant?.price?.amount ?? product?.price?.amount,
+    currency: selectedVariant?.price?.currency ?? product?.price?.currency ?? "INR",
+  };
+  const displayStock = selectedVariant ? (selectedVariant.stock ?? 0) : null;
+
+  // All unique attribute keys across variants e.g. ["Size", "Color"]
+  const allAttrKeys = product
+    ? [...new Set((product.variants ?? []).flatMap((v) => Object.keys(v.attributes ?? {})))]
+    : [];
+
+  // Unique values for a given attr key e.g. ["S", "M", "XL"]
+  const attrValues = (key) =>
+    [...new Set((product?.variants ?? []).map((v) => v.attributes?.[key]).filter(Boolean))];
+
+  // Which value is "active" for a given key — use chosenAttrs (explicit user picks)
+  // so the highlight always reflects what the user actually clicked
+  const activeAttrValue = (key) => chosenAttrs[key] ?? null;
+
+  // When user picks an attr value:
+  // 1. Persist that choice in chosenAttrs
+  // 2. Find the variant that best matches ALL chosen attrs
+  const pickAttrValue = (key, val) => {
+    const next = { ...chosenAttrs, [key]: val };
+    setChosenAttrs(next);
+    let best = null, bestScore = -1;
+    for (const v of product.variants) {
+      let score = 0;
+      for (const [k, dv] of Object.entries(next)) {
+        if (v.attributes?.[k] === dv) score++;
+      }
+      if (score > bestScore) { bestScore = score; best = v; }
+    }
+    if (best) { setSelectedVariantId(best._id); setActiveImg(0); }
+  };
+
+  const images = displayImages;
 
   /* ── Skeleton ─────────────────────────────────────────────── */
   if (isLoading) {
@@ -173,9 +224,10 @@ const ProductDetail = () => {
         .pdp-btn-outline:hover { background-color: #0d0d0b !important; color: #fbf9f6 !important; border-color: #0d0d0b !important; }
         ::selection { background: rgba(201,169,110,0.28); }
         .zoom-img { transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
-        .zoom-img:hover { transform: scale(1.06); }
+        .zoom-img:hover { transform: scale(1.02); }
         .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .attr-btn:hover:not([data-selected="true"]) { border-color: #0d0d0b !important; }
       `}</style>
 
       <div
@@ -252,7 +304,7 @@ const ProductDetail = () => {
                     <img
                       src={img.url}
                       alt={`Thumbnail ${i + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </button>
                 ))}
@@ -261,8 +313,8 @@ const ProductDetail = () => {
 
             {/* Hero image */}
             <div
-              className="relative flex-1 overflow-hidden rounded-sm"
-              style={{ backgroundColor: "#f0ede9", height: "600px" }}
+              className="relative flex-1 rounded-sm"
+              style={{ backgroundColor: "#f5f3f0", minHeight: "420px" }}
               onMouseEnter={() => setImgHovered(true)}
               onMouseLeave={() => setImgHovered(false)}
             >
@@ -271,8 +323,12 @@ const ProductDetail = () => {
                   key={activeImg}
                   src={images[activeImg]?.url}
                   alt={`${product.title} — view ${activeImg + 1}`}
-                  className="zoom-img w-full h-full object-cover"
-                  style={{ animation: "fadeIn 0.35s ease" }}
+                  className="zoom-img w-full h-full object-contain rounded-sm"
+                  style={{
+                    animation: "fadeIn 0.35s ease",
+                    display: "block",
+                    maxWidth: "100%",
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
@@ -453,7 +509,7 @@ const ProductDetail = () => {
                 className="text-2xl font-medium"
                 style={{ color: "#C9A96E" }}
               >
-                {fmt(product.price?.amount, product.price?.currency)}
+                {fmt(displayPrice.amount, displayPrice.currency)}
               </span>
               <span
                 className="text-[0.6rem] tracking-[0.15em] uppercase"
@@ -462,6 +518,99 @@ const ProductDetail = () => {
                 incl. of all taxes
               </span>
             </div>
+
+            {/* ── Variant selector ──────────────────────────── */}
+            {product?.variants?.length > 0 && (
+              <div className="flex flex-col gap-4">
+
+                {/* ── Main row ───────────────────────────────────── */}
+                <div className="flex flex-col gap-2">
+                  <p
+                    className="m-0 text-[0.6rem] tracking-[0.22em] uppercase"
+                    style={{ color: "#6b6158" }}
+                  >
+                    View
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => { setSelectedVariantId(null); setChosenAttrs({}); setActiveImg(0); }}
+                      className="text-[0.6rem] tracking-[0.12em] uppercase px-3.5 py-2 rounded-sm border cursor-pointer transition-all duration-200"
+                      style={{
+                        backgroundColor: selectedVariantId === null ? "#C9A96E" : "transparent",
+                        color: selectedVariantId === null ? "#0d0d0b" : "#6b6158",
+                        borderColor: selectedVariantId === null ? "#C9A96E" : "#d0c5b5",
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: selectedVariantId === null ? 500 : 400,
+                      }}
+                    >
+                      Original
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── One row per attribute key ───────────────────── */}
+                {allAttrKeys.map((attrKey) => (
+                  <div key={attrKey} className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <p
+                        className="m-0 text-[0.6rem] tracking-[0.22em] uppercase"
+                        style={{ color: "#6b6158" }}
+                      >
+                        {attrKey}
+                      </p>
+                      {chosenAttrs[attrKey] && (
+                        <span
+                          className="text-[0.6rem] tracking-[0.1em]"
+                          style={{ color: "#3d342c" }}
+                        >
+                          {chosenAttrs[attrKey]}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {attrValues(attrKey).map((val) => {
+                        const isActive = activeAttrValue(attrKey) === val;
+                        const outOfStock = !(product?.variants ?? []).some(
+                          (v) => v.attributes?.[attrKey] === val && (v.stock ?? 0) > 0
+                        );
+                        return (
+                          <button
+                            key={val}
+                            onClick={() => pickAttrValue(attrKey, val)}
+                            className="text-[0.6rem] tracking-[0.12em] uppercase px-3.5 py-2 rounded-sm border cursor-pointer transition-all duration-200"
+                            style={{
+                              backgroundColor: isActive ? "#0d0d0b" : "transparent",
+                              color: isActive ? "#fbf9f6" : outOfStock ? "#c4bdb5" : "#0d0d0b",
+                              borderColor: isActive ? "#0d0d0b" : outOfStock ? "#e4e2df" : "#d0c5b5",
+                              fontFamily: "'Inter', sans-serif",
+                              textDecoration: outOfStock && !isActive ? "line-through" : "none",
+                            }}
+                          >
+                            {val}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Stock indicator — only when a variant is active */}
+                {displayStock !== null && (
+                  <p
+                    className="m-0 text-[0.6rem] tracking-[0.18em] uppercase"
+                    style={{
+                      color: displayStock === 0 ? "#c0392b" : displayStock <= 5 ? "#b7791f" : "#4a7c59",
+                    }}
+                  >
+                    {displayStock === 0
+                      ? "Out of stock"
+                      : displayStock <= 5
+                      ? `Only ${displayStock} left`
+                      : "In stock"}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Divider */}
             <div className="border-t" style={{ borderColor: "#e4e2df" }} />

@@ -1,4 +1,5 @@
 import axios from "axios";
+// Triggering Vite HMR
 
 const productApiInstance = axios.create({
   baseURL: "/api/products",
@@ -30,7 +31,7 @@ export const getAllProducts = async () => {
   } catch (error) {
     console.error("Error fetching all products:", error);
   }
-};  
+};
 
 export const getProductDetails = async (productId) => {
   try {
@@ -39,4 +40,24 @@ export const getProductDetails = async (productId) => {
   } catch (error) {
     console.error("Error fetching product details:", error);
   }
-};    
+};
+
+export const addProductVariant = async (productId, newProductVariant) => {
+  try {
+    const formData = new FormData();
+    newProductVariant.images.forEach((image) => {
+      formData.append(`images`, image.file);
+    });
+    formData.append("stock", newProductVariant.stock);
+    formData.append("price", newProductVariant.price.amount);
+    formData.append("currency", newProductVariant.price.currency);
+    formData.append("attributes", JSON.stringify(newProductVariant.attributes));
+    const response = await productApiInstance.post(
+      `/${productId}/variants`,
+      formData,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error adding product variant:", error);
+  }
+};

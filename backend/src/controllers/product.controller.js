@@ -105,3 +105,66 @@ export const getProductDetails = async (req, res) => {
     });
   }
 };
+
+export const addProductVariant = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await productModel.findOne({
+      _id: productId,
+      seller: req.user._id,
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+        success: false,
+      });
+    }
+
+    const files = req.files;
+    const images = [];
+    if (files && files.length > 0) {
+      const uploadedImages = await Promise.all(
+        files.map(async (file) => {
+          return await uploadFile({
+            buffer: file.buffer,
+            fileName: file.originalname,
+          });
+        })
+      );
+      images.push(...uploadedImages);
+    }
+    
+    const priceAmount = Number(req.body.price);
+    const priceCurrency = req.body.currency || "INR";
+    const stock = Number(req.body.stock) || 0;
+    const attributes = req.body.attributes ? JSON.parse(req.body.attributes) : {};
+
+    const newVariant = {
+      images,
+      stock,
+      price: {
+        amount: priceAmount,
+        currency: priceCurrency,
+      },
+      attributes,
+    };
+
+    product.variants.push(newVariant);
+    
+    await product.save();
+
+    res.status(201).json({
+      message: "Variant added successfully",
+      success: true,
+      product,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to create product variant",
+      success: false,
+    });
+  }
+};
