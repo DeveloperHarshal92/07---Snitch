@@ -43,7 +43,7 @@ const Dashboard = () => {
       <FontLink />
       <div
         className="min-h-screen selection:bg-[#C9A96E]/30"
-        style={{ backgroundColor: "#fbf9f6", fontFamily: "'Inter', sans-serif", color: "#1b1c1a" }}
+        style={{ backgroundColor: "#fbf9f6", fontFamily: "'Inter', sans-serif", color: "#0d0d0b" }}
       >
 
         {/* ── Header ──────────────────────────────────────────── */}
@@ -71,9 +71,9 @@ const Dashboard = () => {
             <button
               onClick={() => navigate("/seller/create-product")}
               className="text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-200"
-              style={{ color: "#B5ADA3" }}
-              onMouseEnter={e => e.target.style.color = "#1b1c1a"}
-              onMouseLeave={e => e.target.style.color = "#B5ADA3"}
+              style={{ color: "#6b6158" }}
+              onMouseEnter={e => e.target.style.color = "#0d0d0b"}
+              onMouseLeave={e => e.target.style.color = "#6b6158"}
             >
               New Listing
             </button>
@@ -83,9 +83,9 @@ const Dashboard = () => {
           <button
             onClick={() => navigate("/seller/create-product")}
             className="flex items-center gap-2 text-[10px] tracking-[0.22em] uppercase font-medium py-2.5 px-5 transition-all duration-300"
-            style={{ backgroundColor: "#1b1c1a", color: "#fbf9f6" }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#C9A96E"; e.currentTarget.style.color = "#1b1c1a"; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "#1b1c1a"; e.currentTarget.style.color = "#fbf9f6"; }}
+            style={{ backgroundColor: "#0d0d0b", color: "#fbf9f6" }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#C9A96E"; e.currentTarget.style.color = "#0d0d0b"; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "#0d0d0b"; e.currentTarget.style.color = "#fbf9f6"; }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -104,7 +104,7 @@ const Dashboard = () => {
             </p>
             <h1
               className="text-5xl md:text-6xl font-light leading-[1.05]"
-              style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1b1c1a" }}
+              style={{ fontFamily: "'Cormorant Garamond', serif", color: "#0d0d0b" }}
             >
               Your Products
             </h1>
@@ -127,10 +127,10 @@ const Dashboard = () => {
                 className={`px-7 py-6 ${hide === "block" ? "hidden lg:block" : ""}`}
                 style={{ backgroundColor: "#fbf9f6" }}
               >
-                <p className="text-[9px] tracking-[0.2em] uppercase font-medium mb-2" style={{ color: "#B5ADA3" }}>{label}</p>
+                <p className="text-[9px] tracking-[0.2em] uppercase font-medium mb-2" style={{ color: "#6b6158" }}>{label}</p>
                 <p
                   className="text-3xl font-light"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1b1c1a" }}
+                  style={{ fontFamily: "'Cormorant Garamond', serif", color: "#0d0d0b" }}
                 >
                   {value}
                 </p>
@@ -159,13 +159,13 @@ const Dashboard = () => {
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-10 h-10" style={{ color: "#d0c5b5" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
               </svg>
-              <p className="text-[10px] tracking-[0.2em] uppercase" style={{ color: "#B5ADA3" }}>No listings yet</p>
+              <p className="text-[10px] tracking-[0.2em] uppercase" style={{ color: "#6b6158" }}>No listings yet</p>
               <button
                 onClick={() => navigate("/seller/create-product")}
                 className="mt-1 text-[10px] tracking-[0.18em] uppercase transition-colors duration-200"
-                style={{ color: "#7A6E63", textDecoration: "underline", textUnderlineOffset: "4px" }}
+                style={{ color: "#3d342c", textDecoration: "underline", textUnderlineOffset: "4px" }}
                 onMouseEnter={e => e.target.style.color = "#C9A96E"}
-                onMouseLeave={e => e.target.style.color = "#7A6E63"}
+                onMouseLeave={e => e.target.style.color = "#3d342c"}
               >
                 Create your first listing →
               </button>
@@ -218,7 +218,7 @@ const ProductCard = ({ product }) => {
         {hasMultiple && (
           <span
             className="absolute top-3 right-3 text-[9px] tracking-[0.15em] px-2 py-0.5"
-            style={{ backgroundColor: "rgba(251,249,246,0.85)", color: "#7A6E63" }}
+            style={{ backgroundColor: "rgba(251,249,246,0.85)", color: "#3d342c" }}
           >
             {activeImg + 1} / {images.length}
           </span>
@@ -248,7 +248,7 @@ const ProductCard = ({ product }) => {
         <div className="flex items-start justify-between gap-3">
           <h2
             className="text-base font-light leading-snug line-clamp-2 flex-1"
-            style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1b1c1a" }}
+            style={{ fontFamily: "'Cormorant Garamond', serif", color: "#0d0d0b" }}
           >
             {product.title}
           </h2>
@@ -258,7 +258,7 @@ const ProductCard = ({ product }) => {
         </div>
 
         {product.description && (
-          <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "#7A6E63" }}>
+          <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "#3d342c" }}>
             {product.description}
           </p>
         )}
@@ -267,10 +267,10 @@ const ProductCard = ({ product }) => {
           className="mt-auto pt-4 flex items-center justify-between border-t"
           style={{ borderColor: "#e4e2df" }}
         >
-          <span className="text-[9px] tracking-[0.15em] uppercase" style={{ color: "#B5ADA3" }}>
+          <span className="text-[9px] tracking-[0.15em] uppercase" style={{ color: "#6b6158" }}>
             {timeAgo(product.createdAt)}
           </span>
-          <span className="text-[9px] tracking-[0.15em] uppercase" style={{ color: "#B5ADA3" }}>
+          <span className="text-[9px] tracking-[0.15em] uppercase" style={{ color: "#6b6158" }}>
             {images.length} {images.length === 1 ? "photo" : "photos"}
           </span>
         </div>

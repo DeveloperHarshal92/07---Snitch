@@ -82,3 +82,26 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+export const getProductDetails = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await productModel.findById(id);
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+        success: false,
+      });
+    }
+    res.status(200).json({
+      message: "Product details retrieved successfully",
+      success: true,
+      product,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to retrieve product details",
+      success: false,
+    });
+  }
+};

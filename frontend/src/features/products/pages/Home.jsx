@@ -40,11 +40,11 @@ const Home = () => {
     return () => clearTimeout(t);
   }, []);
 
-  /* filter + sort */
   const filtered = products
-    .filter((p) =>
-      p.title?.toLowerCase().includes(search.toLowerCase()) ||
-      p.description?.toLowerCase().includes(search.toLowerCase())
+    .filter(
+      (p) =>
+        p.title?.toLowerCase().includes(search.toLowerCase()) ||
+        p.description?.toLowerCase().includes(search.toLowerCase()),
     )
     .sort((a, b) => {
       if (sortBy === "price-asc") return a.price.amount - b.price.amount;
@@ -58,116 +58,51 @@ const Home = () => {
     <>
       <FontLink />
       <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(28px); }
-          to   { opacity: 1; transform: translateY(0);    }
-        }
         @keyframes marquee {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        .anim-fade-up { animation: fadeUp 0.75s ease forwards; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .card-hover { transition: box-shadow 0.35s ease, transform 0.35s ease; }
         .card-hover:hover { box-shadow: 0 12px 48px rgba(27,24,20,0.10); transform: translateY(-4px); }
         ::selection { background: rgba(201,169,110,0.28); }
+        .search-input:focus { border-bottom-color: #C9A96E !important; }
       `}</style>
 
       <div
+        className="min-h-screen text-[#0d0d0b]"
         style={{
           backgroundColor: "#fbf9f6",
           fontFamily: "'Inter', sans-serif",
-          color: "#1b1c1a",
-          minHeight: "100vh",
         }}
       >
-        {/* ── Navbar ────────────────────────────────────────────── */}
+        {/* ── Navbar ──────────────────────────────────────────────── */}
         <header
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 50,
-            backgroundColor: "#fbf9f6",
-            borderBottom: "1px solid #e4e2df",
-          }}
+          className="sticky top-0 z-50 border-b"
+          style={{ backgroundColor: "#fbf9f6", borderColor: "#e4e2df" }}
         >
-          <div
-            style={{
-              maxWidth: 1400,
-              margin: "0 auto",
-              padding: "0 2rem",
-              height: 68,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1.5rem",
-            }}
-          >
+          <div className="max-w-[1400px] mx-auto px-8 h-[68px] flex items-center justify-between gap-6">
             {/* Brand */}
             <span
+              className="text-base uppercase tracking-[0.35em] select-none cursor-pointer"
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 color: "#C9A96E",
-                fontSize: "1rem",
-                letterSpacing: "0.35em",
-                textTransform: "uppercase",
-                userSelect: "none",
-                cursor: "pointer",
               }}
               onClick={() => navigate("/")}
             >
-              Snitch.
+              Snitch
             </span>
 
-            {/* Nav links */}
-            <nav style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
-              {[
-                { label: "Shop", href: "/" },
-                { label: "Login", href: "/login" },
-                { label: "Register", href: "/register" },
-              ].map(({ label, href }) => (
-                <button
-                  key={label}
-                  onClick={() => navigate(href)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "0.65rem",
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: "#7A6E63",
-                    fontFamily: "'Inter', sans-serif",
-                    padding: 0,
-                    transition: "color 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.target.style.color = "#1b1c1a")}
-                  onMouseLeave={(e) => (e.target.style.color = "#7A6E63")}
-                >
-                  {label}
-                </button>
-              ))}
-            </nav>
-
             {/* Cart icon */}
-            <button
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#1b1c1a",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.4rem",
-              }}
-            >
+            <button className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer text-[#0d0d0b]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                style={{ width: 20, height: 20 }}
+                className="w-5 h-5"
               >
                 <path
                   strokeLinecap="round"
@@ -176,12 +111,8 @@ const Home = () => {
                 />
               </svg>
               <span
-                style={{
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  color: "#7A6E63",
-                }}
+                className="text-[0.6rem] tracking-[0.15em] uppercase"
+                style={{ color: "#3d342c" }}
               >
                 Bag
               </span>
@@ -191,28 +122,18 @@ const Home = () => {
 
         {/* ── Marquee ticker ──────────────────────────────────────── */}
         <div
-          style={{
-            backgroundColor: "#1b1c1a",
-            color: "#C9A96E",
-            overflow: "hidden",
-            whiteSpace: "nowrap",
-            padding: "10px 0",
-          }}
+          className="overflow-hidden whitespace-nowrap py-2.5"
+          style={{ backgroundColor: "#0d0d0b", color: "#C9A96E" }}
         >
-          <div
-            className="marquee-track"
-            style={{ display: "inline-flex", gap: "3rem" }}
-          >
+          <div className="marquee-track inline-flex gap-12">
             {Array.from({ length: 8 }).map((_, i) => (
               <span
                 key={i}
-                style={{
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.25em",
-                  textTransform: "uppercase",
-                }}
+                className="text-[0.6rem] tracking-[0.25em] uppercase"
               >
-                Free shipping over ₹999 &nbsp;·&nbsp; New arrivals weekly &nbsp;·&nbsp; Exclusive drops &nbsp;·&nbsp; Snitch — Wear the narrative
+                Free shipping over ₹999 &nbsp;·&nbsp; New arrivals weekly
+                &nbsp;·&nbsp; Exclusive drops &nbsp;·&nbsp; Snitch — Wear the
+                narrative
               </span>
             ))}
           </div>
@@ -221,87 +142,50 @@ const Home = () => {
         {/* ── Hero ────────────────────────────────────────────────── */}
         <section
           ref={heroRef}
+          className="max-w-[1400px] mx-auto px-8 pt-12 pb-12 flex flex-col gap-4 transition-all duration-[800ms] ease-out"
           style={{
-            maxWidth: 1400,
-            margin: "0 auto",
-            padding: "6rem 2rem 4rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
             opacity: heroVisible ? 1 : 0,
             transform: heroVisible ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 0.8s ease, transform 0.8s ease",
           }}
         >
           <p
-            style={{
-              fontSize: "0.6rem",
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "#C9A96E",
-              fontWeight: 500,
-            }}
+            className="text-[0.6rem] tracking-[0.25em] uppercase font-medium"
+            style={{ color: "#C9A96E" }}
           >
-            New Season — SS '26
+            New Season — SS&apos;26
           </p>
           <h1
+            className="m-0 font-light leading-[1.04] text-[clamp(3rem,7vw,6rem)]"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(3rem, 7vw, 6rem)",
-              fontWeight: 300,
-              lineHeight: 1.04,
-              color: "#1b1c1a",
-              margin: 0,
+              color: "#0d0d0b",
             }}
           >
-            The Edit.
+            The Edit
           </h1>
           <p
-            style={{
-              fontSize: "0.8rem",
-              color: "#7A6E63",
-              maxWidth: 420,
-              lineHeight: 1.75,
-              fontWeight: 300,
-            }}
+            className="text-sm max-w-[420px] leading-[1.75] font-light"
+            style={{ color: "#3d342c" }}
           >
             Curated essentials for the considered wardrobe. Each piece selected
             for its craft, finish, and enduring relevance.
           </p>
         </section>
 
-        {/* ── Divider line ────────────────────────────────────────── */}
-        <div style={{ borderTop: "1px solid #e4e2df" }} />
+        {/* ── Divider ─────────────────────────────────────────────── */}
+        <div className="border-t" style={{ borderColor: "#e4e2df" }} />
 
         {/* ── Filter bar ──────────────────────────────────────────── */}
-        <div
-          style={{
-            maxWidth: 1400,
-            margin: "0 auto",
-            padding: "1.25rem 2rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1rem",
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="max-w-[1400px] mx-auto px-8 py-5 flex items-center justify-between gap-4 flex-wrap">
           {/* Search */}
-          <div style={{ position: "relative", flex: "1 1 220px", maxWidth: 360 }}>
+          <div className="relative flex-1 min-w-[220px] max-w-[360px]">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
-              stroke="#B5ADA3"
-              style={{
-                width: 14,
-                height: 14,
-                position: "absolute",
-                left: 0,
-                top: "50%",
-                transform: "translateY(-50%)",
-              }}
+              stroke="#6b6158"
+              className="w-3.5 h-3.5 absolute left-0 top-1/2 -translate-y-1/2"
             >
               <path
                 strokeLinecap="round"
@@ -314,17 +198,11 @@ const Home = () => {
               placeholder="Search products…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="search-input w-full bg-transparent border-0 outline-none pl-5 pb-2 text-xs text-[#0d0d0b]"
               style={{
-                width: "100%",
-                background: "transparent",
-                border: "none",
                 borderBottom: "1px solid #d0c5b5",
-                outline: "none",
-                paddingLeft: "1.4rem",
-                paddingBottom: "0.5rem",
-                fontSize: "0.75rem",
-                color: "#1b1c1a",
                 fontFamily: "'Inter', sans-serif",
+                transition: "border-color 0.2s",
               }}
               onFocus={(e) => (e.target.style.borderBottomColor = "#C9A96E")}
               onBlur={(e) => (e.target.style.borderBottomColor = "#d0c5b5")}
@@ -332,32 +210,21 @@ const Home = () => {
           </div>
 
           {/* Count + Sort */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+          <div className="flex items-center gap-6">
             <span
-              style={{
-                fontSize: "0.6rem",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#B5ADA3",
-              }}
+              className="text-[0.6rem] tracking-[0.18em] uppercase"
+              style={{ color: "#6b6158" }}
             >
               {filtered.length} {filtered.length === 1 ? "item" : "items"}
             </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
+              className="bg-transparent border-0 outline-none text-[0.6rem] tracking-[0.15em] uppercase pb-1 cursor-pointer"
               style={{
-                background: "transparent",
-                border: "none",
                 borderBottom: "1px solid #d0c5b5",
-                outline: "none",
-                fontSize: "0.6rem",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "#7A6E63",
+                color: "#3d342c",
                 fontFamily: "'Inter', sans-serif",
-                paddingBottom: "4px",
-                cursor: "pointer",
               }}
             >
               <option value="default">Sort: Default</option>
@@ -368,37 +235,28 @@ const Home = () => {
           </div>
         </div>
 
-        <div style={{ borderTop: "1px solid #e4e2df" }} />
+        <div className="border-t" style={{ borderColor: "#e4e2df" }} />
 
         {/* ── Product Grid ────────────────────────────────────────── */}
-        <main
-          style={{
-            maxWidth: 1400,
-            margin: "0 auto",
-            padding: "3rem 2rem 6rem",
-          }}
-        >
+        <main className="max-w-[1400px] mx-auto px-8 py-12 pb-24">
           {/* Loading skeleton */}
           {isLoading && (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} style={{ backgroundColor: "#f5f3f0" }}>
                   <div
-                    style={{
-                      aspectRatio: "4/5",
-                      backgroundColor: "#e4e2df",
-                      animation: "pulse 1.5s ease-in-out infinite",
-                    }}
+                    className="aspect-[4/5] animate-pulse"
+                    style={{ backgroundColor: "#e4e2df" }}
                   />
-                  <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    <div style={{ height: 10, width: "65%", backgroundColor: "#e4e2df", borderRadius: 2 }} />
-                    <div style={{ height: 8, width: "40%", backgroundColor: "#e4e2df", borderRadius: 2 }} />
+                  <div className="p-5 flex flex-col gap-3">
+                    <div
+                      className="h-2.5 rounded"
+                      style={{ backgroundColor: "#e4e2df", width: "65%" }}
+                    />
+                    <div
+                      className="h-2 rounded"
+                      style={{ backgroundColor: "#e4e2df", width: "40%" }}
+                    />
                   </div>
                 </div>
               ))}
@@ -407,23 +265,14 @@ const Home = () => {
 
           {/* Empty state */}
           {!isLoading && filtered.length === 0 && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "8rem 1rem",
-                gap: "1.25rem",
-              }}
-            >
+            <div className="flex flex-col items-center justify-center py-32 gap-5">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1}
                 stroke="#d0c5b5"
-                style={{ width: 44, height: 44 }}
+                className="w-11 h-11"
               >
                 <path
                   strokeLinecap="round"
@@ -432,29 +281,18 @@ const Home = () => {
                 />
               </svg>
               <p
-                style={{
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "#B5ADA3",
-                }}
+                className="text-[0.6rem] tracking-[0.2em] uppercase"
+                style={{ color: "#6b6158" }}
               >
-                {search ? "No products match your search" : "No products available"}
+                {search
+                  ? "No products match your search"
+                  : "No products available"}
               </p>
               {search && (
                 <button
                   onClick={() => setSearch("")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "0.65rem",
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    color: "#C9A96E",
-                    textDecoration: "underline",
-                    textUnderlineOffset: 4,
-                  }}
+                  className="bg-transparent border-none cursor-none text-[0.65rem] tracking-[0.15em] uppercase underline underline-offset-4 cursor-pointer"
+                  style={{ color: "#C9A96E" }}
                 >
                   Clear search
                 </button>
@@ -464,13 +302,7 @@ const Home = () => {
 
           {/* Product cards */}
           {!isLoading && filtered.length > 0 && (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
               {filtered.map((product, idx) => (
                 <ProductCard key={product._id} product={product} idx={idx} />
               ))}
@@ -480,36 +312,21 @@ const Home = () => {
 
         {/* ── Footer ──────────────────────────────────────────────── */}
         <footer
-          style={{
-            borderTop: "1px solid #e4e2df",
-            padding: "3rem 2rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "1rem",
-            maxWidth: 1400,
-            margin: "0 auto",
-          }}
+          className="border-t max-w-[1400px] mx-auto px-8 py-12 flex items-center justify-between flex-wrap gap-4"
+          style={{ borderColor: "#e4e2df" }}
         >
           <span
+            className="text-[0.9rem] tracking-[0.35em] uppercase"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               color: "#C9A96E",
-              fontSize: "0.9rem",
-              letterSpacing: "0.35em",
-              textTransform: "uppercase",
             }}
           >
-            Snitch.
+            Snitch
           </span>
           <p
-            style={{
-              fontSize: "0.6rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              color: "#B5ADA3",
-            }}
+            className="text-[0.6rem] tracking-[0.15em] uppercase"
+            style={{ color: "#6b6158" }}
           >
             © {new Date().getFullYear()} Snitch — All rights reserved
           </p>
@@ -524,10 +341,9 @@ const ProductCard = ({ product, idx }) => {
   const [activeImg, setActiveImg] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const cardRef = useRef(null);
   const images = product.images ?? [];
   const hasMultiple = images.length > 1;
-
+  const navigate = useNavigate();
   useEffect(() => {
     const t = setTimeout(() => setIsVisible(true), idx * 80);
     return () => clearTimeout(t);
@@ -535,13 +351,9 @@ const ProductCard = ({ product, idx }) => {
 
   return (
     <div
-      ref={cardRef}
-      className="card-hover"
+      className="card-hover flex flex-col cursor-pointer"
       style={{
         backgroundColor: "#f5f3f0",
-        display: "flex",
-        flexDirection: "column",
-        cursor: "pointer",
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? "translateY(0)" : "translateY(20px)",
         transition: `opacity 0.55s ease ${idx * 0.06}s, transform 0.55s ease ${idx * 0.06}s`,
@@ -549,43 +361,29 @@ const ProductCard = ({ product, idx }) => {
     >
       {/* Image zone */}
       <div
-        style={{
-          position: "relative",
-          aspectRatio: "4/5",
-          overflow: "hidden",
-          backgroundColor: "#e4e2df",
-        }}
+        onClick={() => navigate(`/product/${product._id}`)}
+        className="relative aspect-[4/5] overflow-hidden"
+        style={{ backgroundColor: "#e4e2df" }}
       >
         {images.length > 0 ? (
           <img
             src={images[activeImg]?.url}
             alt={product.title}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              transition: "transform 0.7s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+            className="w-full h-full object-cover transition-transform duration-700 ease-out"
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "scale(1.05)")
+            }
             onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
           />
         ) : (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <div className="w-full h-full flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1}
               stroke="#d0c5b5"
-              style={{ width: 40, height: 40 }}
+              className="w-10 h-10"
             >
               <path
                 strokeLinecap="round"
@@ -598,25 +396,16 @@ const ProductCard = ({ product, idx }) => {
 
         {/* Wishlist button */}
         <button
-          onClick={(e) => { e.stopPropagation(); setIsWishlisted((w) => !w); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsWishlisted((w) => !w);
+          }}
+          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer transition-transform duration-200 hover:scale-110"
           style={{
-            position: "absolute",
-            top: 12,
-            right: 12,
             background: "rgba(251,249,246,0.88)",
-            border: "none",
-            borderRadius: "50%",
-            width: 32,
-            height: 32,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            color: isWishlisted ? "#C9A96E" : "#B5ADA3",
+            color: isWishlisted ? "#C9A96E" : "#6b6158",
             transition: "color 0.25s, transform 0.2s",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -624,7 +413,7 @@ const ProductCard = ({ product, idx }) => {
             fill={isWishlisted ? "currentColor" : "none"}
             stroke="currentColor"
             strokeWidth={1.5}
-            style={{ width: 14, height: 14 }}
+            className="w-3.5 h-3.5"
           >
             <path
               strokeLinecap="round"
@@ -637,15 +426,10 @@ const ProductCard = ({ product, idx }) => {
         {/* Image count badge */}
         {hasMultiple && (
           <span
+            className="absolute bottom-3 left-3 text-[0.55rem] tracking-[0.15em] px-2 py-0.5"
             style={{
-              position: "absolute",
-              bottom: 12,
-              left: 12,
-              fontSize: "0.55rem",
-              letterSpacing: "0.15em",
               backgroundColor: "rgba(251,249,246,0.85)",
-              color: "#7A6E63",
-              padding: "2px 8px",
+              color: "#3d342c",
             }}
           >
             {activeImg + 1} / {images.length}
@@ -655,15 +439,10 @@ const ProductCard = ({ product, idx }) => {
         {/* Thumbnail scrubber */}
         {hasMultiple && (
           <div
+            className="absolute bottom-0 left-0 right-0 flex gap-[3px] px-3 pb-3 pt-6"
             style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              display: "flex",
-              gap: 3,
-              padding: "1.5rem 0.75rem 0.75rem",
-              background: "linear-gradient(to top, rgba(27,24,20,0.35) 0%, transparent 100%)",
+              background:
+                "linear-gradient(to top, rgba(27,24,20,0.35) 0%, transparent 100%)",
             }}
           >
             {images.map((img, i) => (
@@ -671,13 +450,10 @@ const ProductCard = ({ product, idx }) => {
                 key={img._id ?? i}
                 onMouseEnter={() => setActiveImg(i)}
                 onClick={() => setActiveImg(i)}
+                className="flex-1 h-0.5 border-none cursor-pointer transition-colors duration-200"
                 style={{
-                  flex: 1,
-                  height: 2,
-                  border: "none",
-                  cursor: "pointer",
-                  backgroundColor: i === activeImg ? "#C9A96E" : "rgba(255,255,255,0.45)",
-                  transition: "background-color 0.2s",
+                  backgroundColor:
+                    i === activeImg ? "#C9A96E" : "rgba(255,255,255,0.45)",
                 }}
               />
             ))}
@@ -686,47 +462,20 @@ const ProductCard = ({ product, idx }) => {
       </div>
 
       {/* Info */}
-      <div
-        style={{
-          padding: "1.25rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.6rem",
-          flex: 1,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: "0.75rem",
-          }}
-        >
+      <div className="p-5 flex flex-col gap-2.5 flex-1">
+        <div className="flex items-start justify-between gap-3">
           <h2
+            className="m-0 flex-1 text-[1.05rem] font-light leading-snug line-clamp-2"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "1.05rem",
-              fontWeight: 300,
-              lineHeight: 1.3,
-              color: "#1b1c1a",
-              margin: 0,
-              flex: 1,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
+              color: "#0d0d0b",
             }}
           >
             {product.title}
           </h2>
           <span
-            style={{
-              fontSize: "0.8rem",
-              fontWeight: 500,
-              color: "#C9A96E",
-              whiteSpace: "nowrap",
-            }}
+            className="text-sm font-medium whitespace-nowrap"
+            style={{ color: "#C9A96E" }}
           >
             {fmt(product.price.amount, product.price.currency)}
           </span>
@@ -734,17 +483,8 @@ const ProductCard = ({ product, idx }) => {
 
         {product.description && (
           <p
-            style={{
-              fontSize: "0.7rem",
-              color: "#7A6E63",
-              lineHeight: 1.7,
-              margin: 0,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              fontWeight: 300,
-            }}
+            className="m-0 text-[0.7rem] leading-[1.7] font-light line-clamp-2"
+            style={{ color: "#3d342c" }}
           >
             {product.description}
           </p>
@@ -752,46 +492,30 @@ const ProductCard = ({ product, idx }) => {
 
         {/* Footer row */}
         <div
-          style={{
-            marginTop: "auto",
-            paddingTop: "1rem",
-            borderTop: "1px solid #e4e2df",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
+          className="mt-auto pt-4 border-t flex items-center justify-between"
+          style={{ borderColor: "#e4e2df" }}
         >
           <button
+            className="text-[0.55rem] tracking-[0.2em] uppercase px-4 py-2 border-none cursor-pointer font-medium transition-all duration-300"
             style={{
-              background: "#1b1c1a",
+              backgroundColor: "#0d0d0b",
               color: "#fbf9f6",
-              border: "none",
-              padding: "0.55rem 1.1rem",
-              fontSize: "0.55rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              cursor: "pointer",
               fontFamily: "'Inter', sans-serif",
-              transition: "background 0.25s, color 0.25s",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#C9A96E";
-              e.currentTarget.style.color = "#1b1c1a";
+              e.currentTarget.style.backgroundColor = "#C9A96E";
+              e.currentTarget.style.color = "#0d0d0b";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#1b1c1a";
+              e.currentTarget.style.backgroundColor = "#0d0d0b";
               e.currentTarget.style.color = "#fbf9f6";
             }}
           >
             Add to Bag
           </button>
           <span
-            style={{
-              fontSize: "0.55rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              color: "#B5ADA3",
-            }}
+            className="text-[0.55rem] tracking-[0.15em] uppercase"
+            style={{ color: "#6b6158" }}
           >
             {images.length} {images.length === 1 ? "photo" : "photos"}
           </span>

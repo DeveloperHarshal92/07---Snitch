@@ -33,7 +33,7 @@ const Register = () => {
     };
 
     const inputStyle = {
-        color: '#1b1c1a',
+        color: '#0d0d0b',
         borderBottom: '1px solid #d0c5b5',
         fontFamily: "'Inter', sans-serif",
         paddingTop: '0.5rem',
@@ -118,7 +118,7 @@ const Register = () => {
                             </p>
                             <h1
                                 className="text-[2.6rem] xl:text-5xl font-light leading-[1.1]"
-                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
+                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#0d0d0b' }}
                             >
                                 Elevate Your Style
                             </h1>
@@ -132,7 +132,7 @@ const Register = () => {
                                 <label
                                     htmlFor="reg-fullName"
                                     className="text-[10px] uppercase tracking-[0.18em] font-medium"
-                                    style={{ color: '#7A6E63' }}
+                                    style={{ color: '#3d342c' }}
                                 >
                                     Full Name
                                 </label>
@@ -156,7 +156,7 @@ const Register = () => {
                                 <label
                                     htmlFor="reg-contact"
                                     className="text-[10px] uppercase tracking-[0.18em] font-medium"
-                                    style={{ color: '#7A6E63' }}
+                                    style={{ color: '#3d342c' }}
                                 >
                                     Contact Number
                                 </label>
@@ -180,7 +180,7 @@ const Register = () => {
                                 <label
                                     htmlFor="reg-email"
                                     className="text-[10px] uppercase tracking-[0.18em] font-medium"
-                                    style={{ color: '#7A6E63' }}
+                                    style={{ color: '#3d342c' }}
                                 >
                                     Email Address
                                 </label>
@@ -204,7 +204,7 @@ const Register = () => {
                                 <label
                                     htmlFor="reg-password"
                                     className="text-[10px] uppercase tracking-[0.18em] font-medium"
-                                    style={{ color: '#7A6E63' }}
+                                    style={{ color: '#3d342c' }}
                                 >
                                     Password
                                 </label>
@@ -254,7 +254,7 @@ const Register = () => {
                                 </div>
                                 <span
                                     className="text-[11px] uppercase tracking-[0.15em] transition-colors duration-200"
-                                    style={{ color: formData.isSeller ? '#C9A96E' : '#7A6E63' }}
+                                    style={{ color: formData.isSeller ? '#C9A96E' : '#3d342c' }}
                                 >
                                     Register as Seller
                                 </span>
@@ -264,13 +264,13 @@ const Register = () => {
                             <button
                                 type="submit"
                                 className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 mt-2"
-                                style={{ backgroundColor: '#1b1c1a', color: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
+                                style={{ backgroundColor: '#0d0d0b', color: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
                                 onMouseEnter={e => {
                                     e.currentTarget.style.backgroundColor = '#C9A96E';
-                                    e.currentTarget.style.color = '#1b1c1a';
+                                    e.currentTarget.style.color = '#0d0d0b';
                                 }}
                                 onMouseLeave={e => {
-                                    e.currentTarget.style.backgroundColor = '#1b1c1a';
+                                    e.currentTarget.style.backgroundColor = '#0d0d0b';
                                     e.currentTarget.style.color = '#fbf9f6';
                                 }}
                             >
@@ -280,7 +280,7 @@ const Register = () => {
                             {/* Divider */}
                             <div className="flex items-center gap-4">
                                 <div className="flex-1 h-px" style={{ backgroundColor: '#e4e2df' }} />
-                                <span className="text-[10px] uppercase tracking-[0.15em]" style={{ color: '#B5ADA3' }}>or</span>
+                                <span className="text-[10px] uppercase tracking-[0.15em]" style={{ color: '#6b6158' }}>or</span>
                                 <div className="flex-1 h-px" style={{ backgroundColor: '#e4e2df' }} />
                             </div>
 
@@ -288,14 +288,14 @@ const Register = () => {
                             <ContinueWithGoogle />
 
                             {/* Footer Link */}
-                            <p className="text-center text-[11px]" style={{ color: '#B5ADA3' }}>
+                            <p className="text-center text-[11px]" style={{ color: '#6b6158' }}>
                                 Already have an account?{' '}
                                 <a
                                     href="/login"
                                     className="transition-colors duration-200"
-                                    style={{ color: '#7A6E63', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                                    style={{ color: '#3d342c', textDecoration: 'underline', textUnderlineOffset: '3px' }}
                                     onMouseEnter={e => e.target.style.color = '#C9A96E'}
-                                    onMouseLeave={e => e.target.style.color = '#7A6E63'}
+                                    onMouseLeave={e => e.target.style.color = '#3d342c'}
                                 >
                                     Sign in
                                 </a>

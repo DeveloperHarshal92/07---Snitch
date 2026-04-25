@@ -31,3 +31,12 @@ export const getAllProducts = async () => {
     console.error("Error fetching all products:", error);
   }
 };  
+
+export const getProductDetails = async (productId) => {
+  try {
+    const response = await productApiInstance.get(`/detail/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+  }
+};    

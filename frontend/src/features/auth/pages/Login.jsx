@@ -133,7 +133,7 @@ const Login = () => {
                 className="text-[2.6rem] xl:text-5xl font-light leading-[1.1]"
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
-                  color: "#1b1c1a",
+                  color: "#0d0d0b",
                 }}
               >
                 Enter the Vault
@@ -147,7 +147,7 @@ const Login = () => {
                 <label
                   htmlFor="login-email"
                   className="text-[10px] uppercase tracking-[0.18em] font-medium"
-                  style={{ color: "#7A6E63" }}
+                  style={{ color: "#3d342c" }}
                 >
                   Email Address
                 </label>
@@ -161,7 +161,7 @@ const Login = () => {
                   placeholder="hello@example.com"
                   className="w-full bg-transparent outline-none pt-2 pb-4 px-1 text-sm transition-colors duration-300"
                   style={{
-                    color: "#1b1c1a",
+                    color: "#0d0d0b",
                     borderBottom: "1px solid #d0c5b5",
                     fontFamily: "'Inter', sans-serif",
                   }}
@@ -178,16 +178,16 @@ const Login = () => {
                   <label
                     htmlFor="login-password"
                     className="text-[10px] uppercase tracking-[0.18em] font-medium"
-                    style={{ color: "#7A6E63" }}
+                    style={{ color: "#3d342c" }}
                   >
                     Password
                   </label>
                   <a
                     href="#"
                     className="text-[10px] transition-colors duration-200"
-                    style={{ color: "#B5ADA3" }}
+                    style={{ color: "#6b6158" }}
                     onMouseEnter={(e) => (e.target.style.color = "#C9A96E")}
-                    onMouseLeave={(e) => (e.target.style.color = "#B5ADA3")}
+                    onMouseLeave={(e) => (e.target.style.color = "#6b6158")}
                   >
                     Forgot password?
                   </a>
@@ -202,7 +202,7 @@ const Login = () => {
                   placeholder="••••••••"
                   className="w-full bg-transparent outline-none pt-2 pb-4 px-1 text-sm transition-colors duration-300"
                   style={{
-                    color: "#1b1c1a",
+                    color: "#0d0d0b",
                     borderBottom: "1px solid #d0c5b5",
                     fontFamily: "'Inter', sans-serif",
                   }}
@@ -218,16 +218,16 @@ const Login = () => {
                 type="submit"
                 className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 mt-2"
                 style={{
-                  backgroundColor: "#1b1c1a",
+                  backgroundColor: "#0d0d0b",
                   color: "#fbf9f6",
                   fontFamily: "'Inter', sans-serif",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = "#C9A96E";
-                  e.currentTarget.style.color = "#1b1c1a";
+                  e.currentTarget.style.color = "#0d0d0b";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#1b1c1a";
+                  e.currentTarget.style.backgroundColor = "#0d0d0b";
                   e.currentTarget.style.color = "#fbf9f6";
                 }}
               >
@@ -242,7 +242,7 @@ const Login = () => {
                 />
                 <span
                   className="text-[10px] uppercase tracking-[0.15em]"
-                  style={{ color: "#B5ADA3" }}
+                  style={{ color: "#6b6158" }}
                 >
                   or
                 </span>
@@ -258,19 +258,19 @@ const Login = () => {
               {/* Footer Link */}
               <p
                 className="text-center text-[11px]"
-                style={{ color: "#B5ADA3" }}
+                style={{ color: "#6b6158" }}
               >
                 Don&apos;t have an account?{" "}
                 <a
                   href="/register"
                   className="transition-colors duration-200"
                   style={{
-                    color: "#7A6E63",
+                    color: "#3d342c",
                     textDecoration: "underline",
                     textUnderlineOffset: "3px",
                   }}
                   onMouseEnter={(e) => (e.target.style.color = "#C9A96E")}
-                  onMouseLeave={(e) => (e.target.style.color = "#7A6E63")}
+                  onMouseLeave={(e) => (e.target.style.color = "#3d342c")}
                 >
                   Sign up
                 </a>
