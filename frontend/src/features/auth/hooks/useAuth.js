@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { register, login } from "../services/auth.api";
-import { setUser } from "../state/auth.slice";
+import { setLoading, setUser } from "../state/auth.slice";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -22,6 +22,7 @@ export const useAuth = () => {
     if (data?.user) {
       dispatch(setUser(data.user));
     }
+    return data?.user;  
   }
 
   async function handleLogin({ email, password }) {
@@ -32,5 +33,19 @@ export const useAuth = () => {
     return data?.user;
   }
 
-  return { handleRegister, handleLogin };
+  async function handleGetMe() {
+    try {
+      dispatch(setLoading(true));
+      const data = await getMe();
+      if (data?.user) {
+        dispatch(setUser(data.user));
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  return { handleRegister, handleLogin, handleGetMe };
 };

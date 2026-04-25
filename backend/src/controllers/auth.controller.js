@@ -36,6 +36,7 @@ export async function register(req, res) {
     if (existingUser) {
       return res.status(400).json({
         message: "User with same email or contact already exists",
+        success: false,
       });
     }
 
@@ -51,6 +52,7 @@ export async function register(req, res) {
     console.log(error);
     res.status(500).json({
       message: "Server error",
+      success: false,
     });
   }
 }
@@ -62,12 +64,14 @@ export async function login(req, res) {
     if (!user) {
       return res.status(400).json({
         message: "Invalid credentials",
+        success: false,
       });
     } else {
       const isMatch = await user.matchPassword(password);
       if (!isMatch) {
         return res.status(400).json({
           message: "Invalid credentials",
+          success: false,
         });
       }
       await sendTokenResponse(user, res, "User logged in successfully");
@@ -76,6 +80,7 @@ export async function login(req, res) {
     console.log(error);
     res.status(500).json({
       message: "Server error",
+      success: false,
     });
   }
 }
@@ -108,6 +113,30 @@ export async function googleCallback(req, res) {
     console.log(error);
     res.status(500).json({
       message: "Server error",
+      success: false,
     });
   }
 }
+
+export const getMe = async (req, res) => {
+  try {
+    const user = req.user;
+    res.status(200).json({
+      message: "User profile fetched successfully",
+      success: true,
+      user: {
+        id: user._id,
+        email: user.email,
+        contact: user.contact,
+        fullname: user.fullname,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Server error",
+      success: false,
+    });
+  }
+};

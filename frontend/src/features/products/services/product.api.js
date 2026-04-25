@@ -22,3 +22,12 @@ export const getSellerProducts = async () => {
     console.error("Error fetching seller products:", error);
   }
 };
+
+export const getAllProducts = async () => {
+  try {
+    const response = await productApiInstance.get("/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all products:", error);
+  }
+};  

@@ -39,3 +39,13 @@ export async function login({ email, password }) {
     throw error?.response?.data || error;
   }
 }
+
+export async function getMe() {
+  try {
+    const response = await authApi.get("/me");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error?.response?.data || error;
+  }
+}

@@ -106,14 +106,14 @@ const Dashboard = () => {
               className="text-5xl md:text-6xl font-light leading-[1.05]"
               style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1b1c1a" }}
             >
-              Your Listings
+              Your Products
             </h1>
           </div>
 
           {/* ── Stat strip ──────────────────────────────────── */}
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-px mb-16" style={{ backgroundColor: "#e4e2df" }}>
             {[
-              { label: "Total Listings", value: sellerProducts.length },
+              { label: "Total Products", value: sellerProducts.length },
               {
                 label: "Catalogue Value",
                 value: sellerProducts.length
