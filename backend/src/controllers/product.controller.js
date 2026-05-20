@@ -131,15 +131,17 @@ export const addProductVariant = async (req, res) => {
             buffer: file.buffer,
             fileName: file.originalname,
           });
-        })
+        }),
       );
       images.push(...uploadedImages);
     }
-    
+
     const priceAmount = Number(req.body.price);
     const priceCurrency = req.body.currency || "INR";
     const stock = Number(req.body.stock) || 0;
-    const attributes = req.body.attributes ? JSON.parse(req.body.attributes) : {};
+    const attributes = req.body.attributes
+      ? JSON.parse(req.body.attributes)
+      : {};
 
     const newVariant = {
       images,
@@ -152,7 +154,7 @@ export const addProductVariant = async (req, res) => {
     };
 
     product.variants.push(newVariant);
-    
+
     await product.save();
 
     res.status(201).json({

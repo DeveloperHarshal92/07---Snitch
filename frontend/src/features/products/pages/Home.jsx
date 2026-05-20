@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useProduct } from "../hooks/useProduct";
 import { useNavigate } from "react-router";
@@ -29,7 +29,10 @@ const Home = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [heroVisible, setHeroVisible] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIdx, setHighlightedIdx] = useState(-1);
   const heroRef = useRef(null);
+  const searchRef = useRef(null);
 
   useEffect(() => {
     handleGetAllProducts().finally(() => setIsLoading(false));
@@ -54,6 +57,56 @@ const Home = () => {
       return 0;
     });
 
+  /* Suggestions: top 6 products matching the query */
+  const suggestions = search.trim().length > 0
+    ? products
+        .filter(
+          (p) =>
+            p.title?.toLowerCase().includes(search.toLowerCase()) ||
+            p.description?.toLowerCase().includes(search.toLowerCase()),
+        )
+        .slice(0, 6)
+    : [];
+
+  /* Click outside → close suggestions */
+  useEffect(() => {
+    const handler = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+        setHighlightedIdx(-1);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  /* Keyboard navigation inside the suggestion list */
+  const handleSearchKeyDown = useCallback(
+    (e) => {
+      if (!showSuggestions || suggestions.length === 0) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIdx((i) => (i + 1) % suggestions.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIdx((i) =>
+          i <= 0 ? suggestions.length - 1 : i - 1,
+        );
+      } else if (e.key === "Enter" && highlightedIdx >= 0) {
+        e.preventDefault();
+        const chosen = suggestions[highlightedIdx];
+        navigate(`/product/${chosen._id}`);
+        setShowSuggestions(false);
+        setSearch("");
+        setHighlightedIdx(-1);
+      } else if (e.key === "Escape") {
+        setShowSuggestions(false);
+        setHighlightedIdx(-1);
+      }
+    },
+    [showSuggestions, suggestions, highlightedIdx, navigate],
+  );
+
   return (
     <>
       <FontLink />
@@ -67,6 +120,43 @@ const Home = () => {
         .card-hover:hover { box-shadow: 0 12px 48px rgba(27,24,20,0.10); transform: translateY(-4px); }
         ::selection { background: rgba(201,169,110,0.28); }
         .search-input:focus { border-bottom-color: #C9A96E !important; }
+
+        /* ── Search suggestions dropdown ── */
+        @keyframes suggestionFadeIn {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .suggestions-dropdown {
+          animation: suggestionFadeIn 0.18s ease-out forwards;
+        }
+        .suggestion-item {
+          transition: background-color 0.15s ease;
+        }
+        .suggestion-item:hover,
+        .suggestion-item.highlighted {
+          background-color: #f5f3f0;
+        }
+        .suggestion-thumb {
+          width: 44px;
+          height: 55px;
+          object-fit: cover;
+          flex-shrink: 0;
+          border-radius: 2px;
+        }
+        .suggestion-thumb-placeholder {
+          width: 44px;
+          height: 55px;
+          flex-shrink: 0;
+          background: #e4e2df;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 2px;
+        }
+        .suggestion-highlight {
+          color: #C9A96E;
+          font-weight: 500;
+        }
       `}</style>
 
       <div
@@ -76,69 +166,6 @@ const Home = () => {
           fontFamily: "'Inter', sans-serif",
         }}
       >
-        {/* ── Navbar ──────────────────────────────────────────────── */}
-        <header
-          className="sticky top-0 z-50 border-b"
-          style={{ backgroundColor: "#fbf9f6", borderColor: "#e4e2df" }}
-        >
-          <div className="max-w-[1400px] mx-auto px-8 h-[68px] flex items-center justify-between gap-6">
-            {/* Brand */}
-            <span
-              className="text-base uppercase tracking-[0.35em] select-none cursor-pointer"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                color: "#C9A96E",
-              }}
-              onClick={() => navigate("/")}
-            >
-              Snitch
-            </span>
-
-            {/* Cart icon */}
-            <button className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer text-[#0d0d0b]">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"
-                />
-              </svg>
-              <span
-                className="text-[0.6rem] tracking-[0.15em] uppercase"
-                style={{ color: "#3d342c" }}
-              >
-                Bag
-              </span>
-            </button>
-          </div>
-        </header>
-
-        {/* ── Marquee ticker ──────────────────────────────────────── */}
-        <div
-          className="overflow-hidden whitespace-nowrap py-2.5"
-          style={{ backgroundColor: "#0d0d0b", color: "#C9A96E" }}
-        >
-          <div className="marquee-track inline-flex gap-12">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <span
-                key={i}
-                className="text-[0.6rem] tracking-[0.25em] uppercase"
-              >
-                Free shipping over ₹999 &nbsp;·&nbsp; New arrivals weekly
-                &nbsp;·&nbsp; Exclusive drops &nbsp;·&nbsp; Snitch — Wear the
-                narrative
-              </span>
-            ))}
-          </div>
-        </div>
-
         {/* ── Hero ────────────────────────────────────────────────── */}
         <section
           ref={heroRef}
@@ -161,7 +188,7 @@ const Home = () => {
               color: "#0d0d0b",
             }}
           >
-            The Edit
+            The Edits
           </h1>
           <p
             className="text-sm max-w-[420px] leading-[1.75] font-light"
@@ -178,35 +205,252 @@ const Home = () => {
         {/* ── Filter bar ──────────────────────────────────────────── */}
         <div className="max-w-[1400px] mx-auto px-8 py-5 flex items-center justify-between gap-4 flex-wrap">
           {/* Search */}
-          <div className="relative flex-1 min-w-[220px] max-w-[360px]">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="#6b6158"
-              className="w-3.5 h-3.5 absolute left-0 top-1/2 -translate-y-1/2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-              />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search products…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="search-input w-full bg-transparent border-0 outline-none pl-5 pb-2 text-xs text-[#0d0d0b]"
-              style={{
-                borderBottom: "1px solid #d0c5b5",
-                fontFamily: "'Inter', sans-serif",
-                transition: "border-color 0.2s",
+          <div
+            ref={searchRef}
+            className="relative flex-1 min-w-[220px] max-w-[360px]"
+          >
+            <div 
+              className="flex items-center gap-2 border-b" 
+              style={{ 
+                borderColor: "#d0c5b5", 
+                paddingBottom: "8px",
+                transition: "border-color 0.2s"
               }}
-              onFocus={(e) => (e.target.style.borderBottomColor = "#C9A96E")}
-              onBlur={(e) => (e.target.style.borderBottomColor = "#d0c5b5")}
-            />
+              onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
+              onBlur={(e) => e.currentTarget.style.borderColor = "#d0c5b5"}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="#6b6158"
+                className="w-3.5 h-3.5 flex-shrink-0"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                />
+              </svg>
+              <input
+                id="search-input"
+                type="text"
+                placeholder="Search products…"
+                value={search}
+                autoComplete="off"
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setShowSuggestions(true);
+                  setHighlightedIdx(-1);
+                }}
+                onFocus={() => {
+                  if (search.trim().length > 0) setShowSuggestions(true);
+                }}
+                onKeyDown={handleSearchKeyDown}
+                className="w-full bg-transparent border-0 outline-none text-xs text-[#0d0d0b]"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              />
+            </div>
+
+            {/* ── Suggestion Dropdown ──────────────────────────── */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div
+                className="suggestions-dropdown"
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 10px)",
+                  left: 0,
+                  right: 0,
+                  backgroundColor: "#fbf9f6",
+                  border: "1px solid #e4e2df",
+                  boxShadow: "0 16px 48px rgba(27,24,20,0.12)",
+                  zIndex: 200,
+                  borderRadius: "2px",
+                  overflow: "hidden",
+                  minWidth: "320px",
+                }}
+              >
+                {/* Header */}
+                <div
+                  style={{
+                    padding: "8px 14px 6px",
+                    borderBottom: "1px solid #e4e2df",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.55rem",
+                      letterSpacing: "0.2em",
+                      textTransform: "uppercase",
+                      color: "#6b6158",
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  >
+                    Suggestions
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.55rem",
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      color: "#C9A96E",
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  >
+                    {suggestions.length} found
+                  </span>
+                </div>
+
+                {/* Suggestion items */}
+                <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                  {suggestions.map((product, i) => {
+                    const thumb = product.images?.[0]?.url;
+                    const titleLower = product.title?.toLowerCase() ?? "";
+                    const queryLower = search.toLowerCase();
+                    const matchIdx = titleLower.indexOf(queryLower);
+
+                    /* Highlight matched portion in title */
+                    let titleNode;
+                    if (matchIdx >= 0 && search.trim()) {
+                      titleNode = (
+                        <>
+                          {product.title.slice(0, matchIdx)}
+                          <span className="suggestion-highlight">
+                            {product.title.slice(matchIdx, matchIdx + search.length)}
+                          </span>
+                          {product.title.slice(matchIdx + search.length)}
+                        </>
+                      );
+                    } else {
+                      titleNode = product.title;
+                    }
+
+                    return (
+                      <li
+                        key={product._id}
+                        className={`suggestion-item${
+                          i === highlightedIdx ? " highlighted" : ""
+                        }`}
+                        onMouseEnter={() => setHighlightedIdx(i)}
+                        onMouseLeave={() => setHighlightedIdx(-1)}
+                        onMouseDown={(e) => {
+                          e.preventDefault(); // prevent blur before click
+                          navigate(`/product/${product._id}`);
+                          setShowSuggestions(false);
+                          setSearch("");
+                          setHighlightedIdx(-1);
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          padding: "10px 14px",
+                          cursor: "pointer",
+                          borderBottom: i < suggestions.length - 1 ? "1px solid #f0ede8" : "none",
+                        }}
+                      >
+                        {/* Thumbnail */}
+                        {thumb ? (
+                          <img
+                            src={thumb}
+                            alt={product.title}
+                            className="suggestion-thumb"
+                          />
+                        ) : (
+                          <div className="suggestion-thumb-placeholder">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1}
+                              stroke="#d0c5b5"
+                              style={{ width: 18, height: 18 }}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                              />
+                            </svg>
+                          </div>
+                        )}
+
+                        {/* Text info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "0.8rem",
+                              fontFamily: "'Cormorant Garamond', serif",
+                              color: "#0d0d0b",
+                              fontWeight: 400,
+                              lineHeight: 1.3,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {titleNode}
+                          </p>
+                          {product.description && (
+                            <p
+                              style={{
+                                margin: "3px 0 0",
+                                fontSize: "0.6rem",
+                                color: "#6b6158",
+                                fontFamily: "'Inter', sans-serif",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {product.description}
+                            </p>
+                          )}
+                        </div>
+
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                {/* Footer: view all */}
+                <div
+                  style={{
+                    padding: "8px 14px",
+                    borderTop: "1px solid #e4e2df",
+                    textAlign: "right",
+                  }}
+                >
+                  <button
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setShowSuggestions(false);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "0.55rem",
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      color: "#3d342c",
+                      fontFamily: "'Inter', sans-serif",
+                      textDecoration: "underline",
+                      textUnderlineOffset: "3px",
+                    }}
+                  >
+                    See all {filtered.length} results ↓
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Count + Sort */}

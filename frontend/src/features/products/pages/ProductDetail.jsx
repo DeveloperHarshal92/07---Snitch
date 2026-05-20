@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { useProduct } from "../hooks/useProduct";
 import { useParams, useNavigate } from "react-router";
+import { useCart } from "../../cart/hooks/useCart";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
 const FontLink = () => (
@@ -19,9 +21,27 @@ const fmt = (amount, currency = "INR") =>
   }).format(amount);
 
 /* ── ProductDetail ────────────────────────────────────────────── */
+/* ── Client-side similarity scorer ───────────────────────────── */
+const tokenize = (text = "") =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length > 2);
+
+const similarityScore = (a, b) => {
+  const ta = new Set(tokenize(`${a.title} ${a.description ?? ""}`));
+  const tb = tokenize(`${b.title} ${b.description ?? ""}`);
+  let shared = 0;
+  for (const t of tb) if (ta.has(t)) shared++;
+  return shared;
+};
+
 const ProductDetail = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+
+  const allProducts = useSelector((state) => state.product.products);
 
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +50,8 @@ const ProductDetail = () => {
   const [visible, setVisible] = useState(false);
   const [imgHovered, setImgHovered] = useState(false);
 
-  const { handleGetProductDetails } = useProduct();
+  const { handleGetProductDetails, handleGetAllProducts } = useProduct();
+  const { handleAddToCart } = useCart();
 
   // null = "Main" (product itself), string = variant._id
   const [selectedVariantId, setSelectedVariantId] = useState(null);
@@ -39,6 +60,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     setIsLoading(true);
+    setVisible(false);
     handleGetProductDetails(productId)
       .then((data) => {
         setProduct(data);
@@ -52,28 +74,56 @@ const ProductDetail = () => {
       });
   }, [productId]);
 
+  /* Ensure catalogue is loaded for recommendations */
+  useEffect(() => {
+    if (allProducts.length === 0) handleGetAllProducts();
+  }, []);
+
+  /* Top-4 recommended products (exclude current) */
+  const recommendations = useMemo(() => {
+    if (!product || allProducts.length === 0) return [];
+    return allProducts
+      .filter((p) => p._id !== product._id)
+      .map((p) => ({ product: p, score: similarityScore(product, p) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 4)
+      .map((x) => x.product);
+  }, [product, allProducts]);
+
   const selectedVariant =
     selectedVariantId === null
       ? null
-      : (product?.variants ?? []).find((v) => v._id === selectedVariantId) ?? null;
+      : ((product?.variants ?? []).find((v) => v._id === selectedVariantId) ??
+        null);
 
   // Fall back to product-level values when Main is active
-  const displayImages =
-    selectedVariant?.images?.length ? selectedVariant.images : product?.images ?? [];
+  const displayImages = selectedVariant?.images?.length
+    ? selectedVariant.images
+    : (product?.images ?? []);
   const displayPrice = {
     amount: selectedVariant?.price?.amount ?? product?.price?.amount,
-    currency: selectedVariant?.price?.currency ?? product?.price?.currency ?? "INR",
+    currency:
+      selectedVariant?.price?.currency ?? product?.price?.currency ?? "INR",
   };
   const displayStock = selectedVariant ? (selectedVariant.stock ?? 0) : null;
 
   // All unique attribute keys across variants e.g. ["Size", "Color"]
   const allAttrKeys = product
-    ? [...new Set((product.variants ?? []).flatMap((v) => Object.keys(v.attributes ?? {})))]
+    ? [
+        ...new Set(
+          (product.variants ?? []).flatMap((v) =>
+            Object.keys(v.attributes ?? {}),
+          ),
+        ),
+      ]
     : [];
 
   // Unique values for a given attr key e.g. ["S", "M", "XL"]
-  const attrValues = (key) =>
-    [...new Set((product?.variants ?? []).map((v) => v.attributes?.[key]).filter(Boolean))];
+  const attrValues = (key) => [
+    ...new Set(
+      (product?.variants ?? []).map((v) => v.attributes?.[key]).filter(Boolean),
+    ),
+  ];
 
   // Which value is "active" for a given key — use chosenAttrs (explicit user picks)
   // so the highlight always reflects what the user actually clicked
@@ -85,15 +135,22 @@ const ProductDetail = () => {
   const pickAttrValue = (key, val) => {
     const next = { ...chosenAttrs, [key]: val };
     setChosenAttrs(next);
-    let best = null, bestScore = -1;
+    let best = null,
+      bestScore = -1;
     for (const v of product.variants) {
       let score = 0;
       for (const [k, dv] of Object.entries(next)) {
         if (v.attributes?.[k] === dv) score++;
       }
-      if (score > bestScore) { bestScore = score; best = v; }
+      if (score > bestScore) {
+        bestScore = score;
+        best = v;
+      }
     }
-    if (best) { setSelectedVariantId(best._id); setActiveImg(0); }
+    if (best) {
+      setSelectedVariantId(best._id);
+      setActiveImg(0);
+    }
   };
 
   const images = displayImages;
@@ -104,13 +161,11 @@ const ProductDetail = () => {
       <>
         <FontLink />
         <div
-          className="min-h-screen"
           style={{
             backgroundColor: "#fbf9f6",
             fontFamily: "'Inter', sans-serif",
           }}
         >
-          <Navbar navigate={navigate} />
           <div className="max-w-[1200px] mx-auto px-6 lg:px-12 py-14 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
             {/* Image skeleton */}
             <div className="flex flex-col gap-4">
@@ -228,6 +283,26 @@ const ProductDetail = () => {
         .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .attr-btn:hover:not([data-selected="true"]) { border-color: #0d0d0b !important; }
+
+        /* ── Recommendation rail ── */
+        @keyframes recFadeIn {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .rec-section { animation: recFadeIn 0.55s ease 0.25s both; }
+        .rec-card { transition: box-shadow 0.3s ease, transform 0.3s ease; cursor: pointer; }
+        .rec-card:hover { box-shadow: 0 14px 44px rgba(27,24,20,0.11); transform: translateY(-4px); }
+        .rec-card:hover .rec-img { transform: scale(1.05); }
+        .rec-img { transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+        .rec-cta {
+          position: absolute; bottom: 0; left: 0; right: 0;
+          padding: 10px 14px;
+          background: linear-gradient(to top, rgba(13,13,11,0.78) 0%, transparent 100%);
+          opacity: 0;
+          transition: opacity 0.25s ease;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .rec-card:hover .rec-cta { opacity: 1; }
       `}</style>
 
       <div
@@ -238,11 +313,6 @@ const ProductDetail = () => {
           color: "#0d0d0b",
         }}
       >
-        {/* ── Navbar ─────────────────────────────────────────────── */}
-        <Navbar navigate={navigate} />
-
-        {/* ── Marquee ────────────────────────────────────────────── */}
-        <Marquee />
 
         {/* ── Breadcrumb ─────────────────────────────────────────── */}
         <div
@@ -522,7 +592,6 @@ const ProductDetail = () => {
             {/* ── Variant selector ──────────────────────────── */}
             {product?.variants?.length > 0 && (
               <div className="flex flex-col gap-4">
-
                 {/* ── Main row ───────────────────────────────────── */}
                 <div className="flex flex-col gap-2">
                   <p
@@ -533,12 +602,21 @@ const ProductDetail = () => {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => { setSelectedVariantId(null); setChosenAttrs({}); setActiveImg(0); }}
+                      onClick={() => {
+                        setSelectedVariantId(null);
+                        setChosenAttrs({});
+                        setActiveImg(0);
+                      }}
                       className="text-[0.6rem] tracking-[0.12em] uppercase px-3.5 py-2 rounded-sm border cursor-pointer transition-all duration-200"
                       style={{
-                        backgroundColor: selectedVariantId === null ? "#C9A96E" : "transparent",
-                        color: selectedVariantId === null ? "#0d0d0b" : "#6b6158",
-                        borderColor: selectedVariantId === null ? "#C9A96E" : "#d0c5b5",
+                        backgroundColor:
+                          selectedVariantId === null
+                            ? "#C9A96E"
+                            : "transparent",
+                        color:
+                          selectedVariantId === null ? "#0d0d0b" : "#6b6158",
+                        borderColor:
+                          selectedVariantId === null ? "#C9A96E" : "#d0c5b5",
                         fontFamily: "'Inter', sans-serif",
                         fontWeight: selectedVariantId === null ? 500 : 400,
                       }}
@@ -571,7 +649,9 @@ const ProductDetail = () => {
                       {attrValues(attrKey).map((val) => {
                         const isActive = activeAttrValue(attrKey) === val;
                         const outOfStock = !(product?.variants ?? []).some(
-                          (v) => v.attributes?.[attrKey] === val && (v.stock ?? 0) > 0
+                          (v) =>
+                            v.attributes?.[attrKey] === val &&
+                            (v.stock ?? 0) > 0,
                         );
                         return (
                           <button
@@ -579,11 +659,24 @@ const ProductDetail = () => {
                             onClick={() => pickAttrValue(attrKey, val)}
                             className="text-[0.6rem] tracking-[0.12em] uppercase px-3.5 py-2 rounded-sm border cursor-pointer transition-all duration-200"
                             style={{
-                              backgroundColor: isActive ? "#0d0d0b" : "transparent",
-                              color: isActive ? "#fbf9f6" : outOfStock ? "#c4bdb5" : "#0d0d0b",
-                              borderColor: isActive ? "#0d0d0b" : outOfStock ? "#e4e2df" : "#d0c5b5",
+                              backgroundColor: isActive
+                                ? "#0d0d0b"
+                                : "transparent",
+                              color: isActive
+                                ? "#fbf9f6"
+                                : outOfStock
+                                  ? "#c4bdb5"
+                                  : "#0d0d0b",
+                              borderColor: isActive
+                                ? "#0d0d0b"
+                                : outOfStock
+                                  ? "#e4e2df"
+                                  : "#d0c5b5",
                               fontFamily: "'Inter', sans-serif",
-                              textDecoration: outOfStock && !isActive ? "line-through" : "none",
+                              textDecoration:
+                                outOfStock && !isActive
+                                  ? "line-through"
+                                  : "none",
                             }}
                           >
                             {val}
@@ -599,14 +692,19 @@ const ProductDetail = () => {
                   <p
                     className="m-0 text-[0.6rem] tracking-[0.18em] uppercase"
                     style={{
-                      color: displayStock === 0 ? "#c0392b" : displayStock <= 5 ? "#b7791f" : "#4a7c59",
+                      color:
+                        displayStock === 0
+                          ? "#c0392b"
+                          : displayStock <= 5
+                            ? "#b7791f"
+                            : "#4a7c59",
                     }}
                   >
                     {displayStock === 0
                       ? "Out of stock"
                       : displayStock <= 5
-                      ? `Only ${displayStock} left`
-                      : "In stock"}
+                        ? `Only ${displayStock} left`
+                        : "In stock"}
                   </p>
                 )}
               </div>
@@ -645,6 +743,12 @@ const ProductDetail = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               {/* Add to Cart */}
               <button
+                onClick={() => {
+                  handleAddToCart({
+                    productId: product._id,
+                    variantId: selectedVariantId,
+                  });
+                }}
                 id="btn-add-to-cart"
                 className="pdp-btn-outline flex-1 flex items-center justify-center gap-2 py-4 text-[0.65rem] tracking-[0.22em] uppercase font-medium rounded-sm border cursor-pointer"
                 style={{
@@ -721,6 +825,188 @@ const ProductDetail = () => {
           </div>
         </main>
 
+        {/* ── You May Also Like ────────────────────────────────────── */}
+        {recommendations.length > 0 && (
+          <section
+            className="rec-section"
+            style={{
+              borderTop: "1px solid #e4e2df",
+              paddingTop: "56px",
+              paddingBottom: "64px",
+            }}
+          >
+            <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
+              {/* Header */}
+              <div
+                className="flex items-end justify-between mb-8"
+              >
+                <div className="flex flex-col gap-1">
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "0.6rem",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      color: "#C9A96E",
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  >
+                    Curated for you
+                  </p>
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontWeight: 300,
+                      color: "#0d0d0b",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    You May Also Like
+                  </h2>
+                </div>
+                <button
+                  onClick={() => navigate("/")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "#6b6158",
+                    fontFamily: "'Inter', sans-serif",
+                    textDecoration: "underline",
+                    textUnderlineOffset: "4px",
+                    whiteSpace: "nowrap",
+                    paddingBottom: "4px",
+                  }}
+                >
+                  View all →
+                </button>
+              </div>
+
+              {/* Card rail */}
+              <div
+                className="no-scrollbar"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                  gap: "20px",
+                }}
+              >
+                {recommendations.map((rec, idx) => {
+                  const thumb = rec.images?.[0]?.url;
+                  return (
+                    <div
+                      key={rec._id}
+                      className="rec-card"
+                      onClick={() => navigate(`/product/${rec._id}`)}
+                      style={{
+                        backgroundColor: "#f5f3f0",
+                        display: "flex",
+                        flexDirection: "column",
+                        opacity: 0,
+                        animation: `recFadeIn 0.5s ease ${0.1 + idx * 0.1}s forwards`,
+                      }}
+                    >
+                      {/* Image zone */}
+                      <div
+                        className="relative overflow-hidden"
+                        style={{
+                          aspectRatio: "4/5",
+                          backgroundColor: "#e4e2df",
+                        }}
+                      >
+                        {thumb ? (
+                          <img
+                            src={thumb}
+                            alt={rec.title}
+                            className="rec-img w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div
+                            className="w-full h-full flex items-center justify-center"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1}
+                              stroke="#d0c5b5"
+                              style={{ width: 32, height: 32 }}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                              />
+                            </svg>
+                          </div>
+                        )}
+
+                        {/* Hover CTA overlay */}
+                        <div className="rec-cta">
+                          <span
+                            style={{
+                              fontSize: "0.55rem",
+                              letterSpacing: "0.2em",
+                              textTransform: "uppercase",
+                              color: "#fbf9f6",
+                              fontFamily: "'Inter', sans-serif",
+                              fontWeight: 500,
+                            }}
+                          >
+                            View Product
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Info */}
+                      <div
+                        style={{
+                          padding: "14px 16px 16px",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "6px",
+                        }}
+                      >
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "1rem",
+                            fontFamily: "'Cormorant Garamond', serif",
+                            fontWeight: 400,
+                            color: "#0d0d0b",
+                            lineHeight: 1.25,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {rec.title}
+                        </p>
+                        <span
+                          style={{
+                            fontSize: "0.8rem",
+                            fontFamily: "'Inter', sans-serif",
+                            fontWeight: 500,
+                            color: "#C9A96E",
+                          }}
+                        >
+                          {fmt(rec.price?.amount, rec.price?.currency)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── Footer ─────────────────────────────────────────────── */}
         <footer
           className="border-t max-w-[1200px] mx-auto px-6 lg:px-12 py-10 flex items-center justify-between flex-wrap gap-4"
@@ -749,71 +1035,6 @@ const ProductDetail = () => {
 };
 
 /* ── Sub-components ───────────────────────────────────────────── */
-
-const Navbar = ({ navigate }) => (
-  <header
-    className="sticky top-0 z-50 border-b"
-    style={{ backgroundColor: "#fbf9f6", borderColor: "#e4e2df" }}
-  >
-    <div className="max-w-[1200px] mx-auto px-6 lg:px-12 h-[68px] flex items-center justify-between gap-6">
-      <span
-        className="text-base uppercase tracking-[0.35em] select-none cursor-pointer"
-        style={{ fontFamily: "'Cormorant Garamond', serif", color: "#C9A96E" }}
-        onClick={() => navigate("/")}
-      >
-        Snitch
-      </span>
-      <button
-        className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer"
-        style={{ color: "#0d0d0b" }}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"
-          />
-        </svg>
-        <span
-          className="text-[0.6rem] tracking-[0.15em] uppercase"
-          style={{ color: "#3d342c" }}
-        >
-          Bag
-        </span>
-      </button>
-    </div>
-  </header>
-);
-
-const Marquee = () =>
-  (
-    <style>{`
-    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .marquee-track { animation: marquee 28s linear infinite; }
-  `}</style>
-  ) && (
-    <div
-      className="overflow-hidden whitespace-nowrap py-2.5"
-      style={{ backgroundColor: "#0d0d0b", color: "#C9A96E" }}
-    >
-      <div className="marquee-track inline-flex gap-12">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <span key={i} className="text-[0.6rem] tracking-[0.25em] uppercase">
-            Free shipping over ₹999 &nbsp;·&nbsp; New arrivals weekly
-            &nbsp;·&nbsp; Exclusive drops &nbsp;·&nbsp; Snitch — Wear the
-            narrative
-          </span>
-        ))}
-      </div>
-    </div>
-  );
 
 const MetaRow = ({ label, value, mono = false }) => (
   <div className="flex items-center justify-between gap-4">
