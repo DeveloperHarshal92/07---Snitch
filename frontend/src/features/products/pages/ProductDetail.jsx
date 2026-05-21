@@ -704,7 +704,7 @@ const ProductDetail = () => {
                       ? "Out of stock"
                       : displayStock <= 5
                         ? `Only ${displayStock} left`
-                        : "In stock"}
+                        : `${displayStock} in stock`}
                   </p>
                 )}
               </div>

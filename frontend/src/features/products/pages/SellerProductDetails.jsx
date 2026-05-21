@@ -50,7 +50,7 @@ const SellerProductDetails = () => {
     images: [],
     stock: "",
     price: { amount: "", currency: "INR" },
-    attributes: { "": "" },
+    attributes: [{ id: Date.now(), key: "", value: "" }],
   });
   const [dragOver, setDragOver] = useState(false);
   const [previewUrls, setPreviewUrls] = useState([]);
@@ -89,28 +89,24 @@ const SellerProductDetails = () => {
 
   /* ── Attribute helpers ─────────────────────────────────────── */
   const addAttribute = () =>
-    setNewVariant((v) => ({ ...v, attributes: { ...v.attributes, "": "" } }));
+    setNewVariant((v) => ({
+      ...v,
+      attributes: [...v.attributes, { id: Date.now(), key: "", value: "" }],
+    }));
 
-  const removeAttribute = (key) =>
-    setNewVariant((v) => {
-      const next = { ...v.attributes };
-      delete next[key];
-      return { ...v, attributes: next };
-    });
+  const removeAttribute = (id) =>
+    setNewVariant((v) => ({
+      ...v,
+      attributes: v.attributes.filter((a) => a.id !== id),
+    }));
 
-  const changeAttribute = (oldKey, field, val) => {
-    setNewVariant((v) => {
-      const entries = Object.entries(v.attributes);
-      const idx = entries.findIndex(([k]) => k === oldKey);
-      if (idx === -1) return v;
-      if (field === "key") {
-        entries[idx] = [val, entries[idx][1]];
-      } else {
-        entries[idx] = [entries[idx][0], val];
-      }
-      return { ...v, attributes: Object.fromEntries(entries) };
-    });
-  };
+  const changeAttribute = (id, field, val) =>
+    setNewVariant((v) => ({
+      ...v,
+      attributes: v.attributes.map((a) =>
+        a.id === id ? { ...a, [field]: val } : a
+      ),
+    }));
 
   /* ── Reset form ────────────────────────────────────────────── */
   const resetForm = () => {
@@ -118,7 +114,7 @@ const SellerProductDetails = () => {
       images: [],
       stock: "",
       price: { amount: "", currency: "INR" },
-      attributes: { "": "" },
+      attributes: [{ id: Date.now(), key: "", value: "" }],
     });
     setPreviewUrls([]);
     setShowForm(false);
@@ -133,11 +129,24 @@ const SellerProductDetails = () => {
     }
     setIsCreating(true);
 
-    const attrMap = Object.fromEntries(
-      Object.entries(newVariant.attributes).filter(
-        ([k, v]) => k.trim() && v.trim(),
-      ),
-    );
+    /* Build attribute map — if duplicate keys exist, suffix them (_2, _3…)
+       so every attribute is preserved without silently overwriting. */
+    const attrMap = {};
+    const keyCounts = {};
+    newVariant.attributes
+      .filter(({ key, value }) => key.trim() && value.trim())
+      .forEach(({ key, value }) => {
+        const k = key.trim();
+        if (attrMap[k] === undefined) {
+          // first occurrence — use the key as-is
+          attrMap[k] = value.trim();
+          keyCounts[k] = 1;
+        } else {
+          // subsequent occurrence — suffix with _2, _3 …
+          keyCounts[k] += 1;
+          attrMap[`${k}_${keyCounts[k]}`] = value.trim();
+        }
+      });
 
     const priceAmount =
       newVariant.price.amount !== ""
@@ -749,16 +758,15 @@ const SellerProductDetails = () => {
                         + Add
                       </button>
                     </div>
-                    {Object.entries(newVariant.attributes).map(
-                      ([key, value], idx) => (
-                        <div key={idx} className="flex items-center gap-3">
+                    {newVariant.attributes.map((attr) => (
+                        <div key={attr.id} className="flex items-center gap-3">
                           <input
                             type="text"
                             required
                             placeholder="e.g. Size"
-                            value={key}
+                            value={attr.key}
                             onChange={(e) =>
-                              changeAttribute(key, "key", e.target.value)
+                              changeAttribute(attr.id, "key", e.target.value)
                             }
                             className="input-line flex-1"
                           />
@@ -772,25 +780,20 @@ const SellerProductDetails = () => {
                             type="text"
                             required
                             placeholder="e.g. XL"
-                            value={value}
+                            value={attr.value}
                             onChange={(e) =>
-                              changeAttribute(key, "value", e.target.value)
+                              changeAttribute(attr.id, "value", e.target.value)
                             }
                             className="input-line flex-1"
                           />
                           <button
                             type="button"
-                            onClick={() => removeAttribute(key)}
-                            disabled={
-                              Object.keys(newVariant.attributes).length === 1
-                            }
+                            onClick={() => removeAttribute(attr.id)}
+                            disabled={newVariant.attributes.length === 1}
                             className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-transparent border-none cursor-pointer"
                             style={{
                               color: T.muted,
-                              opacity:
-                                Object.keys(newVariant.attributes).length === 1
-                                  ? 0.25
-                                  : 1,
+                              opacity: newVariant.attributes.length === 1 ? 0.25 : 1,
                             }}
                           >
                             <svg
@@ -808,8 +811,7 @@ const SellerProductDetails = () => {
                             </svg>
                           </button>
                         </div>
-                      ),
-                    )}
+                      ))}
                   </div>
 
                   {/* Actions */}

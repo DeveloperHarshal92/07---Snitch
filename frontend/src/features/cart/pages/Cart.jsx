@@ -20,7 +20,6 @@ const fmt = (amount, currency = "INR") =>
     maximumFractionDigits: 0,
   }).format(amount);
 
-
 /* ── CartItemRow ──────────────────────────────────────────────── */
 const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
   const [visible, setVisible] = useState(false);
@@ -33,30 +32,60 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
   }, [idx]);
 
   const product = item.product ?? {};
+  /* price = snapshotted price at time of adding to cart (the "display price") */
   const price = item.price ?? product.price ?? { amount: 0, currency: "INR" };
   const quantity = item.quantity ?? 1;
-  const lineTotal = price.amount * quantity;
 
   /* Pick the first image from product images array */
   const thumb = product.images?.[0]?.url ?? null;
 
   /* Resolve the matched variant (if any) to get correct stock */
   const matchedVariant = item.variant
-    ? (product.variants ?? []).find((v) => v._id === item.variant) ?? null
+    ? ((product.variants ?? []).find((v) => v._id === item.variant) ?? null)
     : null;
 
   /* Variant attributes label */
   const variantAttrs = matchedVariant?.attributes
     ? Object.entries(matchedVariant.attributes)
-        .map(([k, v]) => `${k}: ${v}`)
+        .map(([k, v]) => `${k.replace(/_\d+$/, "")}: ${v}`)
         .join(" · ")
     : item.variant
-    ? "Variant Selected"
-    : null;
+      ? "Variant Selected"
+      : null;
 
   /* Stock: prefer variant-level stock, fall back to product-level */
-  const stock = matchedVariant != null ? (matchedVariant.stock ?? 0) : (product.stock ?? 0);
+  const stock =
+    matchedVariant != null ? (matchedVariant.stock ?? 0) : (product.stock ?? 0);
   const isOutOfStock = stock === 0;
+
+  /* ── Discount / Price-change system ────────────────────────────
+   * Compares:
+   *   cartPrice    = price.amount  (snapshotted when item was added)
+   *   currentPrice = live price from variant/product (what seller set now)
+   *
+   * If currentPrice < cartPrice  → seller lowered price  → show savings
+   * If currentPrice > cartPrice  → seller raised price   → warn user
+   * ─────────────────────────────────────────────────────────────── */
+  const cartPrice = price.amount;
+  const currentPrice =
+    (matchedVariant?.price?.amount != null
+      ? matchedVariant.price.amount
+      : product.price?.amount) ?? cartPrice;
+
+  const priceDiff = cartPrice - currentPrice; // positive = saving, negative = increase
+  const hasPriceChanged = Math.abs(priceDiff) > 0;
+  const isPriceDrop = priceDiff > 0;
+  const isPriceHike = priceDiff < 0;
+  const discountPct = isPriceDrop
+    ? Math.round((priceDiff / cartPrice) * 100)
+    : 0;
+  const hikePct = isPriceHike
+    ? Math.round((Math.abs(priceDiff) / cartPrice) * 100)
+    : 0;
+
+  /* Use the live (current) price for line total so totals stay accurate */
+  const effectiveUnitPrice = currentPrice;
+  const lineTotal = effectiveUnitPrice * quantity;
 
   return (
     <div
@@ -67,8 +96,8 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
         transform: removing
           ? "translateX(-20px)"
           : visible
-          ? "translateY(0)"
-          : "translateY(18px)",
+            ? "translateY(0)"
+            : "translateY(18px)",
         transition: removing
           ? "opacity 0.35s ease, transform 0.35s ease"
           : `opacity 0.5s ease ${idx * 0.07}s, transform 0.5s ease ${idx * 0.07}s`,
@@ -164,7 +193,15 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
       </div>
 
       {/* Product details */}
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "6px" }}>
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: "6px",
+        }}
+      >
         {/* Title */}
         <h3
           onClick={() => navigate(`/product/${product._id}`)}
@@ -201,7 +238,14 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
         )}
 
         {/* Stock badge */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "2px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginTop: "2px",
+          }}
+        >
           <span
             style={{
               fontSize: "0.55rem",
@@ -211,7 +255,7 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
               color: isOutOfStock ? "#c0392b" : "#4a7c59",
             }}
           >
-            {isOutOfStock ? "Out of stock" : "In stock"}
+            {isOutOfStock ? "Out of stock" : `${stock} in stock`}
           </span>
 
           {/* Tags */}
@@ -233,6 +277,50 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
             </span>
           ))}
         </div>
+
+        {/* ── Discount badge (price dropped) ── */}
+        {isPriceDrop && (
+          <div style={{ marginTop: "4px" }}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                backgroundColor: "rgba(74, 124, 89, 0.1)",
+                color: "#4a7c59",
+                fontSize: "0.5rem",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                padding: "3px 8px",
+                borderRadius: "2px",
+                border: "1px solid rgba(74,124,89,0.25)",
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                style={{ width: 10, height: 10 }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 6h.008v.008H6V6z"
+                />
+              </svg>
+              You save {discountPct}%
+            </span>
+          </div>
+        )}
 
         {/* Qty row */}
         <div
@@ -268,7 +356,12 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
             {/* Decrease */}
             <button
               id={`qty-dec-${item._id}`}
-              onClick={() => onQtyChange(item._id, quantity - 1)}
+              onClick={() =>
+                onQtyChange(
+                  { productId: product._id, variantId: item.variant },
+                  quantity - 1,
+                )
+              }
               disabled={quantity <= 1}
               style={{
                 width: "32px",
@@ -287,10 +380,12 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
                 flexShrink: 0,
               }}
               onMouseEnter={(e) => {
-                if (quantity > 1) e.currentTarget.style.backgroundColor = "#f0ede9";
+                if (quantity > 1)
+                  e.currentTarget.style.backgroundColor = "#f0ede9";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = quantity <= 1 ? "#f5f3f0" : "#fbf9f6";
+                e.currentTarget.style.backgroundColor =
+                  quantity <= 1 ? "#f5f3f0" : "#fbf9f6";
               }}
             >
               −
@@ -319,29 +414,38 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
             {/* Increase */}
             <button
               id={`qty-inc-${item._id}`}
-              onClick={() => onQtyChange(item._id, quantity + 1)}
+              onClick={() =>
+                onQtyChange(
+                  { productId: product._id, variantId: item.variant },
+                  quantity + 1,
+                )
+              }
               disabled={stock > 0 && quantity >= stock}
               style={{
                 width: "32px",
                 height: "32px",
                 border: "none",
                 borderLeft: "1px solid #e4e2df",
-                backgroundColor: (stock > 0 && quantity >= stock) ? "#f5f3f0" : "#fbf9f6",
-                cursor: (stock > 0 && quantity >= stock) ? "not-allowed" : "pointer",
+                backgroundColor:
+                  stock > 0 && quantity >= stock ? "#f5f3f0" : "#fbf9f6",
+                cursor:
+                  stock > 0 && quantity >= stock ? "not-allowed" : "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: (stock > 0 && quantity >= stock) ? "#c4bdb5" : "#3d342c",
+                color: stock > 0 && quantity >= stock ? "#c4bdb5" : "#3d342c",
                 fontSize: "1rem",
                 fontWeight: 300,
                 transition: "background-color 0.15s, color 0.15s",
                 flexShrink: 0,
               }}
               onMouseEnter={(e) => {
-                if (!(stock > 0 && quantity >= stock)) e.currentTarget.style.backgroundColor = "#f0ede9";
+                if (!(stock > 0 && quantity >= stock))
+                  e.currentTarget.style.backgroundColor = "#f0ede9";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = (stock > 0 && quantity >= stock) ? "#f5f3f0" : "#fbf9f6";
+                e.currentTarget.style.backgroundColor =
+                  stock > 0 && quantity >= stock ? "#f5f3f0" : "#fbf9f6";
               }}
             >
               +
@@ -370,39 +474,83 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-end",
-          gap: "12px",
+          gap: "8px",
           flexShrink: 0,
         }}
       >
+        {/* ── Price hike badge ── */}
+        {isPriceHike && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              backgroundColor: "rgba(192, 57, 43, 0.08)",
+              color: "#c0392b",
+              fontSize: "0.5rem",
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              padding: "3px 8px",
+              borderRadius: "2px",
+              border: "1px solid rgba(192,57,43,0.2)",
+            }}
+          >
+            {/* Up arrow */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2.5}
+              stroke="currentColor"
+              style={{ width: 9, height: 9 }}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.5 15.75l7.5-7.5 7.5 7.5"
+              />
+            </svg>
+            Price up {hikePct}%
+          </span>
+        )}
+
+        {/* ── Line total (current price) ── */}
         <span
           style={{
             fontSize: "1.1rem",
             fontWeight: 500,
-            color: "#C9A96E",
+            color: isPriceHike ? "#c0392b" : "#C9A96E",
             fontFamily: "'Inter', sans-serif",
             letterSpacing: "0.01em",
+            transition: "color 0.3s",
           }}
         >
           {fmt(lineTotal, price.currency)}
         </span>
 
-        {quantity > 1 && (
+        {/* ── Strikethrough original (snapshotted) price if changed ── */}
+        {hasPriceChanged && (
           <span
             style={{
-              fontSize: "0.6rem",
-              color: "#6b6158",
+              fontSize: "0.65rem",
+              color: "#a89e94",
               fontFamily: "'Inter', sans-serif",
-              letterSpacing: "0.08em",
+              letterSpacing: "0.05em",
+              textDecoration: "line-through",
             }}
           >
-            {fmt(price.amount, price.currency)} each
+            {fmt(cartPrice * quantity, price.currency)}
           </span>
         )}
 
         {/* Remove button */}
         <button
           id={`cart-remove-${item._id}`}
-          onClick={() => onRemove(item._id)}
+          onClick={() =>
+            onRemove({ productId: product._id, variantId: item.variant })
+          }
           disabled={removing}
           style={{
             background: "none",
@@ -449,11 +597,58 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
 /* ── OrderSummary ─────────────────────────────────────────────── */
 const OrderSummary = ({ cartItems, visible }) => {
   const navigate = useNavigate();
+  const [couponCode, setCouponCode] = useState("");
+  const [isCouponApplied, setIsCouponApplied] = useState(false);
+  const [couponError, setCouponError] = useState("");
+
+  const handleApplyCoupon = () => {
+    if (!couponCode.trim()) return;
+    if (couponCode.trim().toUpperCase() === "SNITCH10") {
+      setIsCouponApplied(true);
+      setCouponError("");
+    } else {
+      setIsCouponApplied(false);
+      setCouponError("Invalid coupon code");
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponCode("");
+    setIsCouponApplied(false);
+    setCouponError("");
+  };
 
   const subtotal = cartItems.reduce((acc, item) => {
-    const amount = item.price?.amount ?? item.product?.price?.amount ?? 0;
-    return acc + amount * (item.quantity ?? 1);
+    const product = item.product ?? {};
+    const matchedVariant = item.variant
+      ? ((product.variants ?? []).find((v) => v._id === item.variant) ?? null)
+      : null;
+    /* Use live current price (same logic as CartItemRow) */
+    const liveAmount =
+      (matchedVariant?.price?.amount != null
+        ? matchedVariant.price.amount
+        : product.price?.amount) ??
+      item.price?.amount ??
+      0;
+    return acc + liveAmount * (item.quantity ?? 1);
   }, 0);
+
+  /* Total savings = sum of (cartPrice - currentPrice) * qty for items where price dropped */
+  const totalSavings = cartItems.reduce((acc, item) => {
+    const product = item.product ?? {};
+    const matchedVariant = item.variant
+      ? ((product.variants ?? []).find((v) => v._id === item.variant) ?? null)
+      : null;
+    const cartPrice = item.price?.amount ?? 0;
+    const livePrice =
+      (matchedVariant?.price?.amount != null
+        ? matchedVariant.price.amount
+        : product.price?.amount) ?? cartPrice;
+    const saving = (cartPrice - livePrice) * (item.quantity ?? 1);
+    return acc + (saving > 0 ? saving : 0);
+  }, 0);
+
+  const hasSavings = totalSavings > 0;
 
   const currency =
     cartItems[0]?.price?.currency ??
@@ -463,7 +658,9 @@ const OrderSummary = ({ cartItems, visible }) => {
   const shippingThreshold = 999;
   const shippingFree = subtotal >= shippingThreshold;
   const shipping = shippingFree ? 0 : 99;
-  const total = subtotal + shipping;
+
+  const couponDiscount = isCouponApplied ? Math.round(subtotal * 0.1) : 0;
+  const total = Math.max(0, subtotal + shipping - couponDiscount);
 
   const progressPct = Math.min((subtotal / shippingThreshold) * 100, 100);
 
@@ -588,7 +785,13 @@ const OrderSummary = ({ cartItems, visible }) => {
 
         {/* Line items */}
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
             <span
               style={{
                 fontSize: "0.65rem",
@@ -600,19 +803,58 @@ const OrderSummary = ({ cartItems, visible }) => {
               Subtotal ({cartItems.length}{" "}
               {cartItems.length === 1 ? "item" : "items"})
             </span>
-            <span
+            <div
               style={{
-                fontSize: "0.8rem",
-                fontWeight: 500,
-                color: "#0d0d0b",
-                fontFamily: "'Inter', sans-serif",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-end",
+                gap: "2px",
               }}
             >
-              {fmt(subtotal, currency)}
-            </span>
+              {hasSavings && (
+                <span
+                  style={{
+                    fontSize: "11px",
+                    color: "gray",
+                    textDecoration: "line-through",
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                >
+                  {fmt(subtotal + totalSavings, currency)}
+                </span>
+              )}
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "black",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                {fmt(subtotal, currency)}
+              </span>
+              {hasSavings && (
+                <span
+                  style={{
+                    fontSize: "11px",
+                    color: "#4a7c59",
+                    fontFamily: "'Inter', sans-serif",
+                    marginTop: "2px",
+                  }}
+                >
+                  ✓ Saving {fmt(totalSavings, currency)}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <span
               style={{
                 fontSize: "0.65rem",
@@ -638,8 +880,179 @@ const OrderSummary = ({ cartItems, visible }) => {
           {/* Divider */}
           <div style={{ borderTop: "1px solid #e4e2df", margin: "4px 0" }} />
 
+          {/* Promo Code Input Section (Moved Above Total) */}
+          <div style={{ margin: "4px 0" }}>
+            <p
+              style={{
+                margin: "0 0 12px",
+                fontSize: "11px",
+                letterSpacing: "0.4px",
+                textTransform: "uppercase",
+                color: "gray",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 500,
+              }}
+            >
+              Have a promo code?
+            </p>
+            {!isCouponApplied ? (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="text"
+                  placeholder="Enter code (e.g., SNITCH10)"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  style={{
+                    flex: 1,
+                    padding: "10px 12px",
+                    fontSize: "0.75rem",
+                    fontFamily: "'Inter', sans-serif",
+                    border: `1px solid ${couponError ? "#c0392b" : "#e4e2df"}`,
+                    borderRadius: "2px",
+                    outline: "none",
+                    backgroundColor: "#fff",
+                  }}
+                />
+                <button
+                  onClick={handleApplyCoupon}
+                  style={{
+                    padding: "0 20px",
+                    backgroundColor: "#3d342c",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "2px",
+                    cursor: "pointer",
+                    fontSize: "0.65rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    fontFamily: "'Inter', sans-serif",
+                    transition: "background-color 0.2s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#0d0d0b")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#3d342c")
+                  }
+                >
+                  Apply
+                </button>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "10px 12px",
+                  backgroundColor: "rgba(74, 124, 89, 0.08)",
+                  border: "1px dashed rgba(74, 124, 89, 0.4)",
+                  borderRadius: "2px",
+                }}
+              >
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="#4a7c59"
+                    style={{ width: 14, height: 14 }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    />
+                  </svg>
+                  <span
+                    style={{
+                      fontSize: "0.7rem",
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#4a7c59",
+                      fontWeight: 500,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    {couponCode} Applied
+                  </span>
+                </div>
+                <button
+                  onClick={removeCoupon}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    fontSize: "0.6rem",
+                    color: "#6b6158",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+            {couponError && (
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  fontSize: "0.6rem",
+                  color: "#c0392b",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                {couponError}
+              </p>
+            )}
+          </div>
+
+          {/* Coupon Discount Row (if applied) */}
+          {isCouponApplied && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.08em",
+                  color: "#4a7c59",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                Coupon ({couponCode})
+              </span>
+              <span
+                style={{
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                  color: "#4a7c59",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                -{fmt(couponDiscount, currency)}
+              </span>
+            </div>
+          )}
+
+          {/* Divider */}
+          <div style={{ borderTop: "1px solid #e4e2df", margin: "4px 0" }} />
+
           {/* Total */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <span
               style={{
                 fontSize: "0.7rem",
@@ -771,24 +1184,57 @@ const OrderSummary = ({ cartItems, visible }) => {
           {[
             {
               icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: 14, height: 14 }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  style={{ width: 14, height: 14 }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
+                  />
                 </svg>
               ),
               label: "Secure",
             },
             {
               icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: 14, height: 14 }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  style={{ width: 14, height: 14 }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+                  />
                 </svg>
               ),
               label: "Fast Ship",
             },
             {
               icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: 14, height: 14 }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  style={{ width: 14, height: 14 }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+                  />
                 </svg>
               ),
               label: "Easy Return",
@@ -830,7 +1276,9 @@ const LoadingSkeleton = () => (
     style={{ display: "flex", gap: "48px", alignItems: "flex-start" }}
   >
     {/* Cart items skeleton */}
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0" }}>
+    <div
+      style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0" }}
+    >
       {[0, 1, 2].map((i) => (
         <div
           key={i}
@@ -851,14 +1299,70 @@ const LoadingSkeleton = () => (
               borderRadius: "2px",
             }}
           />
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px", paddingTop: "4px" }}>
-            <div className="animate-pulse" style={{ height: "18px", width: "60%", backgroundColor: "#e4e2df", borderRadius: "2px" }} />
-            <div className="animate-pulse" style={{ height: "10px", width: "30%", backgroundColor: "#e4e2df", borderRadius: "2px" }} />
-            <div className="animate-pulse" style={{ height: "10px", width: "20%", backgroundColor: "#e4e2df", borderRadius: "2px", marginTop: "8px" }} />
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              paddingTop: "4px",
+            }}
+          >
+            <div
+              className="animate-pulse"
+              style={{
+                height: "18px",
+                width: "60%",
+                backgroundColor: "#e4e2df",
+                borderRadius: "2px",
+              }}
+            />
+            <div
+              className="animate-pulse"
+              style={{
+                height: "10px",
+                width: "30%",
+                backgroundColor: "#e4e2df",
+                borderRadius: "2px",
+              }}
+            />
+            <div
+              className="animate-pulse"
+              style={{
+                height: "10px",
+                width: "20%",
+                backgroundColor: "#e4e2df",
+                borderRadius: "2px",
+                marginTop: "8px",
+              }}
+            />
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "12px" }}>
-            <div className="animate-pulse" style={{ height: "22px", width: "80px", backgroundColor: "#e4e2df", borderRadius: "2px" }} />
-            <div className="animate-pulse" style={{ height: "10px", width: "50px", backgroundColor: "#e4e2df", borderRadius: "2px" }} />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: "12px",
+            }}
+          >
+            <div
+              className="animate-pulse"
+              style={{
+                height: "22px",
+                width: "80px",
+                backgroundColor: "#e4e2df",
+                borderRadius: "2px",
+              }}
+            />
+            <div
+              className="animate-pulse"
+              style={{
+                height: "10px",
+                width: "50px",
+                backgroundColor: "#e4e2df",
+                borderRadius: "2px",
+              }}
+            />
           </div>
         </div>
       ))}
@@ -866,7 +1370,11 @@ const LoadingSkeleton = () => (
     {/* Summary skeleton */}
     <div style={{ width: "320px", flexShrink: 0 }}>
       <div
-        style={{ border: "1px solid #e4e2df", borderRadius: "2px", padding: "28px" }}
+        style={{
+          border: "1px solid #e4e2df",
+          borderRadius: "2px",
+          padding: "28px",
+        }}
       >
         {[0, 1, 2, 3, 4].map((i) => (
           <div
@@ -881,7 +1389,15 @@ const LoadingSkeleton = () => (
             }}
           />
         ))}
-        <div className="animate-pulse" style={{ height: "48px", width: "100%", backgroundColor: "#e4e2df", borderRadius: "2px" }} />
+        <div
+          className="animate-pulse"
+          style={{
+            height: "48px",
+            width: "100%",
+            backgroundColor: "#e4e2df",
+            borderRadius: "2px",
+          }}
+        />
       </div>
     </div>
   </div>
@@ -925,7 +1441,14 @@ const EmptyCart = ({ navigate }) => {
         />
       </svg>
 
-      <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div
+        style={{
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+        }}
+      >
         <h2
           style={{
             margin: 0,
@@ -989,7 +1512,12 @@ const EmptyCart = ({ navigate }) => {
 /* ── Cart ─────────────────────────────────────────────────────── */
 const Cart = () => {
   const cartItems = useSelector((state) => state.cart.items);
-  const { handleGetCart } = useCart();
+  const {
+    handleGetCart,
+    handleRemoveFromCart,
+    handleIncrementCartItem,
+    handleDecrementCartItem,
+  } = useCart();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -1004,24 +1532,76 @@ const Cart = () => {
     });
   }, []);
 
-  const handleRemove = (itemId) => {
-    setRemovingIds((prev) => new Set([...prev, itemId]));
-    setTimeout(() => {
-      dispatch(removeFromCart(itemId));
-      setRemovingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(itemId);
-        return next;
-      });
-    }, 380);
+  const handleRemove = async ({ productId, variantId }) => {
+    // Find the itemId for local state manipulation
+    const item = cartItems.find((i) => {
+      const matchProduct =
+        i.product?._id === productId || i.product === productId;
+      const matchVariant = variantId ? i.variant === variantId : !i.variant;
+      return matchProduct && matchVariant;
+    });
+    const itemId = item?._id;
+
+    if (itemId) setRemovingIds((prev) => new Set([...prev, itemId]));
+    try {
+      await handleRemoveFromCart({ productId, variantId });
+      // Let handleGetCart (called by handleRemoveFromCart) sync Redux,
+      // but also locally dispatch for immediate visual feedback if desired
+      if (itemId) dispatch(removeFromCart(itemId));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (itemId) {
+        setTimeout(() => {
+          setRemovingIds((prev) => {
+            const next = new Set(prev);
+            next.delete(itemId);
+            return next;
+          });
+        }, 380);
+      }
+    }
   };
 
-  const handleQtyChange = (itemId, newQty) => {
+  const handleQtyChange = async ({ productId, variantId }, newQty) => {
     if (newQty < 1) return;
-    const updated = cartItems.map((item) =>
-      item._id === itemId ? { ...item, quantity: newQty } : item
+
+    // Find current qty to know if it's inc or dec
+    const item = cartItems.find((i) => {
+      const matchProduct =
+        i.product?._id === productId || i.product === productId;
+      const matchVariant = variantId ? i.variant === variantId : !i.variant;
+      return matchProduct && matchVariant;
+    });
+    if (!item) return;
+    const itemId = item._id;
+
+    const delta = newQty - item.quantity;
+    if (delta === 0) return;
+
+    // Optimistic UI update
+    const updated = cartItems.map((cartItem) =>
+      cartItem._id === itemId ? { ...cartItem, quantity: newQty } : cartItem,
     );
     dispatch(setItems(updated));
+
+    try {
+      if (delta > 0) {
+        // Increment
+        for (let i = 0; i < delta; i++) {
+          await handleIncrementCartItem({ productId, variantId });
+        }
+      } else {
+        // Decrement
+        for (let i = 0; i < Math.abs(delta); i++) {
+          await handleDecrementCartItem({ productId, variantId });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      // Revert on error (could be refetched by handleGetCart again as a fallback)
+      handleGetCart();
+    }
   };
 
   return (
@@ -1037,7 +1617,6 @@ const Cart = () => {
           flexDirection: "column",
         }}
       >
-
         {/* Loading */}
         {isLoading && <LoadingSkeleton />}
 
@@ -1068,7 +1647,14 @@ const Cart = () => {
               }}
             >
               {/* Breadcrumb */}
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "16px",
+                }}
+              >
                 <button
                   onClick={() => navigate("/")}
                   style={{

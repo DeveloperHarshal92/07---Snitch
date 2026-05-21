@@ -1,6 +1,7 @@
 import cartModel from "../models/cart.model.js";
 import productModel from "../models/product.model.js";
 import { stockOfVariant } from "../dao/product.dao.js";
+import * as cartDao from "../dao/cart.dao.js";
 
 export const addToCart = async (req, res) => {
   const { productId, variantId } = req.params;
@@ -58,15 +59,17 @@ export const addToCart = async (req, res) => {
       });
     }
 
+    const elemMatch = { product: productId };
+    if (variantId) {
+      elemMatch.variant = variantId;
+    } else {
+      elemMatch.variant = { $exists: false }; 
+    }
+
     const query = {
       user: req.user._id,
-      "items.product": productId,
+      items: { $elemMatch: elemMatch }
     };
-    if (variantId) {
-      query["items.variant"] = variantId;
-    } else {
-      query["items.variant"] = { $exists: false }; // Or null depending on how it's saved. Mongoose might just omit it.
-    }
 
     await cartModel.findOneAndUpdate(
       query,
@@ -92,11 +95,17 @@ export const addToCart = async (req, res) => {
   const cartItem = {
     product: productId,
     quantity,
-    price: product.price,
+    price: product.price, // Fallback base price
   };
+  
   if (variantId) {
     cartItem.variant = variantId;
+    const variant = product.variants.id(variantId) || product.variants.find(v => v._id.toString() === variantId);
+    if (variant && variant.price && variant.price.amount) {
+      cartItem.price = variant.price;
+    }
   }
+  
   cart.items.push(cartItem);
 
   await cart.save();
@@ -125,3 +134,67 @@ export const getCart = async (req, res) => {
     cart,
   });
 };
+
+export const removeFromCart = async (req, res) => {
+  const { productId, variantId } = req.params;
+  try {
+    await cartDao.removeItem(req.user._id, productId, variantId);
+    return res.status(200).json({
+      message: "Product removed from cart",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+export const incrementCartItem = async (req, res) => {
+  const { productId, variantId } = req.params;
+  try {
+    // Check stock before incrementing
+    const cart = await cartModel.findOne({ user: req.user._id });
+    const item = cart?.items.find(i => {
+      const matchProduct = i.product.toString() === productId;
+      const matchVariant = variantId ? i.variant?.toString() === variantId : !i.variant;
+      return matchProduct && matchVariant;
+    });
+    
+    if (!item) {
+      return res.status(404).json({ message: "Item not found in cart", success: false });
+    }
+
+    const stock = await stockOfVariant(item.product.toString(), item.variant?.toString());
+    
+    if (item.quantity >= stock) {
+      return res.status(400).json({
+        message: `Only ${stock} items left in stock`,
+        success: false,
+      });
+    }
+
+    await cartDao.incrementQuantity(req.user._id, productId, variantId);
+    return res.status(200).json({
+      message: "Quantity increased",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+export const decrementCartItem = async (req, res) => {
+  const { productId, variantId } = req.params;
+  try {
+    const updated = await cartDao.decrementQuantity(req.user._id, productId, variantId);
+    if (!updated) {
+       return res.status(400).json({ message: "Could not decrement quantity", success: false });
+    }
+    return res.status(200).json({
+      message: "Quantity decreased",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+

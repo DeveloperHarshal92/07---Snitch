@@ -27,3 +27,36 @@ export const getCart = async () => {
     throw error;
   }
 };
+
+export const removeFromCartApi = async ({ productId, variantId }) => {
+  try {
+    const url = variantId ? `/remove/${productId}/${variantId}` : `/remove/${productId}`;
+    const response = await cartApiInstance.delete(url);
+    return response.data;
+  } catch (error) {
+    console.log("Error while removing product from cart: ", error);
+    throw error;
+  }
+};
+
+export const incrementCartItemApi = async ({ productId, variantId }) => {
+  try {
+    const url = variantId ? `/quantity/increment/${productId}/${variantId}` : `/quantity/increment/${productId}`;
+    const response = await cartApiInstance.patch(url);
+    return response.data;
+  } catch (error) {
+    console.log("Error while incrementing cart item: ", error);
+    throw error;
+  }
+};
+
+export const decrementCartItemApi = async ({ productId, variantId }) => {
+  try {
+    const url = variantId ? `/quantity/decrement/${productId}/${variantId}` : `/quantity/decrement/${productId}`;
+    const response = await cartApiInstance.patch(url);
+    return response.data;
+  } catch (error) {
+    console.log("Error while decrementing cart item: ", error);
+    throw error;
+  }
+};

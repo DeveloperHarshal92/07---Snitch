@@ -1,8 +1,17 @@
 import { Router } from "express";
 import { authenticateUser } from "../middlewares/auth.middleware.js";
-import { validateAddToCart } from "../validator/cart.validator.js";
-import { addToCart, getCart } from "../controllers/cart.controller.js";
-
+import {
+  validateAddToCart,
+  validateCartProductParams,
+} from "../validator/cart.validator.js";
+import {
+  addToCart,
+  getCart,
+  removeFromCart,
+  incrementCartItem,
+  decrementCartItem,
+} from "../controllers/cart.controller.js";
+ 
 const router = Router();
 
 /*
@@ -20,7 +29,6 @@ router.post(
   validateAddToCart,
   addToCart,
 );
-
 /*
  * @route GET /api/cart
  * @desc Get the current user's cart
@@ -28,4 +36,49 @@ router.post(
  */
 router.get("/", authenticateUser, getCart);
 
-export default router;
+/* 
+ * @route DELETE /api/cart/remove/:productId
+ * @route DELETE /api/cart/remove/:productId/:variantId
+ * @desc Remove an item from the cart by its product and variant ID
+ * @access Private
+ */
+router.delete(
+  ["/remove/:productId", "/remove/:productId/:variantId"],
+  authenticateUser,
+  validateCartProductParams,
+  removeFromCart,
+);
+
+/*
+ * @route PATCH /api/cart/quantity/increment/:productId
+ * @route PATCH /api/cart/quantity/increment/:productId/:variantId
+ * @desc Increase the quantity of a cart item
+ * @access Private
+ */
+router.patch(
+  [
+    "/quantity/increment/:productId",
+    "/quantity/increment/:productId/:variantId",
+  ],
+  authenticateUser,
+  validateCartProductParams,
+  incrementCartItem,
+);
+
+/*
+ * @route PATCH /api/cart/quantity/decrement/:productId
+ * @route PATCH /api/cart/quantity/decrement/:productId/:variantId
+ * @desc Decrease the quantity of a cart item
+ * @access Private
+ */
+router.patch(
+  [
+    "/quantity/decrement/:productId",
+    "/quantity/decrement/:productId/:variantId",
+  ],
+  authenticateUser,
+  validateCartProductParams,
+  decrementCartItem,
+);
+
+export default router; 
