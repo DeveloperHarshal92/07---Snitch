@@ -4,8 +4,9 @@ import { useSelector } from "react-redux";
 
 const Nav = () => {
   const navigate = useNavigate();
-  const cartItems = useSelector((state) => state.cart.items);
+  const cartItems = useSelector((state) => state.cart.items) ?? [];
   const cartCount = cartItems.length;
+
   
 
   return (

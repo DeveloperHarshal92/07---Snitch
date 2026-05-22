@@ -6,7 +6,7 @@ import {
   decrementCartItemApi,
 } from "../services/cart.api";
 import { useDispatch } from "react-redux";
-import { setItems } from "../state/cart.slice";
+import { setCart } from "../state/cart.slice";
 
 export const useCart = () => {
   const dispatch = useDispatch();
@@ -25,7 +25,13 @@ export const useCart = () => {
   const handleGetCart = async () => {
     try {
       const data = await getCart();
-      dispatch(setItems(data.cart.items));
+      // Aggregation pipeline returns cart as an array; grab first element's items
+      const cartDoc = Array.isArray(data.cart) ? data.cart[0] : data.cart;
+      dispatch(setCart({
+        totalPrice: cartDoc?.totalPrice ?? 0,
+        currency: cartDoc?.currency ?? "INR",
+        items: cartDoc?.items ?? []
+      }));
       return data;
     } catch (error) {
       console.log("Error while fetching cart: ", error);

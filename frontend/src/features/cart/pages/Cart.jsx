@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useCart } from "../hooks/useCart";
-import { removeFromCart, setItems } from "../state/cart.slice";
+import { removeFromCart, setCart } from "../state/cart.slice";
 import { useNavigate } from "react-router";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
@@ -41,7 +41,7 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
 
   /* Resolve the matched variant (if any) to get correct stock */
   const matchedVariant = item.variant
-    ? ((product.variants ?? []).find((v) => v._id === item.variant) ?? null)
+    ? ((Array.isArray(product.variants) ? product.variants : product.variants ? [product.variants] : []).find((v) => v._id === item.variant) ?? null)
     : null;
 
   /* Variant attributes label */
@@ -595,7 +595,8 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
 };
 
 /* ── OrderSummary ─────────────────────────────────────────────── */
-const OrderSummary = ({ cartItems, visible }) => {
+const OrderSummary = ({ cart, visible }) => {
+  const cartItems = cart?.items || [];
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
   const [isCouponApplied, setIsCouponApplied] = useState(false);
@@ -618,26 +619,13 @@ const OrderSummary = ({ cartItems, visible }) => {
     setCouponError("");
   };
 
-  const subtotal = cartItems.reduce((acc, item) => {
-    const product = item.product ?? {};
-    const matchedVariant = item.variant
-      ? ((product.variants ?? []).find((v) => v._id === item.variant) ?? null)
-      : null;
-    /* Use live current price (same logic as CartItemRow) */
-    const liveAmount =
-      (matchedVariant?.price?.amount != null
-        ? matchedVariant.price.amount
-        : product.price?.amount) ??
-      item.price?.amount ??
-      0;
-    return acc + liveAmount * (item.quantity ?? 1);
-  }, 0);
+  const subtotal = cart?.totalPrice || 0;
 
   /* Total savings = sum of (cartPrice - currentPrice) * qty for items where price dropped */
   const totalSavings = cartItems.reduce((acc, item) => {
     const product = item.product ?? {};
     const matchedVariant = item.variant
-      ? ((product.variants ?? []).find((v) => v._id === item.variant) ?? null)
+      ? ((Array.isArray(product.variants) ? product.variants : product.variants ? [product.variants] : []).find((v) => v._id === item.variant) ?? null)
       : null;
     const cartPrice = item.price?.amount ?? 0;
     const livePrice =
@@ -1511,7 +1499,8 @@ const EmptyCart = ({ navigate }) => {
 
 /* ── Cart ─────────────────────────────────────────────────────── */
 const Cart = () => {
-  const cartItems = useSelector((state) => state.cart.items);
+  const cart = useSelector((state) => state.cart);
+  const cartItems = cart.items;
   const {
     handleGetCart,
     handleRemoveFromCart,
@@ -1583,7 +1572,7 @@ const Cart = () => {
     const updated = cartItems.map((cartItem) =>
       cartItem._id === itemId ? { ...cartItem, quantity: newQty } : cartItem,
     );
-    dispatch(setItems(updated));
+    dispatch(setCart({ ...cart, items: updated }));
 
     try {
       if (delta > 0) {
@@ -1771,7 +1760,7 @@ const Cart = () => {
               </div>
 
               {/* RIGHT: Order summary */}
-              <OrderSummary cartItems={cartItems} visible={visible} />
+              <OrderSummary cart={cart} visible={visible} />
             </div>
           </main>
         )}
