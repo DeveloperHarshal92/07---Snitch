@@ -10,8 +10,10 @@ import {
   removeFromCart,
   incrementCartItem,
   decrementCartItem,
+  createOrderController,
+  verifyOrderController,
 } from "../controllers/cart.controller.js";
- 
+
 const router = Router();
 
 /*
@@ -36,7 +38,7 @@ router.post(
  */
 router.get("/", authenticateUser, getCart);
 
-/* 
+/*
  * @route DELETE /api/cart/remove/:productId
  * @route DELETE /api/cart/remove/:productId/:variantId
  * @desc Remove an item from the cart by its product and variant ID
@@ -81,4 +83,23 @@ router.patch(
   decrementCartItem,
 );
 
-export default router; 
+/**
+ * @route POST /api/cart/payment/create/order
+ * @desc Create a payment order for the current cart
+ * @access Private
+ * @argument amount - Total amount to be paid (in INR)
+ * @argument currency - Currency code (default: INR)
+ */
+router.post("/payment/create/order", authenticateUser, createOrderController);
+
+/**
+ * @route POST /api/cart/payment/verify/order
+ * @desc Verify the payment for an order
+ * @access Private
+ * @argument orderId - ID of the order to verify
+ * @argument paymentId - ID of the payment to verify
+ * @argument signature - Signature to verify the payment
+ */
+router.post("/payment/verify/order", authenticateUser, verifyOrderController);
+
+export default router;

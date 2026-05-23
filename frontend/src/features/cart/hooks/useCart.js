@@ -4,6 +4,8 @@ import {
   removeFromCartApi,
   incrementCartItemApi,
   decrementCartItemApi,
+  createCartOrder,
+  verifyCartOrder
 } from "../services/cart.api";
 import { useDispatch } from "react-redux";
 import { setCart } from "../state/cart.slice";
@@ -72,11 +74,33 @@ export const useCart = () => {
     }
   };
 
+  const handleCreateCartOrder = async () => {
+    try {
+      const data = await createCartOrder();
+      return data;
+    } catch (error) {
+      console.log("Error while creating cart order: ", error);
+      throw error;
+    }
+  };  
+
+  const handleVerifyCartOrder = async ({razorpay_order_id, razorpay_payment_id, razorpay_signature}) => {
+    try {
+      const data = await verifyCartOrder({razorpay_order_id, razorpay_payment_id, razorpay_signature});
+      return data.success;
+    } catch (error) {
+      console.log("Error while verifying cart order: ", error);
+      throw error;
+    }
+  };  
+
   return {
     handleAddToCart,
     handleGetCart,
     handleRemoveFromCart,
     handleIncrementCartItem,
     handleDecrementCartItem,
+    handleCreateCartOrder,
+    handleVerifyCartOrder,
   };
 };

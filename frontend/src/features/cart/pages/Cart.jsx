@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useCart } from "../hooks/useCart";
 import { removeFromCart, setCart } from "../state/cart.slice";
 import { useNavigate } from "react-router";
+import { useRazorpay } from "react-razorpay";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
 const FontLink = () => (
@@ -41,7 +42,12 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
 
   /* Resolve the matched variant (if any) to get correct stock */
   const matchedVariant = item.variant
-    ? ((Array.isArray(product.variants) ? product.variants : product.variants ? [product.variants] : []).find((v) => v._id === item.variant) ?? null)
+    ? ((Array.isArray(product.variants)
+        ? product.variants
+        : product.variants
+          ? [product.variants]
+          : []
+      ).find((v) => v._id === item.variant) ?? null)
     : null;
 
   /* Variant attributes label */
@@ -598,13 +604,16 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
 const OrderSummary = ({ cart, visible }) => {
   const cartItems = cart?.items || [];
   const navigate = useNavigate();
+  const { error, isLoading , Razorpay } = useRazorpay();
   const [couponCode, setCouponCode] = useState("");
   const [isCouponApplied, setIsCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState("");
+  const {user} = useSelector((state) => state.auth);
 
   const handleApplyCoupon = () => {
     if (!couponCode.trim()) return;
-    if (couponCode.trim().toUpperCase() === "SNITCH10") {
+    const code = couponCode.trim().toUpperCase();
+    if (code === "SNITCH10" || code === "SNITCH80") {
       setIsCouponApplied(true);
       setCouponError("");
     } else {
@@ -625,7 +634,12 @@ const OrderSummary = ({ cart, visible }) => {
   const totalSavings = cartItems.reduce((acc, item) => {
     const product = item.product ?? {};
     const matchedVariant = item.variant
-      ? ((Array.isArray(product.variants) ? product.variants : product.variants ? [product.variants] : []).find((v) => v._id === item.variant) ?? null)
+      ? ((Array.isArray(product.variants)
+          ? product.variants
+          : product.variants
+            ? [product.variants]
+            : []
+        ).find((v) => v._id === item.variant) ?? null)
       : null;
     const cartPrice = item.price?.amount ?? 0;
     const livePrice =
@@ -647,10 +661,52 @@ const OrderSummary = ({ cart, visible }) => {
   const shippingFree = subtotal >= shippingThreshold;
   const shipping = shippingFree ? 0 : 99;
 
-  const couponDiscount = isCouponApplied ? Math.round(subtotal * 0.1) : 0;
+  const couponDiscount = isCouponApplied 
+    ? couponCode.trim().toUpperCase() === "SNITCH80" 
+      ? Math.round(subtotal * 0.8) 
+      : Math.round(subtotal * 0.1) 
+    : 0;
   const total = Math.max(0, subtotal + shipping - couponDiscount);
 
   const progressPct = Math.min((subtotal / shippingThreshold) * 100, 100);
+
+  const { handleCreateCartOrder, handleVerifyCartOrder } = useCart();
+
+  const handleCheckout = async () => {
+    const response = await handleCreateCartOrder();
+    console.log(response);
+
+    const options = {
+      key: "rzp_test_Ssk7ZpJpogYSca",
+      amount: response.order.amount, // Amount in paise
+      currency: response.order.currency,
+      name: "SNITCH",
+      description: "Test Transaction",
+      order_id: response.order.id, // Generate order_id on server
+      handler: async (response) => {
+        const isValid = await handleVerifyCartOrder(response);
+        if(isValid) {
+          navigate(`/orders-success?order_id=${response.razorpay_order_id}`, {
+            state: {
+              cartItems,
+              summary: { subtotal, total, couponDiscount, shipping, currency, totalSavings }
+            }
+          });
+        } 
+      },
+      prefill: {
+        name: user?.fullname,
+        email: user?.email,
+        contact: user?.contact,
+      },
+      theme: {
+        color: "#F37254",
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+  };
 
   return (
     <aside
@@ -1110,6 +1166,7 @@ const OrderSummary = ({ cart, visible }) => {
             e.currentTarget.style.backgroundColor = "#0d0d0b";
             e.currentTarget.style.color = "#fbf9f6";
           }}
+          onClick={handleCheckout}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
