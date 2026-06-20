@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useProduct } from "../hooks/useProduct";
 import { useParams, useNavigate } from "react-router";
 import { useCart } from "../../cart/hooks/useCart";
+import ReviewSection from "../components/ReviewSection";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
 const FontLink = () => (
@@ -824,6 +825,9 @@ const ProductDetail = () => {
             </div>
           </div>
         </main>
+
+        {/* ── Customer Reviews ─────────────────────────────────────── */}
+        <ReviewSection productId={productId} />
 
         {/* ── You May Also Like ────────────────────────────────────── */}
         {recommendations.length > 0 && (

@@ -79,7 +79,7 @@ const Login = () => {
                 letterSpacing: "0.35em",
               }}
             >
-              Snitch.
+              Snitch
             </span>
             {/* Editorial Headline */}
             <div>

@@ -677,7 +677,7 @@ const OrderSummary = ({ cart, visible }) => {
     console.log(response);
 
     const options = {
-      key: "rzp_test_Ssk7ZpJpogYSca",
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: response.order.amount, // Amount in paise
       currency: response.order.currency,
       name: "SNITCH",

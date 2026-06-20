@@ -3,6 +3,7 @@ import morgan from "morgan";
 import authRouter from "./routes/auth.routes.js";
 import productRouter from "./routes/product.routes.js";
 import cartRouter from "./routes/cart.routes.js";
+import reviewRouter from "./routes/review.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import passport from "passport";
@@ -47,5 +48,6 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/reviews", reviewRouter);
 
 export default app;

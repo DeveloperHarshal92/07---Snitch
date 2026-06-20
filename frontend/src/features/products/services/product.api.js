@@ -6,6 +6,12 @@ const productApiInstance = axios.create({
   withCredentials: true,
 });
 
+const reviewApiInstance = axios.create({
+  baseURL: "/api/reviews",
+  withCredentials: true,
+});
+
+// ── Product APIs ─────────────────────────────────────────────────
 export const createProduct = async (productData) => {
   try {
     const response = await productApiInstance.post("/", productData);
@@ -59,5 +65,47 @@ export const addProductVariant = async (productId, newProductVariant) => {
     return response.data;
   } catch (error) {
     console.error("Error adding product variant:", error);
+  }
+};
+
+// ── Review APIs ──────────────────────────────────────────────────
+ 
+export const getProductReviews = async (productId) => {
+  try {
+    const response = await reviewApiInstance.get(`/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    throw error;
+  }
+};
+ 
+export const addReview = async (productId, reviewData) => {
+  try {
+    const response = await reviewApiInstance.post(`/${productId}`, reviewData);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding review:", error);
+    throw error;
+  }
+};
+ 
+export const editReview = async (reviewId, reviewData) => {
+  try {
+    const response = await reviewApiInstance.put(`/${reviewId}`, reviewData);
+    return response.data;
+  } catch (error) {
+    console.error("Error editing review:", error);
+    throw error;
+  }
+};
+ 
+export const deleteReview = async (reviewId) => {
+  try {
+    const response = await reviewApiInstance.delete(`/${reviewId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    throw error;
   }
 };
