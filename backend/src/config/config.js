@@ -1,5 +1,13 @@
 import dotenv from "dotenv";
-dotenv.config();
+
+dotenv.config({ path: ".env" });
+
+if (process.env.DOTENV_CONFIG_PATH) {
+  dotenv.config({
+    path: process.env.DOTENV_CONFIG_PATH,
+    override: true,
+  });
+}
 
 if (!process.env.MONGO_URI) {
   throw new Error("MONGO_URI is not defined in environment variable");

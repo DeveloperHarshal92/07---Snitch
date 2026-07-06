@@ -1,0 +1,37 @@
+
+> backend@1.0.0 dev
+> npx nodemon server.js
+
+[33m[nodemon] 3.1.9[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injected env (11) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Connected to MongoDB...
+Server listening on port 3000...
+[0mGET /api/products [32m200[0m 705.773 ms - 18414[0m
+[0mGET / [32m200[0m 3.536 ms - 21[0m
+[0mGET /favicon.ico [33m404[0m 4.220 ms - 150[0m
+[0mGET /api/products [32m200[0m 1535.640 ms - 18414[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injected env (11) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Connected to MongoDB...
+Server listening on port 3000...
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injected env (11) from .env // tip: ⌘ suppress logs { quiet: true }
+Connected to MongoDB...
+Server listening on port 3000...
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injected env (11) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injected env (11) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Connected to MongoDB...
+Server listening on port 3000...
+[0mGET / [36m304[0m 12.057 ms - -[0m

@@ -1,0 +1,27 @@
+
+> backend@1.0.0 dev
+> npx nodemon server.js
+
+[33m[nodemon] 3.1.9[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injected env (11) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Connected to MongoDB...
+Server listening on port 3000...
+[0mGET /api/products [0m-[0m - ms - -[0m
+[0mGET /api/products [32m200[0m 211.298 ms - 18414[0m
+[0mGET /api/products [32m200[0m 158.091 ms - 18414[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injected env (11) from .env // tip: ⌘ override existing { override: true }
+Connected to MongoDB...
+Server listening on port 3000...
+[0mGET /api/products [32m200[0m 298.257 ms - 18414[0m
+[0mGET /api/products [32m200[0m 339.568 ms - 18414[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+◇ injected env (11) from .env // tip: ⌘ override existing { override: true }
+Connected to MongoDB...
+Server listening on port 3000...
