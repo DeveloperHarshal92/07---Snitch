@@ -1,16 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 const Login = () => {
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
+  const currentUser = useSelector((state) => state.auth.user);
+  const authLoading = useSelector((state) => state.auth.loading);
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      navigate(currentUser.role === "seller" ? "/seller/dashboard" : "/", { replace: true });
+    }
+  }, [currentUser, authLoading, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

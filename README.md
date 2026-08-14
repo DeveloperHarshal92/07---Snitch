@@ -1,178 +1,178 @@
-# Snitch
+# Snitch — Luxury E-Commerce Platform
 
-A full-stack e-commerce marketplace where **sellers** can list products (with image uploads and variants) and **buyers** can browse, add to cart, and pay via Razorpay. Supports both email/password and Google OAuth login.
-
----
-
-## Features
-
-- **Dual-role auth** — users register as `buyer` or `seller`; role-based route protection enforced on both frontend and backend
-- **Google OAuth 2.0** — sign in via Google (Passport.js strategy, stateless JWT)
-- **JWT authentication** — tokens stored in HTTP-only cookies; middleware validates on every protected route
-- **Product listings** — sellers create products with title, description, price, stock, and up to 7 images per product
-- **Product variants** — sellers can add variants (e.g., size/colour) with their own images, stock, and price
-- **Image uploads** — images uploaded via Multer and stored on ImageKit CDN
-- **Shopping cart** — buyers add/remove items and increment/decrement quantities; supports base products and variants
-- **Checkout & payments** — Razorpay order creation and server-side signature verification
-- **Product reviews** — buyers can leave reviews on products
-- **Seller dashboard** — sellers view and manage their own product listings
-- **Request validation** — all inputs validated with `express-validator` before hitting controllers
+A full-stack modern MERN e-commerce application inspired by luxury fashion aesthetics. **Sellers** can list curated products, upload multi-angle assets to ImageKit, and manage inventory/variants. **Buyers** authenticate, browse editorial collections, apply verified promotional coupons, checkout via Razorpay, and track past orders.
 
 ---
 
-## Tech Stack
+## 🌟 Key Features
 
-| Layer | Technology | Version |
+### 🔐 Authentication & Access Control
+- **Dual-Role Architecture** — Users register as `buyer` or `seller` with role-based route guards (`Protected.jsx`) on both frontend and backend.
+- **Root Route Protection** — Unauthenticated visitors opening `localhost:5173` are immediately routed to `/login`, returning to the storefront or seller dashboard upon successful sign-in.
+- **Google OAuth 2.0 & JWT** — Stateless JWT authentication stored in HTTP-only cookies alongside Google OAuth (Passport.js).
+
+### 🏷️ Server-Authoritative Promo Code & Coupon Engine
+- **Server-Side Validation** — Coupon discounts are calculated strictly on the backend (`couponModel` & `coupon.dao.js`), eliminating client-side tampering.
+- **Rich Business Rules** — Supports percentage discounts with max caps, fixed amounts, expiration dates, minimum cart value thresholds, and usage limits.
+- **Secure Razorpay Integration** — Razorpay orders and payment database records reflect server-verified discounted amounts; coupon usage counters increment atomically only upon confirmed payment verification.
+
+### 📦 Order History & Detail Tracking
+- **Order Manifest** — Dedicated buyer order history page (`/orders`) and comprehensive detail view (`/orders/:orderId`).
+- **Complete Audit Trail** — Tracks item snapshots, variant selections, coupon savings, payment IDs, delivery addresses, and real-time order statuses.
+
+### ✨ Luxury Design & Editorial UI
+- **Dynamic Hero Slider** — Auto-sliding high-resolution campaign banner with smooth transitions, progress indicators, and interactive pause-on-hover controls.
+- **3D Depth Carousel** — Custom visual component styled with Tailwind CSS for featured product drops in "The Edits" section.
+- **Curated Navigation & Footer** — Navbar with matching lookbook collection, order manifest, and dynamic shopping bag badge; editorial footer with newsletter subscription and brand links.
+- **Custom 404 Experience** — Styled error screen with quick navigation recovery.
+
+### 🛍️ Product & Catalog Management
+- **ImageKit CDN Integration** — High-speed asset processing and multi-image uploads via Multer.
+- **Product Variants** — Flexible variant architecture supporting unique prices, SKUs, colors, sizes, and variant-specific galleries.
+- **Interactive Reviews** — Buyer product rating and review submission system.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Description |
 |---|---|---|
-| Frontend framework | React | ^19.2.4 |
-| Build tool | Vite | ^8.0.4 |
-| Styling | Tailwind CSS | ^4.2.2 |
-| State management | Redux Toolkit + React-Redux | ^2.11.2 / ^9.2.0 |
-| Routing | React Router DOM | ^7.14.0 |
-| HTTP client | Axios | ^1.15.0 |
-| Payments (client) | react-razorpay | ^3.0.1 |
-| Backend framework | Express | ^5.2.1 |
-| Database | MongoDB via Mongoose | ^9.4.1 |
-| Authentication | Passport + passport-google-oauth20 | ^0.7.0 / ^2.0.0 |
-| Password hashing | bcryptjs | ^3.0.3 |
-| Tokens | jsonwebtoken | ^9.0.3 |
-| File uploads | Multer + @imagekit/nodejs | ^2.1.1 / ^7.5.0 |
-| Payments (server) | Razorpay | ^2.9.6 |
-| Logging | Morgan | ^1.10.1 |
+| **Frontend** | React 19, Vite 8, Tailwind CSS 4 | Fast, modern client framework and styling |
+| **State Management** | Redux Toolkit, React-Redux | Global store for auth, cart, and catalog state |
+| **Routing** | React Router 7 | Client-side routing with role-based protection |
+| **Payments (Client)** | react-razorpay | Razorpay checkout integration |
+| **Backend** | Node.js, Express 5 | High-performance RESTful API server |
+| **Database** | MongoDB, Mongoose 9 | Object data modeling for users, products, carts, coupons, and orders |
+| **Authentication** | Passport.js, JWT, bcryptjs | Secure password hashing, OAuth 2.0, and token verification |
+| **File Storage** | Multer, ImageKit Node SDK | Cloud image upload and CDN delivery |
+| **Payments (Server)** | Razorpay SDK | Server-side order creation and cryptographic signature verification |
 
 ---
 
-## Project Structure
+## 📁 Repository Structure
 
 ```
 07 - Snitch/
 ├── backend/
-│   ├── server.js          # Entry point — connects DB, starts Express on port 3000
+│   ├── server.js               # Server entry point — DB connection & Express listener
 │   └── src/
-│       ├── app.js         # Express app, CORS, Passport config, route mounting
-│       ├── config/        # DB connection, env config
-│       ├── controllers/   # auth, product, cart, review
-│       ├── dao/           # Data-access layer
-│       ├── middlewares/   # JWT auth, seller-only guard
-│       ├── models/        # Mongoose schemas: user, product, cart, review, payment
-│       ├── routes/        # auth, product, cart, review route files
-│       ├── services/      # Business logic (ImageKit, Razorpay, etc.)
-│       └── validator/     # express-validator rule sets
+│       ├── app.js              # Express app configuration, CORS, cookies, routes
+│       ├── config/             # Environment variables & MongoDB connection
+│       ├── controllers/        # auth, product, cart, coupon, review controllers
+│       ├── dao/                # Data Access Objects (cart, coupon, payment, product, user)
+│       ├── middlewares/        # JWT auth guard, seller guard
+│       ├── models/             # Mongoose schemas (user, product, cart, coupon, payment, review)
+│       ├── routes/             # API routes (auth, products, cart, reviews)
+│       ├── scripts/            # Database seeding scripts (seedCoupons.js)
+│       ├── services/           # External services (ImageKit, Razorpay)
+│       └── validator/          # express-validator request validation schemas
 └── frontend/
     ├── index.html
+    ├── public/                 # Static campaign imagery & local assets
     └── src/
-        ├── app/           # App.jsx, AppLayout, router config, Redux store
+        ├── app/                # App entry, AppLayout, router definition, Redux store
         └── features/
-            ├── auth/      # Login, Register pages + Protected route component
-            ├── products/  # Home, ProductDetail, CreateProduct, Dashboard, SellerProductDetails
-            └── cart/      # Cart page, OrderSuccess page
+            ├── auth/           # Login, Register, Protected route component
+            ├── cart/           # Cart page, OrderSuccess, coupon state & API services
+            ├── orders/         # OrderList, OrderDetail, orders API & custom hooks
+            ├── products/       # Home, ProductDetail, CreateProduct, Seller Dashboard
+            └── Shared/         # Nav, SnitchFooter, HeroSlider, DepthCarousel, NotFound
 ```
 
 ---
 
-## Setup & Installation
+## 🚀 Getting Started
 
 ### Prerequisites
-
 - Node.js (v18+)
-- A running MongoDB instance or Atlas cluster
-- Razorpay test account
-- Google Cloud OAuth 2.0 credentials
-- ImageKit account
+- MongoDB Atlas or local MongoDB
+- Razorpay account (Test mode key & secret)
+- Google Cloud Console OAuth credentials
+- ImageKit account (Public key, private key, URL endpoint)
 
-### 1. Backend
+### 1. Backend Setup
 
 ```bash
 cd backend
 npm install
 ```
 
-Copy the env template and fill in your values (see [Environment Variables](#environment-variables)):
-
-```bash
-# create backend/.env with the variables listed below
-npm run dev        # uses nodemon — hot-reloads on change
+Create a `.env` file in the `backend/` directory:
+```env
+PORT=3000
+NODE_ENV=development
+MONGO_URI=mongodb://localhost:27017/snitch
+JWT_SECRET=your_jwt_secret_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
+IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
+IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 ```
 
-The API server starts at **http://localhost:3000**.
+Seed test coupons:
+```bash
+node src/scripts/seedCoupons.js
+```
 
-### 2. Frontend
+Start the backend server:
+```bash
+npm run dev
+```
+Backend API will run at **`http://localhost:3000`**.
+
+---
+
+### 2. Frontend Setup
 
 ```bash
 cd frontend
 npm install
 ```
 
-```bash
-# create frontend/.env with VITE_RAZORPAY_KEY_ID
-npm run dev        # Vite dev server with HMR
+Create a `.env` file in the `frontend/` directory:
+```env
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 ```
 
-The frontend starts at **http://localhost:5173**.
+Start the Vite development server:
+```bash
+npm run dev
+```
+Frontend will run at **`http://localhost:5173`**.
 
 ---
 
-## Usage
+## 📡 API Reference Overview
 
-| Role | Flow |
-|---|---|
-| Buyer | Register → Browse `/` → View product → Add to cart → Checkout with Razorpay |
-| Seller | Register (role=seller) → `/seller/create-product` → manage via `/seller/dashboard` |
+### Authentication (`/api/auth`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Public | Register new buyer or seller |
+| `POST` | `/api/auth/login` | Public | Login with email and password |
+| `GET` | `/api/auth/google` | Public | Initiate Google OAuth 2.0 login |
+| `GET` | `/api/auth/me` | Private | Retrieve authenticated user profile |
 
-Both roles can sign in via `/login` or Google OAuth (`GET /api/auth/google`).
+### Products & Catalog (`/api/products`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/api/products` | Public | List all active product listings |
+| `GET` | `/api/products/detail/:id` | Public | Retrieve single product details |
+| `POST` | `/api/products` | Seller | Create new product with ImageKit uploads |
+| `GET` | `/api/products/seller` | Seller | Retrieve seller's own listings |
+| `POST` | `/api/products/:productId/variants` | Seller | Add variant to an existing product |
 
----
-
-## Environment Variables
-
-### `backend/.env`
-
-| Variable | Description |
-|---|---|
-| `MONGO_URI` | MongoDB connection string |
-| `JWT_SECRET` | Secret used to sign/verify JWTs |
-| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth 2.0 Client Secret |
-| `GOOGLE_CALLBACK_URL` | OAuth redirect URI (e.g. `http://localhost:5173/api/auth/google/callback`) |
-| `NODE_ENV` | `development` or `production` |
-| `IMAGEKIT_PRIVATE_KEY` | ImageKit private API key |
-| `IMAGEKIT_PUBLIC_KEY` | ImageKit public API key |
-| `IMAGEKIT_URL_ENDPOINT` | ImageKit CDN endpoint URL |
-| `RAZORPAY_KEY_ID` | Razorpay API key ID |
-| `RAZORPAY_KEY_SECRET` | Razorpay API key secret |
-
-### `frontend/.env`
-
-| Variable | Description |
-|---|---|
-| `VITE_RAZORPAY_KEY_ID` | Razorpay key ID exposed to the browser (use test key for dev) |
-
----
-
-## Testing
-
-> No test suite is currently configured. The backend `package.json` includes a placeholder `test` script that exits with an error.
->
-> **TODO**: Add unit/integration tests for controllers and validators.
-
----
-
-## API Routes (summary)
-
-| Method | Path | Access |
-|---|---|---|
-| POST | `/api/auth/register` | Public |
-| POST | `/api/auth/login` | Public |
-| GET | `/api/auth/google` | Public |
-| GET | `/api/auth/me` | Private |
-| GET | `/api/products` | Public |
-| GET | `/api/products/detail/:id` | Public |
-| POST | `/api/products` | Seller only |
-| GET | `/api/products/seller` | Seller only |
-| POST | `/api/products/:productId/variants` | Seller only |
-| GET | `/api/cart` | Buyer |
-| POST | `/api/cart/add/:productId` | Buyer |
-| DELETE | `/api/cart/remove/:productId` | Buyer |
-| POST | `/api/cart/payment/create/order` | Buyer |
-| POST | `/api/cart/payment/verify/order` | Buyer |
-| POST | `/api/reviews` | Buyer |
+### Cart & Checkout (`/api/cart`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/api/cart` | Buyer | Fetch active user cart |
+| `POST` | `/api/cart/add/:productId` | Buyer | Add product or variant to cart |
+| `DELETE` | `/api/cart/remove/:productId` | Buyer | Remove product from cart |
+| `POST` | `/api/cart/coupon/validate` | Buyer | Validate coupon against current cart total |
+| `POST` | `/api/cart/payment/create/order` | Buyer | Create Razorpay order with server discount |
+| `POST` | `/api/cart/payment/verify/order` | Buyer | Verify Razorpay payment signature & confirm |
+| `GET` | `/api/cart/orders` | Buyer | Fetch user order history |
+| `GET` | `/api/cart/orders/:orderId` | Buyer | Fetch single order details |
