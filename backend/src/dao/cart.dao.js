@@ -99,3 +99,11 @@ export const getCartDetails = async (userId) => {
 
   return cart;
 };
+
+export const clearCart = async (userId) => {
+  return await cartModel.findOneAndUpdate(
+    { user: userId },
+    { $set: { items: [] } },
+    { new: true },
+  );
+};

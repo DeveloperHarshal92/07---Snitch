@@ -9,7 +9,7 @@ import {
   validateCoupon,
 } from "../services/cart.api";
 import { useDispatch } from "react-redux";
-import { setCart } from "../state/cart.slice";
+import { setCart, clearCart } from "../state/cart.slice";
 
 export const useCart = () => {
   const dispatch = useDispatch();
@@ -98,12 +98,19 @@ export const useCart = () => {
   const handleVerifyCartOrder = async ({razorpay_order_id, razorpay_payment_id, razorpay_signature}) => {
     try {
       const data = await verifyCartOrder({razorpay_order_id, razorpay_payment_id, razorpay_signature});
+      if (data.success) {
+        dispatch(clearCart());
+      }
       return data.success;
     } catch (error) {
       console.log("Error while verifying cart order: ", error);
       throw error;
     }
-  };  
+  };
+
+  const handleClearCart = () => {
+    dispatch(clearCart());
+  };
 
   return {
     handleAddToCart,
@@ -114,5 +121,6 @@ export const useCart = () => {
     handleCreateCartOrder,
     handleValidateCoupon,
     handleVerifyCartOrder,
+    handleClearCart,
   };
 };

@@ -341,6 +341,9 @@ export const verifyOrderController = async (req, res) => {
       await couponDao.incrementCouponUsage(payment.coupon.code);
     }
 
+    // Clear the buyer's cart in database upon successful payment
+    await cartDao.clearCart(req.user._id);
+
     return res.status(200).json({
       message: "Payment verified successfully",
       success: true,
