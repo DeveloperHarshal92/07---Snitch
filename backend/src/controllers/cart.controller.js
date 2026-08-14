@@ -6,6 +6,8 @@ import * as cartDao from "../dao/cart.dao.js";
 import { getCartDetails } from "../dao/cart.dao.js";
 import { createOrder } from "../services/payment.service.js";
 import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils.js";
+import * as paymentDao from "../dao/payment.dao.js";
+import * as couponDao from "../dao/coupon.dao.js";
 
 export const addToCart = async (req, res) => {
   const { productId, variantId } = req.params;
@@ -218,27 +220,53 @@ export const decrementCartItem = async (req, res) => {
 };
 
 export const createOrderController = async (req, res) => {
+  const { couponCode } = req.body;
   const cart = await getCartDetails(req.user._id);
 
-  if (!cart || cart.items.length === 0) {
+  if (!cart || !cart.items || cart.items.length === 0) {
     return res.status(400).json({
       message: "Cart is empty",
       success: false,
     });
   }
 
+  let discountAmount = 0;
+  let appliedCoupon = null;
+
+  if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
+    const validation = await couponDao.findValidCoupon(
+      couponCode,
+      cart.totalPrice
+    );
+
+    if (!validation.valid) {
+      return res.status(400).json({
+        message: validation.message,
+        success: false,
+      });
+    }
+
+    discountAmount = validation.discountAmount;
+    appliedCoupon = {
+      code: validation.coupon.code,
+      discountAmount,
+    };
+  }
+
+  const finalChargeAmount = Math.max(0, cart.totalPrice - discountAmount);
+
   const order = await createOrder({
-    amount: cart.totalPrice,
+    amount: finalChargeAmount,
     currency: cart.currency,
   });
 
-  const payment = await paymentModel.create({
+  const paymentData = {
     user: req.user._id,
     razorpay: {
       orderId: order.id,
     },
     price: {
-      amount: cart.totalPrice,
+      amount: finalChargeAmount,
       currency: cart.currency,
     },
     orderItems: cart.items.map((item) => ({
@@ -254,7 +282,13 @@ export const createOrderController = async (req, res) => {
           item.product.variants.price.currency || item.product.price.currency,
       },
     })),
-  });
+  };
+
+  if (appliedCoupon) {
+    paymentData.coupon = appliedCoupon;
+  }
+
+  const payment = await paymentModel.create(paymentData);
 
   return res.status(200).json({
     message: "Order created successfully",
@@ -285,7 +319,7 @@ export const verifyOrderController = async (req, res) => {
         payment_id: razorpay_payment_id,
       },
       razorpay_signature,
-      process.env.RAZORPAY_KEY_SECRET,
+      process.env.RAZORPAY_KEY_SECRET
     );
 
     if (!isPaymentValid) {
@@ -302,9 +336,47 @@ export const verifyOrderController = async (req, res) => {
     payment.razorpay.signature = razorpay_signature;
     await payment.save();
 
+    // Increment coupon usage count upon confirmed completion
+    if (payment.coupon?.code) {
+      await couponDao.incrementCouponUsage(payment.coupon.code);
+    }
+
     return res.status(200).json({
       message: "Payment verified successfully",
       success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+export const getUserOrders = async (req, res) => {
+  try {
+    const orders = await paymentDao.getOrdersByUser(req.user._id);
+    return res.status(200).json({
+      message: "Orders retrieved successfully",
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+export const getOrderDetails = async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    const order = await paymentDao.getOrderById(req.user._id, orderId);
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+        success: false,
+      });
+    }
+    return res.status(200).json({
+      message: "Order retrieved successfully",
+      success: true,
+      order,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message, success: false });

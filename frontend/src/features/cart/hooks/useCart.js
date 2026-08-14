@@ -5,7 +5,8 @@ import {
   incrementCartItemApi,
   decrementCartItemApi,
   createCartOrder,
-  verifyCartOrder
+  verifyCartOrder,
+  validateCoupon,
 } from "../services/cart.api";
 import { useDispatch } from "react-redux";
 import { setCart } from "../state/cart.slice";
@@ -74,15 +75,25 @@ export const useCart = () => {
     }
   };
 
-  const handleCreateCartOrder = async () => {
+  const handleCreateCartOrder = async (couponCode) => {
     try {
-      const data = await createCartOrder();
+      const data = await createCartOrder(couponCode);
       return data;
     } catch (error) {
       console.log("Error while creating cart order: ", error);
       throw error;
     }
   };  
+
+  const handleValidateCoupon = async (code) => {
+    try {
+      const data = await validateCoupon(code);
+      return data;
+    } catch (error) {
+      console.log("Error while validating coupon: ", error);
+      throw error;
+    }
+  };
 
   const handleVerifyCartOrder = async ({razorpay_order_id, razorpay_payment_id, razorpay_signature}) => {
     try {
@@ -101,6 +112,7 @@ export const useCart = () => {
     handleIncrementCartItem,
     handleDecrementCartItem,
     handleCreateCartOrder,
+    handleValidateCoupon,
     handleVerifyCartOrder,
   };
 };

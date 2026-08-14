@@ -32,7 +32,11 @@ const paymentSchema = new mongoose.Schema({
       price: priceSchema,
     },
   ],
-});
+  coupon: {
+    code: String,
+    discountAmount: Number,
+  },
+}, { timestamps: true });
 
 const paymentModel = mongoose.model("payment", paymentSchema);
 

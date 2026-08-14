@@ -12,7 +12,10 @@ import {
   decrementCartItem,
   createOrderController,
   verifyOrderController,
+  getUserOrders,
+  getOrderDetails,
 } from "../controllers/cart.controller.js";
+import { validateCouponController } from "../controllers/coupon.controller.js";
 
 const router = Router();
 
@@ -101,5 +104,27 @@ router.post("/payment/create/order", authenticateUser, createOrderController);
  * @argument signature - Signature to verify the payment
  */
 router.post("/payment/verify/order", authenticateUser, verifyOrderController);
+
+/**
+ * @route GET /api/cart/orders
+ * @desc Get all past orders for the authenticated user
+ * @access Private
+ */
+router.get("/orders", authenticateUser, getUserOrders);
+
+/**
+ * @route GET /api/cart/orders/:orderId
+ * @desc Get details of a single order by ID
+ * @access Private
+ */
+router.get("/orders/:orderId", authenticateUser, getOrderDetails);
+
+/**
+ * @route POST /api/cart/coupon/validate
+ * @desc Validate a coupon code against the current user cart
+ * @access Private
+ * @argument code - Coupon code to validate
+ */
+router.post("/coupon/validate", authenticateUser, validateCouponController);
 
 export default router;

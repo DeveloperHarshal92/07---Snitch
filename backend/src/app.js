@@ -26,6 +26,9 @@ app.use(
   }),
 );
 
+// Static files
+app.use(express.static("public"))
+
 app.use(passport.initialize());
 
 passport.use(

@@ -607,28 +607,69 @@ const OrderSummary = ({ cart, visible }) => {
   const { error, isLoading , Razorpay } = useRazorpay();
   const [couponCode, setCouponCode] = useState("");
   const [isCouponApplied, setIsCouponApplied] = useState(false);
+  const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponError, setCouponError] = useState("");
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const {user} = useSelector((state) => state.auth);
 
-  const handleApplyCoupon = () => {
+  const { handleCreateCartOrder, handleVerifyCartOrder, handleValidateCoupon } = useCart();
+
+  const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
     const code = couponCode.trim().toUpperCase();
-    if (code === "SNITCH10" || code === "SNITCH80") {
-      setIsCouponApplied(true);
-      setCouponError("");
-    } else {
+    setIsValidatingCoupon(true);
+    setCouponError("");
+    try {
+      const res = await handleValidateCoupon(code);
+      if (res.valid) {
+        setIsCouponApplied(true);
+        setCouponDiscount(res.discountAmount || 0);
+        setCouponError("");
+      } else {
+        setIsCouponApplied(false);
+        setCouponDiscount(0);
+        setCouponError(res.message || "Invalid coupon code");
+      }
+    } catch (err) {
       setIsCouponApplied(false);
-      setCouponError("Invalid coupon code");
+      setCouponDiscount(0);
+      setCouponError(
+        err?.response?.data?.message || err.message || "Failed to validate coupon"
+      );
+    } finally {
+      setIsValidatingCoupon(false);
     }
   };
 
   const removeCoupon = () => {
     setCouponCode("");
     setIsCouponApplied(false);
+    setCouponDiscount(0);
     setCouponError("");
   };
 
   const subtotal = cart?.totalPrice || 0;
+
+  // Re-verify coupon discount if subtotal changes
+  useEffect(() => {
+    if (isCouponApplied && couponCode) {
+      handleValidateCoupon(couponCode)
+        .then((res) => {
+          if (res.valid) {
+            setCouponDiscount(res.discountAmount || 0);
+            setCouponError("");
+          } else {
+            setIsCouponApplied(false);
+            setCouponDiscount(0);
+            setCouponError(res.message || "Coupon no longer valid for updated cart");
+          }
+        })
+        .catch(() => {
+          setIsCouponApplied(false);
+          setCouponDiscount(0);
+        });
+    }
+  }, [subtotal]);
 
   /* Total savings = sum of (cartPrice - currentPrice) * qty for items where price dropped */
   const totalSavings = cartItems.reduce((acc, item) => {
@@ -661,28 +702,22 @@ const OrderSummary = ({ cart, visible }) => {
   const shippingFree = subtotal >= shippingThreshold;
   const shipping = shippingFree ? 0 : 99;
 
-  const couponDiscount = isCouponApplied 
-    ? couponCode.trim().toUpperCase() === "SNITCH80" 
-      ? Math.round(subtotal * 0.8) 
-      : Math.round(subtotal * 0.1) 
-    : 0;
   const total = Math.max(0, subtotal + shipping - couponDiscount);
 
   const progressPct = Math.min((subtotal / shippingThreshold) * 100, 100);
 
-  const { handleCreateCartOrder, handleVerifyCartOrder } = useCart();
-
   const handleCheckout = async () => {
-    const response = await handleCreateCartOrder();
+    const codeToSend = isCouponApplied ? couponCode.trim().toUpperCase() : undefined;
+    const response = await handleCreateCartOrder(codeToSend);
     console.log(response);
 
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: response.order.amount, // Amount in paise
+      amount: response.order.amount, // Server-calculated amount in paise
       currency: response.order.currency,
       name: "SNITCH",
       description: "Test Transaction",
-      order_id: response.order.id, // Generate order_id on server
+      order_id: response.order.id, // Server-generated order ID
       handler: async (response) => {
         const isValid = await handleVerifyCartOrder(response);
         if(isValid) {
@@ -959,27 +994,32 @@ const OrderSummary = ({ cart, visible }) => {
                 />
                 <button
                   onClick={handleApplyCoupon}
+                  disabled={isValidatingCoupon || !couponCode.trim()}
                   style={{
                     padding: "0 20px",
-                    backgroundColor: "#3d342c",
+                    backgroundColor: isValidatingCoupon || !couponCode.trim() ? "#8a8179" : "#3d342c",
                     color: "#fff",
                     border: "none",
                     borderRadius: "2px",
-                    cursor: "pointer",
+                    cursor: isValidatingCoupon || !couponCode.trim() ? "not-allowed" : "pointer",
                     fontSize: "0.65rem",
                     textTransform: "uppercase",
                     letterSpacing: "0.1em",
                     fontFamily: "'Inter', sans-serif",
                     transition: "background-color 0.2s",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#0d0d0b")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#3d342c")
-                  }
+                  onMouseEnter={(e) => {
+                    if (!isValidatingCoupon && couponCode.trim()) {
+                      e.currentTarget.style.backgroundColor = "#0d0d0b";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isValidatingCoupon && couponCode.trim()) {
+                      e.currentTarget.style.backgroundColor = "#3d342c";
+                    }
+                  }}
                 >
-                  Apply
+                  {isValidatingCoupon ? "Checking..." : "Apply"}
                 </button>
               </div>
             ) : (

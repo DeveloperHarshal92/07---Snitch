@@ -66,12 +66,23 @@ export const decrementCartItemApi = async ({ productId, variantId }) => {
   }
 };
 
-export const createCartOrder = async () => {
+export const createCartOrder = async (couponCode) => {
   try {
-    const response = await cartApiInstance.post("/payment/create/order");
+    const payload = couponCode ? { couponCode } : {};
+    const response = await cartApiInstance.post("/payment/create/order", payload);
     return response.data;
   } catch (error) {
     console.log("Error while creating cart order: ", error);
+    throw error;
+  }
+};
+
+export const validateCoupon = async (code) => {
+  try {
+    const response = await cartApiInstance.post("/coupon/validate", { code });
+    return response.data;
+  } catch (error) {
+    console.log("Error while validating coupon: ", error);
     throw error;
   }
 };
@@ -90,6 +101,26 @@ export const verifyCartOrder = async ({
     return response.data;
   } catch (error) {
     console.log("Error while verifying cart order: ", error);
+    throw error;
+  }
+};
+
+export const getOrders = async () => {
+  try {
+    const response = await cartApiInstance.get("/orders");
+    return response.data;
+  } catch (error) {
+    console.log("Error while fetching orders: ", error);
+    throw error;
+  }
+};
+
+export const getOrderById = async (orderId) => {
+  try {
+    const response = await cartApiInstance.get(`/orders/${orderId}`);
+    return response.data;
+  } catch (error) {
+    console.log("Error while fetching order details: ", error);
     throw error;
   }
 };

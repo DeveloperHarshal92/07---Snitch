@@ -9,6 +9,9 @@ import ProductDetail from "../features/products/pages/ProductDetail";
 import SellerProductDetails from "../features/products/pages/SellerProductDetails";
 import Cart from "../features/cart/pages/Cart";
 import OrderSuccess from "../features/cart/pages/OrderSuccess";
+import OrderList from "../features/orders/pages/OrderList";
+import OrderDetail from "../features/orders/pages/OrderDetail";
+import NotFound from "../features/Shared/pages/NotFound";
 import AppLayout from "./AppLayout";
 
 export const routes = createBrowserRouter([
@@ -71,6 +74,26 @@ export const routes = createBrowserRouter([
             <OrderSuccess />
           </Protected>
         ),
+      },
+      {
+        path: "/orders",
+        element: (
+          <Protected role="buyer">
+            <OrderList />
+          </Protected>
+        ),
+      },
+      {
+        path: "/orders/:orderId",
+        element: (
+          <Protected role="buyer">
+            <OrderDetail />
+          </Protected>
+        ),
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
