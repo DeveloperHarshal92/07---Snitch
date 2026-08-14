@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useProduct } from "../hooks/useProduct";
 import { useNavigate } from "react-router";
+import HeroSlider from "../../Shared/components/HeroSlider";
+import SnitchFooter from "../../Shared/components/SnitchFooter";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
 const FontLink = () => (
@@ -169,34 +171,42 @@ const Home = () => {
         {/* ── Hero ────────────────────────────────────────────────── */}
         <section
           ref={heroRef}
-          className="max-w-[1400px] mx-auto px-8 pt-12 pb-12 flex flex-col gap-4 transition-all duration-[800ms] ease-out"
+          className="max-w-[1400px] mx-auto px-8 pt-10 pb-10 flex flex-row items-center justify-between gap-6 transition-all duration-[800ms] ease-out overflow-hidden"
           style={{
             opacity: heroVisible ? 1 : 0,
             transform: heroVisible ? "translateY(0)" : "translateY(20px)",
           }}
         >
-          <p
-            className="text-[0.6rem] tracking-[0.25em] uppercase font-medium"
-            style={{ color: "#C9A96E" }}
-          >
-            New Season — SS&apos;26
-          </p>
-          <h1
-            className="m-0 font-light leading-[1.04] text-[clamp(3rem,7vw,6rem)]"
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              color: "#0d0d0b",
-            }}
-          >
-            The Edits
-          </h1>
-          <p
-            className="text-sm max-w-[420px] leading-[1.75] font-light"
-            style={{ color: "#3d342c" }}
-          >
-            Curated essentials for the considered wardrobe. Each piece selected
-            for its craft, finish, and enduring relevance.
-          </p>
+          {/* ── Left: text ─────────────────────────────── */}
+          <div className="flex flex-col gap-5 flex-1 min-w-0">
+            <p
+              className="text-[0.6rem] tracking-[0.25em] uppercase font-medium"
+              style={{ color: "#C9A96E" }}
+            >
+              New Season — SS&apos;26
+            </p>
+            <h1
+              className="m-0 font-light leading-[1.04] text-[clamp(3rem,7vw,6rem)]"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                color: "#0d0d0b",
+              }}
+            >
+              The Edits
+            </h1>
+            <p
+              className="text-sm max-w-[420px] leading-[1.75] font-light"
+              style={{ color: "#3d342c" }}
+            >
+              Curated essentials for the considered wardrobe. Each piece selected
+              for its craft, finish, and enduring relevance.
+            </p>
+          </div>
+
+          {/* ── Right: auto-sliding product ad slider ──── */}
+          <div className="relative flex-shrink-0 w-[65%] max-w-[680px] h-[390px] hidden sm:block">
+            <HeroSlider interval={3800} />
+          </div>
         </section>
 
         {/* ── Divider ─────────────────────────────────────────────── */}
@@ -554,27 +564,7 @@ const Home = () => {
           )}
         </main>
 
-        {/* ── Footer ──────────────────────────────────────────────── */}
-        <footer
-          className="border-t max-w-[1400px] mx-auto px-8 py-12 flex items-center justify-between flex-wrap gap-4"
-          style={{ borderColor: "#e4e2df" }}
-        >
-          <span
-            className="text-[0.9rem] tracking-[0.35em] uppercase"
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              color: "#C9A96E",
-            }}
-          >
-            Snitch
-          </span>
-          <p
-            className="text-[0.6rem] tracking-[0.15em] uppercase"
-            style={{ color: "#6b6158" }}
-          >
-            © {new Date().getFullYear()} Snitch — All rights reserved
-          </p>
-        </footer>
+        <SnitchFooter />
       </div>
     </>
   );
