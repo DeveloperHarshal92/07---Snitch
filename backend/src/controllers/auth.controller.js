@@ -11,7 +11,12 @@ async function sendTokenResponse(user, res, message) {
     { expiresIn: "7d" },
   );
 
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: config.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
 
   res.status(200).json({
     message,
@@ -87,15 +92,15 @@ export async function login(req, res) {
 
 export async function googleCallback(req, res) {
   const { id, displayName, emails, photos } = req.user;
-  const email = emails[0].value;
-  const profilePic = photos[0].value;
+  const email = emails && emails[0] ? emails[0].value : null;
   try {
-    const user = await userModel.findOne({ email });
+    let user = await userModel.findOne({ email });
     if (!user) {
       user = await userModel.create({
         email,
-        fullname: displayName,
+        fullname: displayName || "Google User",
         googleId: id,
+        role: "buyer",
       });
     }
 
@@ -107,12 +112,20 @@ export async function googleCallback(req, res) {
       { expiresIn: "7d" },
     );
 
-    res.cookie("token", token);
-    res.redirect("http://localhost:5173/");
+    const isProduction = config.NODE_ENV === "production";
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    const redirectUrl = isProduction ? "/" : (process.env.CLIENT_URL || "https://snitch-w2cn.onrender.com/");
+    res.redirect(redirectUrl);
   } catch (error) {
-    console.log(error);
+    console.log("Error in googleCallback:", error);
     res.status(500).json({
-      message: "Server error",
+      message: "Server error during Google login",
       success: false,
     });
   }

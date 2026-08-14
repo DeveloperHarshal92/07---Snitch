@@ -50,7 +50,7 @@ router.get(
     session: false,
     failureRedirect:
       config.NODE_ENV === "development"
-        ? "http://localhost:5173/login"
+        ? "https://snitch-w2cn.onrender.com/login"
         : "/login",
   }),
   googleCallback,
