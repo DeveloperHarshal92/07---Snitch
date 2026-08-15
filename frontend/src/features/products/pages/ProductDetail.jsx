@@ -1024,13 +1024,13 @@ const ProductDetail = () => {
             }}
             onClick={() => navigate("/")}
           >
-            Snitch
+            Luxurisen
           </span>
           <p
             className="text-[0.6rem] tracking-[0.15em] uppercase m-0"
             style={{ color: "#6b6158" }}
           >
-            © {new Date().getFullYear()} Snitch — All rights reserved
+            © {new Date().getFullYear()} Luxurisen — All rights reserved
           </p>
         </footer>
       </div>

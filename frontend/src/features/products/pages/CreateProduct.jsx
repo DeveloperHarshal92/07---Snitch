@@ -124,7 +124,7 @@ const CreateProduct = () => {
             className="text-sm tracking-[0.35em] uppercase select-none"
             style={{ fontFamily: T.serif, color: T.gold }}
           >
-            Snitch.
+            Luxurisen.
           </span>
 
           <nav className="hidden md:flex items-center gap-8">

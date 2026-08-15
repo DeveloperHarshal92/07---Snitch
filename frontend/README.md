@@ -1,11 +1,11 @@
-# Snitch — Frontend Client Application
+# Luxurisen — Frontend Client Application (Portfolio Demo)
 
 [![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite_8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-764ABC?style=for-the-badge&logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
 
-The frontend client for **Snitch**, built with React 19, Vite, Tailwind CSS 4, and Redux Toolkit. Engineered around a luxury editorial aesthetic featuring Cormorant Garamond typography, refined warm beige/charcoal/gold palettes, micro-interactions, responsive carousel components, server-authoritative promo codes, and complete role-based route protection.
+The frontend client for **Luxurisen**, built with React 19, Vite, Tailwind CSS 4, and Redux Toolkit. Engineered around a luxury editorial aesthetic featuring Cormorant Garamond typography, refined warm beige/charcoal/gold palettes, micro-interactions, responsive carousel components, server-authoritative promo codes, and role-based route protection.
 
 ---
 
@@ -20,11 +20,11 @@ The frontend client for **Snitch**, built with React 19, Vite, Tailwind CSS 4, a
   - Headings & Editorial Titles: `Cormorant Garamond, serif`
   - Body, Buttons, & Numerical Data: `Inter, sans-serif`
 - **Components**:
-  - Luxury Brand Favicon (`public/favicon.svg`) with squircle gold thread emblem.
+  - Luxury Brand Vector Logo (`LuxurisenLogo.jsx` and `public/luxurisen-logo.svg`).
   - Interactive auto-sliding Hero Slider (65% viewport width) with pause-on-hover.
   - 3D Depth Carousel for featured collection edits.
   - Navbar with matching lookbook grid icon, orders manifest, and dynamic shopping bag badge.
-  - Editorial SnitchFooter with newsletter subscription.
+  - Editorial LuxurisenFooter with newsletter subscription.
   - Custom 404 Not Found recovery view.
 
 ---
@@ -35,8 +35,8 @@ The frontend client for **Snitch**, built with React 19, Vite, Tailwind CSS 4, a
 frontend/src/
 ├── app/
 │   ├── App.jsx                 # App root — handles initial auth dispatch (/api/auth/me)
-│   ├── AppLayout.jsx           # Main layout containing Nav and SnitchFooter
-│   ├── app.routes.jsx          # React Router definition with role-based Protected wrappers
+│   ├── AppLayout.jsx           # Main layout containing dismissible demo banner and Nav
+│   ├── app.routes.jsx          # React Router definition with public storefront & protected routes
 │   └── store.js                # Redux Toolkit global store configuration
 │
 └── features/
@@ -49,7 +49,7 @@ frontend/src/
     │
     ├── cart/                   # Shopping Cart & Checkout Feature
     │   ├── hooks/              # useCart.js (add, remove, increment, validateCoupon, checkout)
-    │   ├── pages/              # Cart.jsx (OrderSummary + Promo Code UI), OrderSuccess.jsx
+    │   ├── pages/              # Cart.jsx (OrderSummary + Promo Code UI + Test Warning), OrderSuccess.jsx
     │   ├── services/           # cart.api.js
     │   └── state/              # cart.slice.js
     │
@@ -64,7 +64,7 @@ frontend/src/
     │   └── services/           # products.api.js
     │
     └── Shared/                 # Shared Reusable UI Components
-        ├── components/         # Nav.jsx, SnitchFooter.jsx, HeroSlider.jsx, DepthCarousel.jsx
+        ├── components/         # Nav.jsx, LuxurisenLogo.jsx, LuxurisenFooter.jsx, HeroSlider.jsx, DepthCarousel.jsx
         └── pages/              # NotFound.jsx (Custom 404 screen)
 ```
 
@@ -72,13 +72,13 @@ frontend/src/
 
 ## 🔒 Route Protection Architecture
 
-- **Root Guard (`/`)**: Unauthenticated users opening `http://localhost:5173/` are immediately redirected to `/login`.
+- **Public Storefront (`/` & `/product/:productId`)**: Accessible by all unauthenticated visitors for browsing.
 - **Post-Login Routing**:
   - `buyer` role redirects to `/`
   - `seller` role redirects to `/seller/dashboard`
-- **Reverse Auth Protection**: Already authenticated users visiting `/login` or `/register` are automatically forwarded to their respective home/dashboard.
+- **Reverse Auth Protection**: Authenticated users visiting `/login` or `/register` are automatically forwarded to their respective home/dashboard.
 - **Buyer & Seller Protected Routes**:
-  - Buyer-only: `/`, `/product/:productId`, `/cart`, `/orders`, `/orders/:orderId`, `/orders-success`
+  - Buyer-only: `/cart`, `/orders`, `/orders/:orderId`, `/orders-success`
   - Seller-only: `/seller/dashboard`, `/seller/create-product`, `/seller/product/:productId`
 
 ---

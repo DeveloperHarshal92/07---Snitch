@@ -120,7 +120,7 @@ export async function googleCallback(req, res) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    const redirectUrl = isProduction ? "/" : (process.env.CLIENT_URL || "https://snitch-w2cn.onrender.com/");
+    const redirectUrl = isProduction ? "/" : (process.env.CLIENT_URL || "/");
     res.redirect(redirectUrl);
   } catch (error) {
     console.log("Error in googleCallback:", error);

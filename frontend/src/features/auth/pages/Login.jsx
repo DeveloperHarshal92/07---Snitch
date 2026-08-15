@@ -65,8 +65,8 @@ const Login = () => {
           style={{ backgroundColor: "#f5f3f0" }}
         >
           <img
-            src="/snitch_editorial_warm.png"
-            alt="Snitch Fashion Editorial"
+            src="/luxurisen_editorial_warm.png"
+            alt="Luxurisen Fashion Editorial"
             className="absolute inset-0 w-full h-full object-cover object-top"
             style={{ filter: "brightness(0.97)" }}
           />
@@ -88,7 +88,7 @@ const Login = () => {
                 letterSpacing: "0.35em",
               }}
             >
-              Snitch
+              Luxurisen
             </span>
             {/* Editorial Headline */}
             <div>
@@ -126,7 +126,7 @@ const Login = () => {
                   color: "#C9A96E",
                 }}
               >
-                Snitch.
+                Luxurisen.
               </span>
             </div>
 
@@ -136,7 +136,7 @@ const Login = () => {
                 className="text-[10px] uppercase tracking-[0.22em] mb-4 font-medium"
                 style={{ color: "#C9A96E" }}
               >
-                Sign in to Snitch
+                Sign in to Luxurisen
               </p>
               <h1
                 className="text-[2.6rem] xl:text-5xl font-light leading-[1.1]"

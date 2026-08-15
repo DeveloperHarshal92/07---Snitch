@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useOrders } from "../hooks/useOrders";
-import SnitchFooter from "../../Shared/components/SnitchFooter";
+import LuxurisenFooter from "../../Shared/components/LuxurisenFooter";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
 const FontLink = () => (
@@ -411,7 +411,7 @@ const OrderDetail = () => {
                     />
                   </svg>
                   <p className="m-0 text-[0.65rem] text-[#6b5e50] leading-relaxed">
-                    This order record is cryptographically verified and archived in your Snitch client profile. Delivery notifications will be sent directly to your registered account.
+                    This order record is cryptographically verified and archived in your Luxurisen client profile. Delivery notifications will be sent directly to your registered account.
                   </p>
                 </div>
               </div>
@@ -437,7 +437,7 @@ const OrderDetail = () => {
           )}
         </div>
 
-        <SnitchFooter />
+        <LuxurisenFooter />
       </div>
     </>
   );

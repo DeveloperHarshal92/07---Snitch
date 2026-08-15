@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router";
-import SnitchFooter from "../components/SnitchFooter";
+import LuxurisenFooter from "../components/LuxurisenFooter";
 
 const FontLink = () => (
   <link
@@ -148,7 +148,7 @@ const NotFound = () => {
           </div>
         </main>
 
-        <SnitchFooter />
+        <LuxurisenFooter />
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 420" width="100%" height="100%">
   <!-- Icon -->
-  <g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" transform="translate(130, 20)">
+  <g fill="none" stroke="#C9A96E" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" transform="translate(130, 20)">
     <!-- Central cloud outline -->
     <path d="M 65 95 C 45 95 30 75 40 55 C 45 40 65 35 75 45 C 85 25 115 20 135 35 C 150 20 180 25 190 45 C 205 35 220 50 215 68 C 225 80 220 95 200 95" fill="none" opacity="0.9" />
     
@@ -23,7 +23,7 @@
   </g>
 
   <!-- Luxurisen Text -->
-  <text x="250" y="320" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="64" font-weight="300" letter-spacing="2" fill="currentColor">
-    Luxurisen
+  <text x="250" y="320" text-anchor="middle" font-family="'Cormorant Garamond', 'Inter', serif" font-size="64" font-weight="600" letter-spacing="4" fill="#C9A96E">
+    LUXURISEN
   </text>
 </svg>

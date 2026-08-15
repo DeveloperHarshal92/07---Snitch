@@ -1,15 +1,14 @@
-# Snitch — Curated Luxury Fashion & Apparel Platform
+# Luxurisen — Curated Luxury Fashion (Portfolio Demo)
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-snitch--w2cn.onrender.com-C9A96E?style=for-the-badge&logo=render&logoColor=white)](https://snitch-w2cn.onrender.com/)
 [![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express_5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
-A full-stack, luxury fashion e-commerce application engineered with the MERN stack. Designed with high-fashion editorial aesthetics, Cormorant Garamond typography, refined warm beige/charcoal/gold palettes, and robust enterprise architecture.
+A full-stack, luxury fashion e-commerce portfolio demonstration engineered with the MERN stack. Designed with high-fashion editorial aesthetics, Cormorant Garamond typography, refined warm beige/charcoal/gold palettes, and robust enterprise architecture.
 
-**Live Deployment:** [https://snitch-w2cn.onrender.com/](https://snitch-w2cn.onrender.com/)
+> **Notice:** This project is a student portfolio and educational demonstration. No real financial transactions or commercial brand operations take place.
 
 ---
 
@@ -17,13 +16,14 @@ A full-stack, luxury fashion e-commerce application engineered with the MERN sta
 
 ### 🔐 Authentication & Access Control
 - **Dual-Role RBAC**: Users register as either `buyer` or `seller` with strict role-based route guards (`Protected.jsx`) across both client and server.
-- **Root Route Protection**: Unauthenticated visitors accessing the root URL (`/`) are immediately redirected to `/login`, returning to the storefront or seller dashboard upon successful authentication.
+- **Public Storefront**: Unauthenticated visitors can browse the storefront catalog (`/`) and view product details (`/product/:productId`) without forced login redirects.
+- **Protected Actions**: Orders, checkout, and seller management require authentication before access.
 - **Google OAuth 2.0 & JWT**: Stateless JSON Web Tokens stored in secure HTTP-only cookies alongside Google OAuth (Passport.js strategy).
 - **Post-Login Routing**: Automatic role redirection sends buyers to `/` and sellers to `/seller/dashboard`.
 
 ### 🏷️ Server-Authoritative Promo Code Engine
 - **Tamper-Proof Discount Calculation**: Discounts are verified and calculated strictly server-side (`couponModel` & `coupon.dao.js`), eliminating client-side price manipulation.
-- **Comprehensive Business Rules**: Supports percentage discounts with max caps (e.g. `SNITCH80` = 80% off up to ₹2,000), fixed discounts (e.g. `FLAT500` = ₹500 off), minimum cart value constraints, expiration dates, and usage limits.
+- **Comprehensive Business Rules**: Supports percentage discounts with max caps (e.g. `LUX80` = 80% off up to ₹2,000), fixed discounts (e.g. `FLAT500` = ₹500 off), minimum cart value constraints, expiration dates, and usage limits.
 - **Atomic Usage Tracking**: Coupon redemption counts increment atomically in MongoDB only upon confirmed Razorpay payment signature verification.
 - **Live Re-validation**: Active coupons automatically re-validate if the cart subtotal changes (e.g. quantity adjustments).
 
@@ -35,8 +35,8 @@ A full-stack, luxury fashion e-commerce application engineered with the MERN sta
 ### ✨ Luxury Design & Editorial UI
 - **Dynamic Hero Slider**: 65% width luxury campaign banner with auto-slide, pause-on-hover, progress indicators, and Cormorant Garamond typography.
 - **3D Depth Carousel**: Featured product drops in "The Edits" section powered by Tailwind CSS.
-- **Curated Navigation & Branding**: Custom gold vector favicon, luxury header with lookbook collection grid, orders manifest, and dynamic shopping bag badge count.
-- **Editorial Footer & 404 Page**: Complete brand footer with interactive newsletter subscription and a styled 404 error page (`NotFound.jsx`) with quick navigation recovery.
+- **Curated Navigation & Branding**: Custom Luxurisen vector logo, gold accents, lookbook collection grid, orders manifest, and dynamic shopping bag badge count.
+- **Editorial Footer & 404 Page**: Complete brand footer (`LuxurisenFooter.jsx`) with interactive newsletter subscription and a styled 404 error page (`NotFound.jsx`) with quick navigation recovery.
 
 ### 🛍️ Product Catalog & Seller Tools
 - **ImageKit CDN Integration**: Multi-angle image uploads via Multer and cloud storage on ImageKit CDN.
@@ -59,7 +59,7 @@ A full-stack, luxury fashion e-commerce application engineered with the MERN sta
 ## 📁 Project Architecture
 
 ```
-07 - Snitch/
+luxurisen/
 ├── backend/
 │   ├── server.js               # Entry point with dynamic PORT binding for Render
 │   ├── package.json            # Server scripts ("start": "node server.js")
@@ -87,7 +87,7 @@ A full-stack, luxury fashion e-commerce application engineered with the MERN sta
             ├── cart/           # Cart page, OrderSuccess, coupon state & API services
             ├── orders/         # OrderList, OrderDetail, orders API & custom hooks
             ├── products/       # Home, ProductDetail, CreateProduct, Seller Dashboard
-            └── Shared/         # Nav, SnitchFooter, HeroSlider, DepthCarousel, NotFound
+            └── Shared/         # Nav, LuxurisenFooter, LuxurisenLogo, HeroSlider, DepthCarousel, NotFound
 ```
 
 ---

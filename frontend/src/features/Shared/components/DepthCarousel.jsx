@@ -411,7 +411,7 @@ const DepthCarousel = ({
       }}
       role="group"
       aria-roledescription="carousel"
-      aria-label="Snitch product carousel"
+      aria-label="Luxurisen product carousel"
       tabIndex={0}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

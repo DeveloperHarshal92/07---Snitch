@@ -715,7 +715,7 @@ const OrderSummary = ({ cart, visible }) => {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: response.order.amount, // Server-calculated amount in paise
       currency: response.order.currency,
-      name: "SNITCH",
+      name: "LUXURISEN",
       description: "Test Transaction",
       order_id: response.order.id, // Server-generated order ID
       handler: async (response) => {
@@ -978,7 +978,7 @@ const OrderSummary = ({ cart, visible }) => {
               <div style={{ display: "flex", gap: "8px" }}>
                 <input
                   type="text"
-                  placeholder="Enter code (e.g., SNITCH10)"
+                  placeholder="Enter code (e.g., LUX10)"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   style={{
@@ -1224,6 +1224,44 @@ const OrderSummary = ({ cart, visible }) => {
           </svg>
           Proceed to Checkout
         </button>
+
+        {/* Test Mode Disclaimer */}
+        <div
+          style={{
+            marginTop: "10px",
+            padding: "8px 12px",
+            backgroundColor: "#fef3c7",
+            border: "1px solid #fde68a",
+            borderRadius: "2px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="#b45309"
+            style={{ width: 15, height: 15, flexShrink: 0 }}
+          >
+            <path
+              fillRule="evenodd"
+              d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span
+            style={{
+              fontSize: "0.65rem",
+              color: "#92400e",
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 500,
+              lineHeight: 1.3,
+            }}
+          >
+            Test Mode Only. Do not enter real payment details.
+          </span>
+        </div>
 
         {/* Continue shopping */}
         <button
@@ -1887,7 +1925,7 @@ const Cart = () => {
               color: "#C9A96E",
             }}
           >
-            Snitch
+            Luxurisen
           </span>
           <p
             style={{
@@ -1899,7 +1937,7 @@ const Cart = () => {
               fontFamily: "'Inter', sans-serif",
             }}
           >
-            © {new Date().getFullYear()} Snitch — All rights reserved
+            © {new Date().getFullYear()} Luxurisen — All rights reserved
           </p>
         </footer>
       </div>

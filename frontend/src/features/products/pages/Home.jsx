@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useProduct } from "../hooks/useProduct";
 import { useNavigate } from "react-router";
 import HeroSlider from "../../Shared/components/HeroSlider";
-import SnitchFooter from "../../Shared/components/SnitchFooter";
+import LuxurisenFooter from "../../Shared/components/LuxurisenFooter";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
 const FontLink = () => (
@@ -564,7 +564,7 @@ const Home = () => {
           )}
         </main>
 
-        <SnitchFooter />
+        <LuxurisenFooter />
       </div>
     </>
   );

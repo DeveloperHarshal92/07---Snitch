@@ -307,7 +307,7 @@ const SellerProductDetails = () => {
             style={{ fontFamily: T.serif, color: T.gold }}
             onClick={() => navigate("/")}
           >
-            Snitch
+            Luxurisen
           </span>
           <span
             className="text-[0.6rem] tracking-[0.25em] uppercase"

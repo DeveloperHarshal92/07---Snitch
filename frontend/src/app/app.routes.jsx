@@ -28,11 +28,7 @@ export const routes = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: (
-          <Protected role="buyer">
-            <Home />
-          </Protected>
-        ),
+        element: <Home />,
       },
       {
         path: "/seller",
@@ -57,11 +53,7 @@ export const routes = createBrowserRouter([
       },
       {
         path: "/product/:productId",
-        element: (
-          <Protected role="buyer">
-            <ProductDetail />
-          </Protected>
-        ),
+        element: <ProductDetail />,
       },
       {
         path: "/seller/product/:productId",

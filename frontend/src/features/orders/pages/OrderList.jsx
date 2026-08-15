@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useOrders } from "../hooks/useOrders";
-import SnitchFooter from "../../Shared/components/SnitchFooter";
+import LuxurisenFooter from "../../Shared/components/LuxurisenFooter";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
 const FontLink = () => (
@@ -383,7 +383,7 @@ const OrderList = () => {
           )}
         </div>
 
-        <SnitchFooter />
+        <LuxurisenFooter />
       </div>
     </>
   );

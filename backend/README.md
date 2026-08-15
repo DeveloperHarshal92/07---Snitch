@@ -1,11 +1,11 @@
-# Snitch — Backend REST API Server
+# Luxurisen — Backend REST API Server (Portfolio Demo)
 
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express_5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Mongoose](https://img.shields.io/badge/Mongoose_9-880000?style=for-the-badge&logo=mongoose&logoColor=white)](https://mongoosejs.com/)
 
-RESTful API backend for **Snitch**, built with Express 5, Node.js, and MongoDB/Mongoose. Powers role-based authentication, ImageKit CDN media pipelines, server-authoritative promo codes, Razorpay order creation & signature verification, and static frontend hosting with SPA wildcard routing.
+RESTful API backend for **Luxurisen**, built with Express 5, Node.js, and MongoDB/Mongoose. Powers role-based authentication, ImageKit CDN media pipelines, server-authoritative promo codes, Razorpay order creation & signature verification, and static frontend hosting with SPA wildcard routing.
 
 ---
 
@@ -38,7 +38,7 @@ backend/
     ├── routes/                 # Express route modules
     ├── scripts/
     │   └── seedCoupons.js      # Seed sample test promo codes into MongoDB
-    ├── services/               # imagekit.service.js, payment.service.js
+    ├── services/               # storage.service.js, payment.service.js
     └── validator/              # express-validator schemas for auth, cart, products
 ```
 
@@ -60,7 +60,7 @@ Implemented in `coupon.dao.js`:
 |---|---|
 | `npm run start` | Starts production server using `node server.js` |
 | `npm run dev` | Starts development server with Nodemon hot-reloading |
-| `node src/scripts/seedCoupons.js` | Seeds MongoDB with test coupons (`SNITCH10`, `SNITCH80`, `FLAT500`, `EXPIRED10`, `MINVALUE999`, `LIMIT1`) |
+| `node src/scripts/seedCoupons.js` | Seeds MongoDB with test coupons (`LUX10`, `LUX80`, `FLAT500`, `EXPIRED10`, `MINVALUE999`, `LIMIT1`) |
 
 ---
 
@@ -71,7 +71,7 @@ Create `.env` in `backend/`:
 ```env
 PORT=3000
 NODE_ENV=development
-MONGO_URI=mongodb://localhost:27017/snitch
+MONGO_URI=mongodb://localhost:27017/luxurisen
 JWT_SECRET=your_jwt_secret_key
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret

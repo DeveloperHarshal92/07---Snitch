@@ -4,7 +4,7 @@ import couponModel from "../models/coupon.model.js";
 
 const sampleCoupons = [
   {
-    code: "SNITCH10",
+    code: "LUX10",
     discountType: "percentage",
     discountValue: 10,
     maxDiscountAmount: null,
@@ -12,7 +12,7 @@ const sampleCoupons = [
     isActive: true,
   },
   {
-    code: "SNITCH80",
+    code: "LUX80",
     discountType: "percentage",
     discountValue: 80,
     maxDiscountAmount: 2000,

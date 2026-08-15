@@ -15,8 +15,8 @@ const Marquee = () => (
         {Array.from({ length: 8 }).map((_, i) => (
           <span key={i} className="text-[0.6rem] tracking-[0.25em] uppercase">
             Free shipping over ₹999 &nbsp;·&nbsp; New arrivals weekly
-            &nbsp;·&nbsp; Exclusive drops &nbsp;·&nbsp; Snitch — Wear the
-            narrative
+            &nbsp;·&nbsp; Exclusive drops &nbsp;·&nbsp; Luxurisen — Refined
+            Luxury Tailoring
           </span>
         ))}
       </div>

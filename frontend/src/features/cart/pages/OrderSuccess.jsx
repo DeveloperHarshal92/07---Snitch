@@ -392,7 +392,7 @@ const OrderSuccess = () => {
                   lineHeight: 1.6,
                 }}
               >
-                Thank you for shopping with Snitch.
+                Thank you for shopping with Luxurisen.
                 <br />
                 Your order is on its way.
               </p>
@@ -621,7 +621,7 @@ const OrderSuccess = () => {
               transition: "opacity 0.8s ease 0.3s",
             }}
           >
-            Snitch
+            Luxurisen
           </p>
         </div>
       </div>

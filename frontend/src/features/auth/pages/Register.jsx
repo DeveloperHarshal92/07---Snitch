@@ -69,8 +69,8 @@ const Register = () => {
                 {/* ── LEFT: Editorial Image Panel ── */}
                 <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ backgroundColor: '#f5f3f0' }}>
                     <img
-                        src="/snitch_editorial_warm.png"
-                        alt="Snitch Fashion Editorial"
+                        src="/luxurisen_editorial_warm.png"
+                        alt="Luxurisen Fashion Editorial"
                         className="absolute inset-0 w-full h-full object-cover object-top"
                         style={{ filter: 'brightness(0.97)' }}
                     />
@@ -83,7 +83,7 @@ const Register = () => {
                             className="text-sm font-medium tracking-[0.35em] uppercase"
                             style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
                         >
-                            Snitch.
+                            Luxurisen.
                         </span>
                         <div>
                             <p
@@ -113,7 +113,7 @@ const Register = () => {
                                 className="text-sm tracking-[0.35em] uppercase"
                                 style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
                             >
-                                Snitch.
+                                Luxurisen.
                             </span>
                         </div>
 
@@ -123,7 +123,7 @@ const Register = () => {
                                 className="text-[10px] uppercase tracking-[0.22em] mb-4 font-medium"
                                 style={{ color: '#C9A96E' }}
                             >
-                                Welcome to Snitch
+                                Welcome to Luxurisen
                             </p>
                             <h1
                                 className="text-[2.6rem] xl:text-5xl font-light leading-[1.1]"

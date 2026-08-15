@@ -48,10 +48,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect:
-      config.NODE_ENV === "development"
-        ? "https://snitch-w2cn.onrender.com/login"
-        : "/login",
+    failureRedirect: process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/login` : "/login",
   }),
   googleCallback,
 );

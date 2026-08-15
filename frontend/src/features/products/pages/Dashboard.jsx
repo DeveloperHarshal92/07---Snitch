@@ -72,7 +72,7 @@ const Dashboard = () => {
               color: "#C9A96E",
             }}
           >
-            Snitch
+            Luxurisen
           </span>
 
           {/* Nav */}

@@ -7,7 +7,7 @@ const client = new ImageKit({
   urlEndpoint: config.IMAGEKIT_URL_ENDPOINT,
 });
 
-export async function uploadFile({ buffer, fileName, folder = "Snitch" }) {
+export async function uploadFile({ buffer, fileName, folder = "Luxurisen" }) {
   try {
     const result = await client.files.upload({
       file: await imageKit.toFile(buffer),
