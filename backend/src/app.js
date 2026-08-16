@@ -23,11 +23,25 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+const allowedOrigins = [
+  "https://luxurisen.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3000",
+  config.CLIENT_URL,
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. same-origin static frontend, Postman, mobile apps)
-      callback(null, true);
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".onrender.com")) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
     },
     credentials: true,
   }),

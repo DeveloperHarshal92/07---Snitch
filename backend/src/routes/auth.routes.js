@@ -10,7 +10,6 @@ import {
   validateRegisterUser,
 } from "../validator/auth.validator.js";
 import passport from "passport";
-import { config } from "../config/config.js";
 import { authenticateUser } from "../middlewares/auth.middleware.js";
 
 const router = Router();
