@@ -1,11 +1,14 @@
 # Luxurisen — Frontend Client Application (Portfolio Demo)
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-luxurisen.onrender.com-C9A96E?style=for-the-badge&logo=render&logoColor=white)](https://luxurisen.onrender.com/)
 [![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite_8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-764ABC?style=for-the-badge&logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
 
 The frontend client for **Luxurisen**, built with React 19, Vite, Tailwind CSS 4, and Redux Toolkit. Engineered around a luxury editorial aesthetic featuring Cormorant Garamond typography, refined warm beige/charcoal/gold palettes, micro-interactions, responsive carousel components, server-authoritative promo codes, and role-based route protection.
+
+🔗 **Live Application URL:** [https://luxurisen.onrender.com/](https://luxurisen.onrender.com/)
 
 ---
 

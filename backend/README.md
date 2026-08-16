@@ -1,11 +1,14 @@
 # Luxurisen — Backend REST API Server (Portfolio Demo)
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-luxurisen.onrender.com-C9A96E?style=for-the-badge&logo=render&logoColor=white)](https://luxurisen.onrender.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express_5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Mongoose](https://img.shields.io/badge/Mongoose_9-880000?style=for-the-badge&logo=mongoose&logoColor=white)](https://mongoosejs.com/)
 
 RESTful API backend for **Luxurisen**, built with Express 5, Node.js, and MongoDB/Mongoose. Powers role-based authentication, ImageKit CDN media pipelines, server-authoritative promo codes, Razorpay order creation & signature verification, and static frontend hosting with SPA wildcard routing.
+
+🔗 **Live Application URL:** [https://luxurisen.onrender.com/](https://luxurisen.onrender.com/)
 
 ---
 

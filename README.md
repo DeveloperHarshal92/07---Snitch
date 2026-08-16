@@ -1,5 +1,6 @@
 # Luxurisen — Curated Luxury Fashion (Portfolio Demo)
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-luxurisen.onrender.com-C9A96E?style=for-the-badge&logo=render&logoColor=white)](https://luxurisen.onrender.com/)
 [![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -7,6 +8,8 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
 A full-stack, luxury fashion e-commerce portfolio demonstration engineered with the MERN stack. Designed with high-fashion editorial aesthetics, Cormorant Garamond typography, refined warm beige/charcoal/gold palettes, and robust enterprise architecture.
+
+🔗 **Live Application URL:** [https://luxurisen.onrender.com/](https://luxurisen.onrender.com/)
 
 > **Notice:** This project is a student portfolio and educational demonstration. No real financial transactions or commercial brand operations take place.
 
@@ -171,7 +174,7 @@ The project is structured to deploy smoothly as a single full-stack service on R
    - **Root Directory**: `backend`
    - **Build Command**: `npm install`
    - **Start Command**: `node server.js`
-   - **Environment Variables**: Add all variables from `backend/.env` (ensure `GOOGLE_CALLBACK_URL` is set to `https://<your-app>.onrender.com/api/auth/google/callback` and `NODE_ENV=production`).
+   - **Environment Variables**: Add all variables from `backend/.env` (ensure `GOOGLE_CALLBACK_URL` is set to `https://luxurisen.onrender.com/api/auth/google/callback` and `NODE_ENV=production`).
 
 ---
 

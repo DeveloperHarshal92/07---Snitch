@@ -215,6 +215,8 @@ To explicitly communicate that the application is a non-commercial educational p
     - `dist/assets/index-Z_ZKxQqd.js` (542.29 kB)
 - **Static Asset Synchronization:**  
   The built assets in `frontend/dist/` were synced directly into `backend/public/` to ensure the Node/Express monolith serves the updated bundle under SPA wildcard fallback routing.
+- **Production URL**:  
+  Live demo hosted at [https://luxurisen.onrender.com/](https://luxurisen.onrender.com/)
 - **Git Commit:**  
   All changes staged and committed under message:  
   `"chore: rebrand to generic portfolio and remove forced root login to comply with hosting policies"`.
