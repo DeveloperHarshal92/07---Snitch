@@ -32,31 +32,24 @@ export const addToCart = async (req, res) => {
 
   const stock = await stockOfVariant(productId, variantId);
 
-  const cart =
-    (await cartModel.findOne({
-      user: req.user._id,
-    })) ||
-    (await cartModel.create({
+  let cart = await cartModel.findOne({ user: req.user._id });
+  if (!cart) {
+    cart = await cartModel.create({
       user: req.user._id,
       items: [],
-    }));
+    });
+  }
 
-  const isProductInCart = cart.items.some((item) => {
-    const matchProduct = item.product.toString() === productId;
+  const existingItemIndex = cart.items.findIndex((item) => {
+    const matchProduct = item.product.toString() === productId.toString();
     const matchVariant = variantId
-      ? item.variant?.toString() === variantId
+      ? item.variant?.toString() === variantId.toString()
       : !item.variant;
     return matchProduct && matchVariant;
   });
 
-  if (isProductInCart) {
-    const quantityInCart = cart.items.find((item) => {
-      const matchProduct = item.product.toString() === productId;
-      const matchVariant = variantId
-        ? item.variant?.toString() === variantId
-        : !item.variant;
-      return matchProduct && matchVariant;
-    }).quantity;
+  if (existingItemIndex > -1) {
+    const quantityInCart = cart.items[existingItemIndex].quantity;
 
     if (quantityInCart + quantity > stock) {
       return res.status(400).json({
@@ -65,25 +58,8 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    const elemMatch = { product: productId };
-    if (variantId) {
-      elemMatch.variant = variantId;
-    } else {
-      elemMatch.variant = { $exists: false };
-    }
-
-    const query = {
-      user: req.user._id,
-      items: { $elemMatch: elemMatch },
-    };
-
-    await cartModel.findOneAndUpdate(
-      query,
-      {
-        $inc: { "items.$.quantity": quantity },
-      },
-      { new: true },
-    );
+    cart.items[existingItemIndex].quantity += quantity;
+    await cart.save();
 
     return res.status(200).json({
       message: "Product quantity updated in cart",
@@ -98,24 +74,27 @@ export const addToCart = async (req, res) => {
     });
   }
 
+  let itemPrice = product.price;
+  if (variantId && Array.isArray(product.variants)) {
+    const variant = product.variants.find(
+      (v) => v._id && v._id.toString() === variantId.toString(),
+    );
+    if (variant && variant.price && variant.price.amount) {
+      itemPrice = variant.price;
+    }
+  }
+
   const cartItem = {
     product: productId,
     quantity,
-    price: product.price, // Fallback base price
+    price: itemPrice,
   };
 
   if (variantId) {
     cartItem.variant = variantId;
-    const variant =
-      product.variants.id(variantId) ||
-      product.variants.find((v) => v._id.toString() === variantId);
-    if (variant && variant.price && variant.price.amount) {
-      cartItem.price = variant.price;
-    }
   }
 
   cart.items.push(cartItem);
-
   await cart.save();
 
   return res.status(200).json({
@@ -130,10 +109,12 @@ export const getCart = async (req, res) => {
   let cart = await getCartDetails(user._id);
 
   if (!cart) {
-    cart = await cartModel.create({
+    cart = {
       user: user._id,
       items: [],
-    });
+      totalPrice: 0,
+      currency: "INR",
+    };
   }
 
   return res.status(200).json({
@@ -159,12 +140,11 @@ export const removeFromCart = async (req, res) => {
 export const incrementCartItem = async (req, res) => {
   const { productId, variantId } = req.params;
   try {
-    // Check stock before incrementing
     const cart = await cartModel.findOne({ user: req.user._id });
     const item = cart?.items.find((i) => {
-      const matchProduct = i.product.toString() === productId;
+      const matchProduct = i.product.toString() === productId.toString();
       const matchVariant = variantId
-        ? i.variant?.toString() === variantId
+        ? i.variant?.toString() === variantId.toString()
         : !i.variant;
       return matchProduct && matchVariant;
     });
@@ -236,7 +216,7 @@ export const createOrderController = async (req, res) => {
   if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
     const validation = await couponDao.findValidCoupon(
       couponCode,
-      cart.totalPrice
+      cart.totalPrice,
     );
 
     if (!validation.valid) {
@@ -269,19 +249,42 @@ export const createOrderController = async (req, res) => {
       amount: finalChargeAmount,
       currency: cart.currency,
     },
-    orderItems: cart.items.map((item) => ({
-      title: item.product.title,
-      productId: item.product._id,
-      variantId: item.variant,
-      quantity: item.quantity,
-      images: item.product.variants.images || item.product.images,
-      description: item.product.description,
-      price: {
-        amount: item.product.variants.price.amount || item.product.price.amount,
-        currency:
-          item.product.variants.price.currency || item.product.price.currency,
-      },
-    })),
+    orderItems: cart.items.map((item) => {
+      const matchedVariant =
+        item.variant && Array.isArray(item.product.variants)
+          ? item.product.variants.find(
+              (v) => v._id && v._id.toString() === item.variant.toString(),
+            )
+          : null;
+
+      const itemImages =
+        (matchedVariant?.images?.length
+          ? matchedVariant.images
+          : item.product.images) || [];
+      const itemPriceAmount =
+        matchedVariant?.price?.amount ??
+        item.price?.amount ??
+        item.product.price?.amount ??
+        0;
+      const itemPriceCurrency =
+        matchedVariant?.price?.currency ??
+        item.price?.currency ??
+        item.product.price?.currency ??
+        "INR";
+
+      return {
+        title: item.product.title,
+        productId: item.product._id,
+        variantId: item.variant || null,
+        quantity: item.quantity,
+        images: itemImages,
+        description: item.product.description,
+        price: {
+          amount: itemPriceAmount,
+          currency: itemPriceCurrency,
+        },
+      };
+    }),
   };
 
   if (appliedCoupon) {
@@ -319,7 +322,7 @@ export const verifyOrderController = async (req, res) => {
         payment_id: razorpay_payment_id,
       },
       razorpay_signature,
-      process.env.RAZORPAY_KEY_SECRET
+      process.env.RAZORPAY_KEY_SECRET,
     );
 
     if (!isPaymentValid) {

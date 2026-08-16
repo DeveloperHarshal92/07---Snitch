@@ -43,6 +43,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
 
   const allProducts = useSelector((state) => state.product.products);
+  const user = useSelector((state) => state.auth.user);
 
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +51,8 @@ const ProductDetail = () => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [imgHovered, setImgHovered] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [addSuccess, setAddSuccess] = useState(false);
 
   const { handleGetProductDetails, handleGetAllProducts } = useProduct();
   const { handleAddToCart } = useCart();
@@ -744,40 +747,97 @@ const ProductDetail = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               {/* Add to Cart */}
               <button
-                onClick={() => {
-                  handleAddToCart({
-                    productId: product._id,
-                    variantId: selectedVariantId,
-                  });
+                onClick={async () => {
+                  if (!user) {
+                    navigate("/login");
+                    return;
+                  }
+                  if (isAdding) return;
+                  try {
+                    setIsAdding(true);
+                    await handleAddToCart({
+                      productId: product._id,
+                      variantId: selectedVariantId,
+                    });
+                    setAddSuccess(true);
+                    setTimeout(() => setAddSuccess(false), 2200);
+                  } catch (err) {
+                    console.error("Failed to add to cart:", err);
+                  } finally {
+                    setIsAdding(false);
+                  }
                 }}
+                disabled={isAdding}
                 id="btn-add-to-cart"
-                className="pdp-btn-outline flex-1 flex items-center justify-center gap-2 py-4 text-[0.65rem] tracking-[0.22em] uppercase font-medium rounded-sm border cursor-pointer"
+                className="pdp-btn-outline flex-1 flex items-center justify-center gap-2 py-4 text-[0.65rem] tracking-[0.22em] uppercase font-medium rounded-sm border cursor-pointer transition-colors"
                 style={{
-                  backgroundColor: "transparent",
-                  color: "#0d0d0b",
-                  borderColor: "#0d0d0b",
+                  backgroundColor: addSuccess ? "#16a34a" : "transparent",
+                  color: addSuccess ? "#ffffff" : "#0d0d0b",
+                  borderColor: addSuccess ? "#16a34a" : "#0d0d0b",
                   fontFamily: "'Inter', sans-serif",
                 }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"
-                  />
-                </svg>
-                Add to Cart
+                {addSuccess ? (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m4.5 12.75 6 6 9-13.5"
+                      />
+                    </svg>
+                    Added to Bag
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"
+                      />
+                    </svg>
+                    {isAdding ? "Adding..." : "Add to Cart"}
+                  </>
+                )}
               </button>
 
               {/* Buy Now */}
               <button
+                onClick={async () => {
+                  if (!user) {
+                    navigate("/login");
+                    return;
+                  }
+                  if (isAdding) return;
+                  try {
+                    setIsAdding(true);
+                    await handleAddToCart({
+                      productId: product._id,
+                      variantId: selectedVariantId,
+                    });
+                    navigate("/cart");
+                  } catch (err) {
+                    console.error("Failed to proceed to checkout:", err);
+                  } finally {
+                    setIsAdding(false);
+                  }
+                }}
+                disabled={isAdding}
                 id="btn-buy-now"
                 className="pdp-btn-dark flex-1 flex items-center justify-center gap-2 py-4 text-[0.65rem] tracking-[0.22em] uppercase font-medium rounded-sm border-none cursor-pointer"
                 style={{
