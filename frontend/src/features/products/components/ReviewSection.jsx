@@ -40,14 +40,14 @@ const StarRow = ({ rating, size = 14, interactive = false, onChange }) => {
   const display = interactive ? hovered || rating : rating;
 
   return (
-    <div style={{ display: "flex", gap: "3px", alignItems: "center" }}>
+    <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((n) => (
         <span
           key={n}
           onClick={() => interactive && onChange?.(n)}
           onMouseEnter={() => interactive && setHovered(n)}
           onMouseLeave={() => interactive && setHovered(0)}
-          style={{ cursor: interactive ? "pointer" : "default" }}
+          className={interactive ? "cursor-pointer" : "cursor-default"}
         >
           <StarIcon filled={n <= display} size={size} />
         </span>
@@ -59,63 +59,34 @@ const StarRow = ({ rating, size = 14, interactive = false, onChange }) => {
 const RatingBar = ({ star, count, total }) => {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <span
-        style={{
-          fontSize: "0.6rem",
-          letterSpacing: "0.12em",
-          color: "#6b6158",
-          width: "32px",
-          textAlign: "right",
-          fontFamily: "'Inter', sans-serif",
-        }}
-      >
+    <div className="flex items-center gap-2.5">
+      <span className="text-[0.6rem] tracking-[0.12em] text-[#6b6158] dark:text-[#a8a29e] w-8 text-right font-sans">
         {star} ★
       </span>
-      <div
-        style={{
-          flex: 1,
-          height: "4px",
-          backgroundColor: "#e4e2df",
-          borderRadius: "2px",
-          overflow: "hidden",
-        }}
-      >
+      <div className="flex-1 h-1 bg-[#e4e2df] dark:bg-[#292522] rounded-full overflow-hidden">
         <div
-          style={{
-            width: `${pct}%`,
-            height: "100%",
-            backgroundColor: "#C9A96E",
-            borderRadius: "2px",
-            transition: "width 0.6s ease",
-          }}
+          style={{ width: `${pct}%` }}
+          className="h-full bg-[#C9A96E] rounded-full transition-all duration-500"
         />
       </div>
-      <span
-        style={{
-          fontSize: "0.6rem",
-          color: "#6b6158",
-          width: "24px",
-          fontFamily: "'Inter', sans-serif",
-        }}
-      >
+      <span className="text-[0.6rem] text-[#6b6158] dark:text-[#a8a29e] w-6 font-sans">
         {count}
       </span>
     </div>
   );
 };
 
-// ── Review Form ──────────────────────────────────────────────────
+// ── Review Form (add / edit) ─────────────────────────────────────
 
 const ReviewForm = ({ productId, existingReview = null, onDone, onCancel }) => {
   const { handleAddReview, handleEditReview } = useProduct();
+
+  const isEdit = !!existingReview;
   const [rating, setRating] = useState(existingReview?.rating ?? 0);
   const [title, setTitle] = useState(existingReview?.title ?? "");
   const [body, setBody] = useState(existingReview?.body ?? "");
-  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const isEdit = Boolean(existingReview);
+  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
     if (rating === 0) return setError("Please select a star rating.");
@@ -141,71 +112,23 @@ const ReviewForm = ({ productId, existingReview = null, onDone, onCancel }) => {
     }
   };
 
-  const inputStyle = {
-    width: "100%",
-    backgroundColor: "#f5f3f0",
-    border: "1px solid #e4e2df",
-    borderRadius: "2px",
-    padding: "10px 14px",
-    fontSize: "0.8rem",
-    color: "#0d0d0b",
-    fontFamily: "'Inter', sans-serif",
-    outline: "none",
-    boxSizing: "border-box",
-  };
-
   return (
-    <div
-      style={{
-        border: "1px solid #e4e2df",
-        borderRadius: "2px",
-        padding: "28px",
-        backgroundColor: "#faf8f5",
-        display: "flex",
-        flexDirection: "column",
-        gap: "18px",
-      }}
-    >
-      <p
-        style={{
-          margin: 0,
-          fontSize: "0.6rem",
-          letterSpacing: "0.25em",
-          textTransform: "uppercase",
-          color: "#C9A96E",
-          fontFamily: "'Inter', sans-serif",
-        }}
-      >
+    <div className="border border-[#e4e2df] dark:border-[#292522] rounded-lg p-6 sm:p-7 bg-[#faf8f5] dark:bg-[#161412] flex flex-col gap-4">
+      <p className="m-0 text-[0.6rem] tracking-[0.25em] uppercase text-[#C9A96E] font-medium">
         {isEdit ? "Edit your review" : "Write a review"}
       </p>
 
       {/* Star picker */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        <label
-          style={{
-            fontSize: "0.6rem",
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            color: "#6b6158",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+      <div className="flex flex-col gap-2">
+        <label className="text-[0.6rem] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
           Your Rating
         </label>
         <StarRow rating={rating} size={22} interactive onChange={setRating} />
       </div>
 
       {/* Title */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        <label
-          style={{
-            fontSize: "0.6rem",
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            color: "#6b6158",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+      <div className="flex flex-col gap-2">
+        <label className="text-[0.6rem] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
           Title
         </label>
         <input
@@ -214,21 +137,13 @@ const ReviewForm = ({ productId, existingReview = null, onDone, onCancel }) => {
           maxLength={100}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Summarise your experience"
-          style={inputStyle}
+          className="w-full bg-[#f5f3f0] dark:bg-[#1f1c19] border border-[#e4e2df] dark:border-[#292522] rounded px-3.5 py-2.5 text-xs text-[#0d0d0b] dark:text-[#fbf9f6] outline-none focus:border-[#C9A96E] transition-all"
         />
       </div>
 
       {/* Body */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        <label
-          style={{
-            fontSize: "0.6rem",
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            color: "#6b6158",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+      <div className="flex flex-col gap-2">
+        <label className="text-[0.6rem] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
           Review
         </label>
         <textarea
@@ -237,71 +152,33 @@ const ReviewForm = ({ productId, existingReview = null, onDone, onCancel }) => {
           onChange={(e) => setBody(e.target.value)}
           placeholder="Tell others what you think about this product..."
           rows={4}
-          style={{ ...inputStyle, resize: "vertical", lineHeight: 1.7 }}
+          className="w-full bg-[#f5f3f0] dark:bg-[#1f1c19] border border-[#e4e2df] dark:border-[#292522] rounded px-3.5 py-2.5 text-xs text-[#0d0d0b] dark:text-[#fbf9f6] outline-none focus:border-[#C9A96E] transition-all resize-y leading-relaxed"
         />
-        <span
-          style={{
-            fontSize: "0.55rem",
-            color: "#9d9089",
-            fontFamily: "'Inter', sans-serif",
-            textAlign: "right",
-          }}
-        >
+        <span className="text-[0.55rem] text-[#9d9089] text-right">
           {body.length}/1000
         </span>
       </div>
 
       {/* Error */}
       {error && (
-        <p
-          style={{
-            margin: 0,
-            fontSize: "0.65rem",
-            color: "#c0392b",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+        <p className="m-0 text-xs text-red-500 font-light">
           {error}
         </p>
       )}
 
       {/* Actions */}
-      <div style={{ display: "flex", gap: "10px" }}>
+      <div className="flex gap-2.5 pt-1">
         <button
           onClick={handleSubmit}
           disabled={submitting}
-          style={{
-            flex: 1,
-            padding: "12px",
-            backgroundColor: submitting ? "#6b6158" : "#0d0d0b",
-            color: "#fbf9f6",
-            border: "none",
-            borderRadius: "2px",
-            fontSize: "0.6rem",
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            fontFamily: "'Inter', sans-serif",
-            cursor: submitting ? "not-allowed" : "pointer",
-            transition: "background-color 0.2s",
-          }}
+          className="flex-1 py-3 bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] rounded text-[0.62rem] tracking-[0.22em] uppercase font-semibold hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] transition-all cursor-pointer"
         >
           {submitting ? "Saving…" : isEdit ? "Save Changes" : "Submit Review"}
         </button>
         {onCancel && (
           <button
             onClick={onCancel}
-            style={{
-              padding: "12px 20px",
-              backgroundColor: "transparent",
-              color: "#6b6158",
-              border: "1px solid #e4e2df",
-              borderRadius: "2px",
-              fontSize: "0.6rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              fontFamily: "'Inter', sans-serif",
-              cursor: "pointer",
-            }}
+            className="px-5 py-3 bg-transparent text-[#6b6158] dark:text-[#a8a29e] border border-[#e4e2df] dark:border-[#292522] rounded text-[0.62rem] tracking-[0.15em] uppercase hover:text-[#0d0d0b] dark:hover:text-white transition-all cursor-pointer"
           >
             Cancel
           </button>
@@ -317,75 +194,30 @@ const ReviewCard = ({ review, currentUserId, onEdit, onDelete }) => {
   const isOwn = review.user?._id === currentUserId;
 
   return (
-    <div
-      style={{
-        padding: "22px 0",
-        borderBottom: "1px solid #e4e2df",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-      }}
-    >
+    <div className="py-5 border-b border-[#e4e2df] dark:border-[#292522] flex flex-col gap-2.5">
       {/* Top row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: "12px",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-1.5">
           <StarRow rating={review.rating} size={13} />
           <p
-            style={{
-              margin: 0,
-              fontSize: "0.9rem",
-              fontFamily: "'Cormorant Garamond', serif",
-              fontWeight: 500,
-              color: "#0d0d0b",
-              lineHeight: 1.3,
-            }}
+            className="m-0 text-sm md:text-base font-light text-[#0d0d0b] dark:text-[#fbf9f6] leading-snug"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
             {review.title}
           </p>
         </div>
 
         {isOwn && (
-          <div style={{ display: "flex", gap: "10px", flexShrink: 0 }}>
+          <div className="flex gap-2.5 flex-shrink-0">
             <button
               onClick={() => onEdit(review)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "0.55rem",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "#6b6158",
-                fontFamily: "'Inter', sans-serif",
-                textDecoration: "underline",
-                textUnderlineOffset: "3px",
-                padding: 0,
-              }}
+              className="bg-transparent border-none cursor-pointer text-[0.55rem] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e] hover:text-[#C9A96E] underline underline-offset-4 p-0"
             >
               Edit
             </button>
             <button
               onClick={() => onDelete(review._id)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "0.55rem",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "#c0392b",
-                fontFamily: "'Inter', sans-serif",
-                textDecoration: "underline",
-                textUnderlineOffset: "3px",
-                padding: 0,
-              }}
+              className="bg-transparent border-none cursor-pointer text-[0.55rem] tracking-[0.15em] uppercase text-red-500 hover:text-red-600 underline underline-offset-4 p-0"
             >
               Delete
             </button>
@@ -394,39 +226,17 @@ const ReviewCard = ({ review, currentUserId, onEdit, onDelete }) => {
       </div>
 
       {/* Body */}
-      <p
-        style={{
-          margin: 0,
-          fontSize: "0.8rem",
-          color: "#3d342c",
-          lineHeight: 1.75,
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 300,
-        }}
-      >
+      <p className="m-0 text-xs md:text-sm text-[#3d342c] dark:text-[#d6d3d1] leading-relaxed font-light">
         {review.body}
       </p>
 
       {/* Author + date */}
-      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <span
-          style={{
-            fontSize: "0.6rem",
-            letterSpacing: "0.1em",
-            color: "#6b6158",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+      <div className="flex gap-2 items-center text-xs text-[#6b6158] dark:text-[#a8a29e]">
+        <span className="font-medium text-[#0d0d0b] dark:text-[#fbf9f6]">
           {review.user?.fullname ?? "Anonymous"}
         </span>
-        <span style={{ color: "#d0c5b5", fontSize: "0.6rem" }}>·</span>
-        <span
-          style={{
-            fontSize: "0.6rem",
-            color: "#9d9089",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+        <span>·</span>
+        <span>
           {new Date(review.createdAt).toLocaleDateString("en-IN", {
             day: "numeric",
             month: "long",
@@ -435,16 +245,8 @@ const ReviewCard = ({ review, currentUserId, onEdit, onDelete }) => {
         </span>
         {isOwn && (
           <>
-            <span style={{ color: "#d0c5b5", fontSize: "0.6rem" }}>·</span>
-            <span
-              style={{
-                fontSize: "0.55rem",
-                letterSpacing: "0.1em",
-                color: "#C9A96E",
-                fontFamily: "'Inter', sans-serif",
-                textTransform: "uppercase",
-              }}
-            >
+            <span>·</span>
+            <span className="text-[0.55rem] tracking-wider uppercase text-[#C9A96E] font-semibold">
               Your review
             </span>
           </>
@@ -480,7 +282,10 @@ const ReviewSection = ({ productId }) => {
   const handleEdit = (review) => {
     setEditingReview(review);
     setShowForm(false);
-    window.scrollTo({ top: document.getElementById("review-form-anchor")?.offsetTop - 80, behavior: "smooth" });
+    window.scrollTo({
+      top: document.getElementById("review-form-anchor")?.offsetTop - 80,
+      behavior: "smooth",
+    });
   };
 
   const handleDelete = async (reviewId) => {
@@ -499,49 +304,22 @@ const ReviewSection = ({ productId }) => {
   };
 
   const canWriteReview =
-    currentUser && currentUser.role === "buyer" && !userHasReviewed && !editingReview;
+    currentUser &&
+    currentUser.role === "buyer" &&
+    !userHasReviewed &&
+    !editingReview;
 
   return (
-    <section
-      style={{
-        borderTop: "1px solid #e4e2df",
-        paddingTop: "56px",
-        paddingBottom: "64px",
-      }}
-    >
-      <style>{`
-        @keyframes reviewFadeIn {
-          from { opacity: 0; transform: translateY(14px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .review-card-animate { animation: reviewFadeIn 0.4s ease both; }
-      `}</style>
-
+    <section className="border-t border-[#e4e2df] dark:border-[#292522] py-14">
       <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
-
         {/* ── Section header ──────────────────────────────────── */}
-        <div style={{ marginBottom: "36px" }}>
-          <p
-            style={{
-              margin: "0 0 6px",
-              fontSize: "0.6rem",
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: "#C9A96E",
-              fontFamily: "'Inter', sans-serif",
-            }}
-          >
+        <div className="mb-9">
+          <p className="m-0 mb-1.5 text-[0.6rem] tracking-[0.28em] uppercase text-[#C9A96E] font-medium">
             What customers say
           </p>
           <h2
-            style={{
-              margin: 0,
-              fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
-              fontFamily: "'Cormorant Garamond', serif",
-              fontWeight: 300,
-              color: "#0d0d0b",
-              lineHeight: 1.1,
-            }}
+            className="m-0 text-3xl md:text-4xl font-light text-[#0d0d0b] dark:text-white leading-tight"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
             Customer Reviews
           </h2>
@@ -549,59 +327,24 @@ const ReviewSection = ({ productId }) => {
 
         {/* ── Stats + Write CTA row ────────────────────────── */}
         {stats && stats.totalReviews > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "auto 1fr",
-              gap: "40px",
-              alignItems: "start",
-              marginBottom: "40px",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-8 sm:gap-12 items-start mb-10">
             {/* Average rating block */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "8px",
-                minWidth: "110px",
-              }}
-            >
+            <div className="flex flex-col items-center gap-2 min-w-[110px]">
               <span
-                style={{
-                  fontSize: "3rem",
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontWeight: 300,
-                  color: "#0d0d0b",
-                  lineHeight: 1,
-                }}
+                className="text-5xl font-light text-[#0d0d0b] dark:text-white leading-none"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 {stats.averageRating.toFixed(1)}
               </span>
               <StarRow rating={Math.round(stats.averageRating)} size={16} />
-              <span
-                style={{
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.12em",
-                  color: "#6b6158",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
-                {stats.totalReviews} {stats.totalReviews === 1 ? "review" : "reviews"}
+              <span className="text-[0.6rem] tracking-[0.12em] text-[#6b6158] dark:text-[#a8a29e]">
+                {stats.totalReviews}{" "}
+                {stats.totalReviews === 1 ? "review" : "reviews"}
               </span>
             </div>
 
             {/* Distribution bars */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "7px",
-                paddingTop: "6px",
-              }}
-            >
+            <div className="flex flex-col gap-1.5 pt-1">
               {[5, 4, 3, 2, 1].map((star) => (
                 <RatingBar
                   key={star}
@@ -615,15 +358,9 @@ const ReviewSection = ({ productId }) => {
         )}
 
         {/* ── Write Review button ─────────────────────────── */}
-        <div id="review-form-anchor" style={{ marginBottom: "32px" }}>
+        <div id="review-form-anchor" className="mb-8">
           {!currentUser && (
-            <p
-              style={{
-                fontSize: "0.7rem",
-                color: "#6b6158",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
+            <p className="text-xs text-[#6b6158] dark:text-[#a8a29e]">
               Please sign in to leave a review.
             </p>
           )}
@@ -631,27 +368,7 @@ const ReviewSection = ({ productId }) => {
           {canWriteReview && !showForm && (
             <button
               onClick={() => setShowForm(true)}
-              style={{
-                padding: "13px 28px",
-                backgroundColor: "transparent",
-                color: "#0d0d0b",
-                border: "1px solid #0d0d0b",
-                borderRadius: "2px",
-                fontSize: "0.6rem",
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                fontFamily: "'Inter', sans-serif",
-                cursor: "pointer",
-                transition: "background-color 0.25s, color 0.25s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#0d0d0b";
-                e.currentTarget.style.color = "#fbf9f6";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = "#0d0d0b";
-              }}
+              className="px-7 py-3 bg-transparent text-[#0d0d0b] dark:text-[#fbf9f6] border border-[#0d0d0b] dark:border-white/40 rounded text-[0.62rem] tracking-[0.22em] uppercase font-semibold hover:bg-[#0d0d0b] hover:text-[#fbf9f6] dark:hover:bg-white dark:hover:text-[#0d0d0b] transition-all cursor-pointer"
             >
               Write a Review
             </button>
@@ -659,7 +376,7 @@ const ReviewSection = ({ productId }) => {
 
           {/* New review form */}
           {showForm && !editingReview && (
-            <div className="review-card-animate">
+            <div className="animate-fadeIn">
               <ReviewForm
                 productId={productId}
                 onDone={handleFormDone}
@@ -670,7 +387,7 @@ const ReviewSection = ({ productId }) => {
 
           {/* Edit review form */}
           {editingReview && (
-            <div className="review-card-animate">
+            <div className="animate-fadeIn">
               <ReviewForm
                 productId={productId}
                 existingReview={editingReview}
@@ -683,78 +400,28 @@ const ReviewSection = ({ productId }) => {
 
         {/* ── Review list ─────────────────────────────────── */}
         {loadingReviews ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div className="flex flex-col gap-6">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                style={{
-                  padding: "22px 0",
-                  borderBottom: "1px solid #e4e2df",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
+                className="py-5 border-b border-[#e4e2df] dark:border-[#292522] flex flex-col gap-2.5 animate-pulse"
               >
-                <div
-                  className="animate-pulse"
-                  style={{
-                    height: "10px",
-                    width: "80px",
-                    backgroundColor: "#e4e2df",
-                    borderRadius: "4px",
-                  }}
-                />
-                <div
-                  className="animate-pulse"
-                  style={{
-                    height: "14px",
-                    width: "200px",
-                    backgroundColor: "#e4e2df",
-                    borderRadius: "4px",
-                  }}
-                />
-                <div
-                  className="animate-pulse"
-                  style={{
-                    height: "10px",
-                    width: "100%",
-                    backgroundColor: "#e4e2df",
-                    borderRadius: "4px",
-                  }}
-                />
+                <div className="h-2.5 w-20 bg-[#e4e2df] dark:bg-[#292522] rounded" />
+                <div className="h-3.5 w-48 bg-[#e4e2df] dark:bg-[#292522] rounded" />
+                <div className="h-2.5 w-full bg-[#e4e2df] dark:bg-[#292522] rounded" />
               </div>
             ))}
           </div>
         ) : reviews.length === 0 ? (
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "#9d9089",
-              fontFamily: "'Inter', sans-serif",
-              fontStyle: "italic",
-              paddingTop: "8px",
-            }}
-          >
+          <p className="text-xs text-[#9d9089] dark:text-[#78716c] italic pt-2">
             No reviews yet. Be the first to share your thoughts.
           </p>
         ) : (
-          <div>
-            {reviews.map((review, idx) => (
-              <div
-                key={review._id}
-                className="review-card-animate"
-                style={{ animationDelay: `${idx * 0.07}s` }}
-              >
+          <div className="divide-y divide-[#e4e2df] dark:divide-[#292522]">
+            {reviews.map((review) => (
+              <div key={review._id}>
                 {deletingId === review._id ? (
-                  <div
-                    style={{
-                      padding: "22px 0",
-                      borderBottom: "1px solid #e4e2df",
-                      fontSize: "0.65rem",
-                      color: "#9d9089",
-                      fontFamily: "'Inter', sans-serif",
-                    }}
-                  >
+                  <div className="py-5 text-xs text-[#9d9089]">
                     Deleting…
                   </div>
                 ) : (

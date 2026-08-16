@@ -153,3 +153,25 @@ export const getMe = async (req, res) => {
     });
   }
 };
+
+export const logout = async (req, res) => {
+  try {
+    const isProduction = config.NODE_ENV === "production";
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+    });
+    return res.status(200).json({
+      message: "Logged out successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.log("Error in logout:", error);
+    return res.status(500).json({
+      message: "Server error during logout",
+      success: false,
+    });
+  }
+};
+

@@ -1,1 +1,186 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --bg-primary: #fbf9f6;
+    --bg-surface: #f5f3f0;
+    --bg-card: #f5f3f0;
+    --bg-bezel: rgba(27, 24, 20, 0.03);
+    --text-primary: #0d0d0b;
+    --text-secondary: #524941;
+    --text-muted: #8c827a;
+    --border-subtle: #e4e2df;
+    --border-strong: #d0c5b5;
+    --accent-gold: #C9A96E;
+    --accent-gold-hover: #DEBA7E;
+  }
+
+  html.dark, [data-theme="dark"] {
+    --bg-primary: #0d0d0b;
+    --bg-surface: #141210;
+    --bg-card: #191715;
+    --bg-bezel: rgba(255, 255, 255, 0.03);
+    --text-primary: #fbf9f6;
+    --text-secondary: #d6d3d1;
+    --text-muted: #a8a29e;
+    --border-subtle: #292522;
+    --border-strong: #3d3733;
+    --accent-gold: #DEBA7E;
+    --accent-gold-hover: #edd6a6;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::selection {
+    background-color: rgba(201, 169, 110, 0.35);
+    color: #0d0d0b;
+  }
+
+  html.dark ::selection {
+    background-color: rgba(222, 186, 126, 0.45);
+    color: #fbf9f6;
+  }
+}
+
+/* ── Custom Scrollbar ────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold);
+}
+
+/* ── Luxury Typography Helpers ───────────────────────────────── */
+.font-serif-lux {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-sans-lux {
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Double Bezel & Card Architecture ────────────────────────── */
+.bezel-outer {
+  background: var(--bg-bezel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.25rem;
+  padding: 0.375rem;
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.bezel-outer:hover {
+  border-color: rgba(201, 169, 110, 0.45);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.25);
+}
+
+.bezel-inner {
+  background: var(--bg-card);
+  border-radius: calc(1.25rem - 0.375rem);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+html:not(.dark) .bezel-inner {
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+/* ── Button-in-Button & Magnetic Micro-Motion ────────────────── */
+.btn-pill-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-pill-primary:hover {
+  background-color: var(--accent-gold);
+  color: #0d0d0b;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -6px rgba(201, 169, 110, 0.45);
+}
+
+.btn-pill-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-pill-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-pill-primary:hover .btn-pill-icon {
+  background-color: #0d0d0b;
+  color: #fbf9f6;
+  transform: translateX(2px);
+}
+
+/* ── Shimmer & Keyframes ─────────────────────────────────────── */
+@keyframes goldShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.gold-shimmer {
+  background: linear-gradient(90deg, #C9A96E 0%, #ecd39a 50%, #C9A96E 100%);
+  background-size: 200% 100%;
+  animation: goldShimmer 3.5s infinite linear;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+/* ── Hide scrollbar utility ──────────────────────────────────── */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

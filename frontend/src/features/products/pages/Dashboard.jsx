@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import LuxurisenFooter from "../../Shared/components/LuxurisenFooter";
+import ThemeToggle from "../../Shared/components/ThemeToggle";
 
 /* ── Google Fonts injected once ─────────────────────────────── */
 const FontLink = () => (
@@ -15,7 +18,7 @@ const FontLink = () => (
 const fmt = (amount, currency) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency,
+    currency: currency || "INR",
     maximumFractionDigits: 0,
   }).format(amount);
 
@@ -31,9 +34,15 @@ const timeAgo = (iso) => {
 /* ── Dashboard ───────────────────────────────────────────────── */
 const Dashboard = () => {
   const { handleGetSellerProducts } = useProduct();
+  const { handleLogout } = useAuth();
   const sellerProducts = useSelector((s) => s.product.sellerProducts);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+
+  const onLogoutClick = async () => {
+    await handleLogout();
+    navigate("/login");
+  };
 
   useEffect(() => {
     handleGetSellerProducts().finally(() => setIsLoading(false));
@@ -51,226 +60,192 @@ const Dashboard = () => {
   return (
     <>
       <FontLink />
-      <div
-        className="min-h-screen selection:bg-[#C9A96E]/30"
-        style={{
-          backgroundColor: "#fbf9f6",
-          fontFamily: "'Inter', sans-serif",
-          color: "#0d0d0b",
-        }}
-      >
-        {/* ── Header ──────────────────────────────────────────── */}
-        <header
-          className="sticky top-0 z-50 flex items-center justify-between px-8 md:px-16 py-5 border-b"
-          style={{ backgroundColor: "#fbf9f6", borderColor: "#e4e2df" }}
-        >
-          {/* Brand */}
-          <span
-            className="text-sm tracking-[0.35em] uppercase select-none"
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              color: "#C9A96E",
-            }}
-          >
-            Luxurisen
-          </span>
+      <div className="min-h-screen bg-[#fbf9f6] dark:bg-[#0a0908] text-[#0d0d0b] dark:text-[#fbf9f6] transition-colors duration-300 font-sans flex flex-col justify-between">
+        <div>
+          {/* ── Header ──────────────────────────────────────────── */}
+          <header className="sticky top-0 z-40 flex items-center justify-between px-6 sm:px-12 py-4 border-b border-[#e4e2df] dark:border-[#292522] bg-[#fbf9f6]/90 dark:bg-[#0a0908]/90 backdrop-blur-md">
+            {/* Brand */}
+            <span
+              className="text-sm tracking-[0.35em] uppercase select-none cursor-pointer text-[#C9A96E]"
+              onClick={() => navigate("/")}
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              Luxurisen
+            </span>
 
-          {/* Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <button
-              onClick={() => navigate("/seller/dashboard")}
-              className="text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-200"
-              style={{
-                color: "#C9A96E",
-                borderBottom: "1px solid #C9A96E",
-                paddingBottom: "2px",
-              }}
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => navigate("/seller/create-product")}
-              className="text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-200"
-              style={{ color: "#6b6158" }}
-              onMouseEnter={(e) => (e.target.style.color = "#0d0d0b")}
-              onMouseLeave={(e) => (e.target.style.color = "#6b6158")}
-            >
-              New Listing
-            </button>
-          </nav>
-
-          {/* CTA */}
-          <button
-            onClick={() => navigate("/seller/create-product")}
-            className="flex items-center gap-2 text-[10px] tracking-[0.22em] uppercase font-medium py-2.5 px-5 transition-all duration-300"
-            style={{ backgroundColor: "#0d0d0b", color: "#fbf9f6" }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#C9A96E";
-              e.currentTarget.style.color = "#0d0d0b";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#0d0d0b";
-              e.currentTarget.style.color = "#fbf9f6";
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-              stroke="currentColor"
-              className="w-3 h-3"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
-            New Listing
-          </button>
-        </header>
-
-        {/* ── Main ────────────────────────────────────────────── */}
-        <main className="px-8 sm:px-12 lg:px-20 xl:px-28 py-14 lg:py-20">
-          {/* Heading */}
-          <div className="mb-12">
-            <p
-              className="text-[10px] uppercase tracking-[0.22em] mb-3 font-medium"
-              style={{ color: "#C9A96E" }}
-            >
-              Seller Portal
-            </p>
-            <h1
-              className="text-5xl md:text-6xl font-light leading-[1.05]"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                color: "#0d0d0b",
-              }}
-            >
-              Your Products
-            </h1>
-          </div>
-
-          {/* ── Stat strip ──────────────────────────────────── */}
-          <div
-            className="grid grid-cols-2 lg:grid-cols-3 gap-px mb-16"
-            style={{ backgroundColor: "#e4e2df" }}
-          >
-            {[
-              { label: "Total Products", value: sellerProducts.length },
-              {
-                label: "Catalogue Value",
-                value: sellerProducts.length
-                  ? fmt(
-                      totalRevenue,
-                      sellerProducts[0]?.price?.currency ?? "INR",
-                    )
-                  : "—",
-              },
-              { label: "Total Photos", value: totalImages, hide: "block" },
-            ].map(({ label, value, hide }) => (
-              <div
-                key={label}
-                className={`px-7 py-6 ${hide === "block" ? "hidden lg:block" : ""}`}
-                style={{ backgroundColor: "#fbf9f6" }}
+            {/* Nav */}
+            <nav className="hidden md:flex items-center gap-8">
+              <button
+                onClick={() => navigate("/seller/dashboard")}
+                className="text-[10px] tracking-[0.2em] uppercase font-medium text-[#C9A96E] border-b border-[#C9A96E] pb-0.5 cursor-pointer bg-transparent"
               >
-                <p
-                  className="text-[9px] tracking-[0.2em] uppercase font-medium mb-2"
-                  style={{ color: "#6b6158" }}
-                >
-                  {label}
-                </p>
-                <p
-                  className="text-3xl font-light"
-                  style={{
-                    fontFamily: "'Cormorant Garamond', serif",
-                    color: "#0d0d0b",
-                  }}
-                >
-                  {value}
-                </p>
-              </div>
-            ))}
-          </div>
+                Dashboard
+              </button>
+              <button
+                onClick={() => navigate("/seller/create-product")}
+                className="text-[10px] tracking-[0.2em] uppercase font-medium text-[#6b6158] dark:text-[#a8a29e] hover:text-[#0d0d0b] dark:hover:text-white transition-colors duration-200 cursor-pointer bg-transparent border-none"
+              >
+                New Listing
+              </button>
+            </nav>
 
-          {/* ── Loading skeleton ──────────────────────────────— */}
-          {isLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="animate-pulse"
-                  style={{ backgroundColor: "#f5f3f0" }}
+            {/* CTA & Actions */}
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+
+              <button
+                onClick={() => navigate("/seller/create-product")}
+                className="flex items-center gap-2 text-[10px] tracking-[0.22em] uppercase font-semibold py-2.5 px-4 rounded-full bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] transition-all duration-300 cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                  stroke="currentColor"
+                  className="w-3 h-3"
                 >
-                  <div
-                    className="aspect-[4/5]"
-                    style={{ backgroundColor: "#e4e2df" }}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
                   />
-                  <div className="p-5 space-y-3">
-                    <div
-                      className="h-2.5 rounded"
-                      style={{ backgroundColor: "#e4e2df", width: "70%" }}
-                    />
-                    <div
-                      className="h-2 rounded"
-                      style={{ backgroundColor: "#e4e2df", width: "45%" }}
-                    />
-                  </div>
+                </svg>
+                <span>New Listing</span>
+              </button>
+
+              <button
+                onClick={onLogoutClick}
+                title="Sign Out"
+                className="flex items-center gap-1.5 px-3 py-2 text-[10px] tracking-[0.18em] uppercase border border-[#e4e2df] dark:border-[#292522] text-[#6b6158] dark:text-[#a8a29e] hover:border-[#0d0d0b] dark:hover:border-white hover:text-[#0d0d0b] dark:hover:text-white rounded-full transition-colors duration-200 cursor-pointer bg-transparent"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-3.5 h-3.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
+                  />
+                </svg>
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </header>
+
+          {/* ── Main ────────────────────────────────────────────── */}
+          <main className="max-w-[1200px] mx-auto px-6 sm:px-12 py-10 lg:py-14">
+            {/* Heading */}
+            <div className="mb-10">
+              <p className="text-[10px] uppercase tracking-[0.25em] mb-2 font-medium text-[#C9A96E]">
+                Seller Portal
+              </p>
+              <h1
+                className="text-4xl md:text-5xl font-light text-[#0d0d0b] dark:text-white leading-tight"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                Your Products
+              </h1>
+            </div>
+
+            {/* ── Stat strip ──────────────────────────────────── */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-px mb-12 bg-[#e4e2df] dark:bg-[#292522] rounded-lg overflow-hidden border border-[#e4e2df] dark:border-[#292522]">
+              {[
+                { label: "Total Products", value: sellerProducts.length },
+                {
+                  label: "Catalogue Value",
+                  value: sellerProducts.length
+                    ? fmt(
+                        totalRevenue,
+                        sellerProducts[0]?.price?.currency ?? "INR",
+                      )
+                    : "—",
+                },
+                { label: "Total Photos", value: totalImages, hide: "block" },
+              ].map(({ label, value, hide }) => (
+                <div
+                  key={label}
+                  className={`p-6 bg-[#fbf9f6] dark:bg-[#141210] ${
+                    hide === "block" ? "hidden lg:block" : ""
+                  }`}
+                >
+                  <p className="text-[9px] tracking-[0.2em] uppercase font-medium mb-1 text-[#6b6158] dark:text-[#a8a29e]">
+                    {label}
+                  </p>
+                  <p
+                    className="text-3xl font-light text-[#0d0d0b] dark:text-[#fbf9f6]"
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
+                    {value}
+                  </p>
                 </div>
               ))}
             </div>
-          )}
 
-          {/* ── Empty state ───────────────────────────────────── */}
-          {!isLoading && sellerProducts.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-32 gap-5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1}
-                stroke="currentColor"
-                className="w-10 h-10"
-                style={{ color: "#d0c5b5" }}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
-                />
-              </svg>
-              <p
-                className="text-[10px] tracking-[0.2em] uppercase"
-                style={{ color: "#6b6158" }}
-              >
-                No listings yet
-              </p>
-              <button
-                onClick={() => navigate("/seller/create-product")}
-                className="mt-1 text-[10px] tracking-[0.18em] uppercase transition-colors duration-200"
-                style={{
-                  color: "#3d342c",
-                  textDecoration: "underline",
-                  textUnderlineOffset: "4px",
-                }}
-                onMouseEnter={(e) => (e.target.style.color = "#C9A96E")}
-                onMouseLeave={(e) => (e.target.style.color = "#3d342c")}
-              >
-                Create your first listing →
-              </button>
-            </div>
-          )}
+            {/* ── Loading skeleton ──────────────────────────────— */}
+            {isLoading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="animate-pulse bg-[#f5f3f0] dark:bg-[#141210] rounded-lg overflow-hidden border border-[#e4e2df] dark:border-[#292522]"
+                  >
+                    <div className="aspect-[4/5] bg-[#e4e2df] dark:bg-[#1f1c19]" />
+                    <div className="p-5 space-y-3">
+                      <div className="h-3 rounded bg-[#e4e2df] dark:bg-[#1f1c19] w-[70%]" />
+                      <div className="h-2.5 rounded bg-[#e4e2df] dark:bg-[#1f1c19] w-[45%]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
-          {/* ── Product grid ──────────────────────────────────── */}
-          {!isLoading && sellerProducts.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sellerProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          )}
-        </main>
+            {/* ── Empty state ───────────────────────────────────── */}
+            {!isLoading && sellerProducts.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-28 gap-4 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1}
+                  stroke="currentColor"
+                  className="w-12 h-12 text-[#C9A96E]"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
+                  />
+                </svg>
+                <p className="text-xs tracking-[0.2em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
+                  No listings yet
+                </p>
+                <button
+                  onClick={() => navigate("/seller/create-product")}
+                  className="mt-1 text-xs tracking-wider uppercase text-[#0d0d0b] dark:text-[#fbf9f6] hover:text-[#C9A96E] dark:hover:text-[#C9A96E] underline underline-offset-4 cursor-pointer bg-transparent border-none"
+                >
+                  Create your first listing →
+                </button>
+              </div>
+            )}
+
+            {/* ── Product grid ──────────────────────────────────── */}
+            {!isLoading && sellerProducts.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {sellerProducts.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            )}
+          </main>
+        </div>
+
+        <LuxurisenFooter />
       </div>
     </>
   );
@@ -286,22 +261,18 @@ const ProductCard = ({ product }) => {
   return (
     <div
       onClick={() => navigate(`/seller/product/${product._id}`)}
-      className="cursor-pointer group flex flex-col transition-shadow duration-300"
-      style={{ backgroundColor: "#f5f3f0" }}
+      className="cursor-pointer group flex flex-col bg-[#f5f3f0] dark:bg-[#141210] border border-[#e4e2df] dark:border-[#292522] rounded-lg overflow-hidden transition-all duration-300 hover:border-[#C9A96E] dark:hover:border-[#C9A96E] hover:shadow-md"
     >
       {/* Image */}
-      <div
-        className="relative aspect-[4/5] overflow-hidden"
-        style={{ backgroundColor: "#e4e2df" }}
-      >
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#e4e2df] dark:bg-[#1f1c19]">
         {images.length > 0 ? (
           <img
             src={images[activeImg]?.url}
             alt={product.title}
-            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center text-[#a8a29e]">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -309,7 +280,6 @@ const ProductCard = ({ product }) => {
               strokeWidth={1}
               stroke="currentColor"
               className="w-10 h-10"
-              style={{ color: "#d0c5b5" }}
             >
               <path
                 strokeLinecap="round"
@@ -322,36 +292,22 @@ const ProductCard = ({ product }) => {
 
         {/* Count badge */}
         {hasMultiple && (
-          <span
-            className="absolute top-3 right-3 text-[9px] tracking-[0.15em] px-2 py-0.5"
-            style={{
-              backgroundColor: "rgba(251,249,246,0.85)",
-              color: "#3d342c",
-            }}
-          >
+          <span className="absolute top-3 right-3 text-[9px] tracking-[0.15em] px-2 py-0.5 bg-black/60 text-white rounded">
             {activeImg + 1} / {images.length}
           </span>
         )}
 
         {/* Hover thumbnail strip */}
         {hasMultiple && (
-          <div
-            className="absolute bottom-0 left-0 right-0 flex gap-1 px-3 pb-3 pt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            style={{
-              background:
-                "linear-gradient(to top, rgba(27,24,20,0.35) 0%, transparent 100%)",
-            }}
-          >
+          <div className="absolute bottom-0 left-0 right-0 flex gap-1 px-3 pb-3 pt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/50 to-transparent">
             {images.map((img, i) => (
               <button
-                key={img._id}
+                key={img._id || i}
                 onMouseEnter={() => setActiveImg(i)}
                 onClick={() => setActiveImg(i)}
-                className="flex-1 h-0.5 transition-all duration-200"
-                style={{
-                  backgroundColor:
-                    i === activeImg ? "#C9A96E" : "rgba(255,255,255,0.45)",
-                }}
+                className={`flex-1 h-0.5 transition-all duration-200 ${
+                  i === activeImg ? "bg-[#C9A96E]" : "bg-white/40"
+                }`}
               />
             ))}
           </div>
@@ -359,48 +315,28 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Info */}
-      <div className="p-5 flex flex-col gap-2 flex-1">
+      <div className="p-4 flex flex-col gap-2 flex-1">
         <div className="flex items-start justify-between gap-3">
           <h2
-            className="text-base font-light leading-snug line-clamp-2 flex-1"
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              color: "#0d0d0b",
-            }}
+            className="text-base font-light leading-snug line-clamp-2 flex-1 text-[#0d0d0b] dark:text-[#fbf9f6]"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
             {product.title}
           </h2>
-          <span
-            className="text-sm font-medium whitespace-nowrap"
-            style={{ color: "#C9A96E" }}
-          >
+          <span className="text-sm font-medium text-[#C9A96E] whitespace-nowrap">
             {fmt(product.price.amount, product.price.currency)}
           </span>
         </div>
 
         {product.description && (
-          <p
-            className="text-xs leading-relaxed line-clamp-2"
-            style={{ color: "#3d342c" }}
-          >
+          <p className="text-xs leading-relaxed line-clamp-2 text-[#3d342c] dark:text-[#a8a29e] font-light">
             {product.description}
           </p>
         )}
 
-        <div
-          className="mt-auto pt-4 flex items-center justify-between border-t"
-          style={{ borderColor: "#e4e2df" }}
-        >
-          <span
-            className="text-[9px] tracking-[0.15em] uppercase"
-            style={{ color: "#6b6158" }}
-          >
-            {timeAgo(product.createdAt)}
-          </span>
-          <span
-            className="text-[9px] tracking-[0.15em] uppercase"
-            style={{ color: "#6b6158" }}
-          >
+        <div className="mt-auto pt-3 flex items-center justify-between border-t border-[#e4e2df] dark:border-[#292522] text-[9px] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
+          <span>{timeAgo(product.createdAt)}</span>
+          <span>
             {images.length} {images.length === 1 ? "photo" : "photos"}
           </span>
         </div>

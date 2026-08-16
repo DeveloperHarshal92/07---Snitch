@@ -23,34 +23,23 @@ const fmt = (amount, currency = "INR") =>
 const StatusBadge = ({ status }) => {
   const s = (status || "pending").toLowerCase();
 
-  let bg = "rgba(201, 169, 110, 0.12)";
-  let text = "#8c6f37";
-  let border = "rgba(201, 169, 110, 0.3)";
-  let label = "Pending";
-
   if (s === "completed") {
-    bg = "rgba(46, 125, 50, 0.08)";
-    text = "#2e7d32";
-    border = "rgba(46, 125, 50, 0.25)";
-    label = "Confirmed ✓";
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 text-[0.55rem] font-medium tracking-[0.14em] uppercase rounded-full border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25">
+        Confirmed ✓
+      </span>
+    );
   } else if (s === "failed") {
-    bg = "rgba(198, 40, 40, 0.08)";
-    text = "#c62828";
-    border = "rgba(198, 40, 40, 0.25)";
-    label = "Failed";
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 text-[0.55rem] font-medium tracking-[0.14em] uppercase rounded-full border bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/25">
+        Failed
+      </span>
+    );
   }
 
   return (
-    <span
-      className="inline-flex items-center px-2.5 py-1 text-[0.55rem] font-medium tracking-[0.14em] uppercase rounded-full border"
-      style={{
-        backgroundColor: bg,
-        color: text,
-        borderColor: border,
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
-      {label}
+    <span className="inline-flex items-center px-2.5 py-1 text-[0.55rem] font-medium tracking-[0.14em] uppercase rounded-full border bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25">
+      Pending
     </span>
   );
 };
@@ -95,7 +84,6 @@ const OrderCard = ({ order, idx }) => {
   const dateText = formatDate(order.createdAt);
   const orderIdText = formatOrderId(order.razorpay?.orderId || order._id);
 
-  // Grab first up to 4 preview thumbnails
   const previewImages = items
     .map((it) => it.images?.[0]?.url)
     .filter(Boolean)
@@ -104,7 +92,7 @@ const OrderCard = ({ order, idx }) => {
   return (
     <div
       onClick={() => navigate(`/orders/${order._id}`)}
-      className="group relative bg-[#ffffff] border border-[#e8e2d8] p-6 sm:p-7 rounded-[3px] cursor-pointer transition-all duration-300 hover:border-[#C9A96E] hover:shadow-[0_10px_30px_rgba(27,24,20,0.06)]"
+      className="group relative bg-white dark:bg-[#141210] border border-[#e8e2d8] dark:border-[#292522] p-6 sm:p-7 rounded-lg cursor-pointer transition-all duration-300 hover:border-[#C9A96E] dark:hover:border-[#C9A96E] hover:shadow-lg shadow-sm"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(16px)",
@@ -112,19 +100,13 @@ const OrderCard = ({ order, idx }) => {
       }}
     >
       {/* Top row: ID, Date, Status */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#f0ede9]">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#f0ede9] dark:border-[#292522]">
         <div className="flex items-center gap-3">
           <div>
-            <span
-              className="text-[0.55rem] tracking-[0.2em] uppercase block text-[#a09890] font-medium"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
+            <span className="text-[0.55rem] tracking-[0.2em] uppercase block text-[#a09890] dark:text-[#78716c] font-medium font-sans">
               Order ID
             </span>
-            <span
-              className="text-[0.8rem] font-medium text-[#1a1410] tracking-[0.03em]"
-              style={{ fontFamily: "'Courier New', monospace" }}
-            >
+            <span className="text-[0.8rem] font-medium text-[#1a1410] dark:text-[#fbf9f6] tracking-[0.03em] font-mono">
               {orderIdText}
             </span>
           </div>
@@ -132,16 +114,10 @@ const OrderCard = ({ order, idx }) => {
 
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <span
-              className="text-[0.55rem] tracking-[0.2em] uppercase block text-[#a09890] font-medium"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
+            <span className="text-[0.55rem] tracking-[0.2em] uppercase block text-[#a09890] dark:text-[#78716c] font-medium font-sans">
               Date Placed
             </span>
-            <span
-              className="text-[0.75rem] font-medium text-[#3d342c]"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
+            <span className="text-[0.75rem] font-medium text-[#3d342c] dark:text-[#d6d3d1] font-sans">
               {dateText}
             </span>
           </div>
@@ -158,7 +134,7 @@ const OrderCard = ({ order, idx }) => {
               {previewImages.map((src, i) => (
                 <div
                   key={i}
-                  className="w-14 h-16 sm:w-16 sm:h-20 bg-[#f0ede9] rounded-[2px] overflow-hidden flex-shrink-0 border border-[#e8e2d8]"
+                  className="w-14 h-16 sm:w-16 sm:h-20 bg-[#f0ede9] dark:bg-[#1f1c19] rounded overflow-hidden flex-shrink-0 border border-[#e8e2d8] dark:border-[#292522]"
                 >
                   <img
                     src={src}
@@ -168,13 +144,13 @@ const OrderCard = ({ order, idx }) => {
                 </div>
               ))}
               {items.length > 4 && (
-                <div className="w-14 h-16 sm:w-16 sm:h-20 bg-[#f5f3f0] border border-[#e8e2d8] rounded-[2px] flex items-center justify-center flex-shrink-0 text-[0.65rem] text-[#6b6158] font-medium">
+                <div className="w-14 h-16 sm:w-16 sm:h-20 bg-[#f5f3f0] dark:bg-[#1c1916] border border-[#e8e2d8] dark:border-[#292522] rounded flex items-center justify-center flex-shrink-0 text-[0.65rem] text-[#6b6158] dark:text-[#a8a29e] font-medium">
                   +{items.length - 4}
                 </div>
               )}
             </div>
           ) : (
-            <div className="w-14 h-16 sm:w-16 sm:h-20 bg-[#f0ede9] rounded-[2px] flex items-center justify-center text-[#a09890]">
+            <div className="w-14 h-16 sm:w-16 sm:h-20 bg-[#f0ede9] dark:bg-[#1f1c19] rounded flex items-center justify-center text-[#a09890]">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -187,16 +163,10 @@ const OrderCard = ({ order, idx }) => {
           )}
 
           <div className="flex flex-col gap-1 min-w-[120px]">
-            <p
-              className="text-[0.72rem] text-[#1a1410] font-medium m-0 line-clamp-1"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
+            <p className="text-xs sm:text-sm text-[#1a1410] dark:text-[#fbf9f6] font-medium m-0 line-clamp-1 font-sans">
               {items[0]?.title || "Purchased Items"}
             </p>
-            <p
-              className="text-[0.65rem] text-[#7a6e65] m-0"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
+            <p className="text-[0.65rem] text-[#7a6e65] dark:text-[#a8a29e] m-0 font-sans">
               {itemCount} {itemCount === 1 ? "item" : "items"} in package
             </p>
           </div>
@@ -205,24 +175,15 @@ const OrderCard = ({ order, idx }) => {
         {/* Total & Action link */}
         <div className="flex items-center gap-6 self-end sm:self-auto">
           <div className="text-right">
-            <span
-              className="text-[0.55rem] tracking-[0.2em] uppercase block text-[#a09890] font-medium"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
+            <span className="text-[0.55rem] tracking-[0.2em] uppercase block text-[#a09890] dark:text-[#78716c] font-medium font-sans">
               Total
             </span>
-            <span
-              className="text-[1.05rem] font-semibold text-[#1a1410]"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
+            <span className="text-base font-semibold text-[#1a1410] dark:text-[#fbf9f6] font-sans">
               {fmt(totalAmount, currency)}
             </span>
           </div>
 
-          <div
-            className="flex items-center gap-1 text-[0.65rem] font-medium tracking-[0.15em] uppercase text-[#1a1410] group-hover:text-[#C9A96E] transition-colors duration-200"
-            style={{ fontFamily: "'Inter', sans-serif" }}
-          >
+          <div className="flex items-center gap-1 text-[0.65rem] font-medium tracking-[0.15em] uppercase text-[#1a1410] dark:text-[#fbf9f6] group-hover:text-[#C9A96E] dark:group-hover:text-[#C9A96E] transition-colors duration-200 font-sans">
             <span>Details</span>
             <svg
               viewBox="0 0 20 20"
@@ -265,36 +226,25 @@ const OrderList = () => {
   return (
     <>
       <FontLink />
-      <div
-        className="min-h-screen flex flex-col justify-between"
-        style={{
-          backgroundColor: "#fbf9f6",
-          fontFamily: "'Inter', sans-serif",
-        }}
-      >
+      <div className="min-h-screen bg-[#fbf9f6] dark:bg-[#0a0908] text-[#0d0d0b] dark:text-[#fbf9f6] transition-colors duration-300 flex flex-col justify-between font-sans">
         <div className="max-w-[1100px] w-full mx-auto px-6 sm:px-8 pt-10 pb-20 flex-1">
           {/* Header section */}
-          <div className="mb-10 pb-6 border-b border-[#e8e2d8]">
+          <div className="mb-10 pb-6 border-b border-[#e8e2d8] dark:border-[#292522]">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p
-                  className="text-[0.6rem] tracking-[0.25em] uppercase font-medium mb-1"
-                  style={{ color: "#C9A96E" }}
-                >
+                <p className="text-[0.6rem] tracking-[0.25em] uppercase font-medium mb-1 text-[#C9A96E]">
                   Client Archive
                 </p>
                 <h1
-                  className="m-0 font-light text-[clamp(2.2rem,5vw,3.5rem)] text-[#0d0d0b] leading-tight"
+                  className="m-0 font-light text-3xl sm:text-5xl text-[#0d0d0b] dark:text-white leading-tight"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}
                 >
                   Order History
                 </h1>
               </div>
-              <p
-                className="text-[0.75rem] text-[#7a6e65] font-light max-w-[340px] leading-relaxed"
-                style={{ fontFamily: "'Inter', sans-serif" }}
-              >
-                Review your acquired pieces, verification records, and delivery tracking.
+              <p className="text-xs text-[#7a6e65] dark:text-[#a8a29e] font-light max-w-[340px] leading-relaxed">
+                Review your acquired pieces, verification records, and delivery
+                tracking.
               </p>
             </div>
           </div>
@@ -305,15 +255,15 @@ const OrderList = () => {
               {[1, 2, 3].map((n) => (
                 <div
                   key={n}
-                  className="bg-white border border-[#e8e2d8] p-6 rounded-[3px] animate-pulse h-36 flex flex-col justify-between"
+                  className="bg-white dark:bg-[#141210] border border-[#e8e2d8] dark:border-[#292522] p-6 rounded-lg animate-pulse h-36 flex flex-col justify-between"
                 >
                   <div className="flex justify-between">
-                    <div className="w-36 h-4 bg-[#f0ede9] rounded" />
-                    <div className="w-20 h-4 bg-[#f0ede9] rounded" />
+                    <div className="w-36 h-4 bg-[#f0ede9] dark:bg-[#1f1c19] rounded" />
+                    <div className="w-20 h-4 bg-[#f0ede9] dark:bg-[#1f1c19] rounded" />
                   </div>
                   <div className="flex gap-3">
-                    <div className="w-14 h-16 bg-[#f0ede9] rounded" />
-                    <div className="w-14 h-16 bg-[#f0ede9] rounded" />
+                    <div className="w-14 h-16 bg-[#f0ede9] dark:bg-[#1f1c19] rounded" />
+                    <div className="w-14 h-16 bg-[#f0ede9] dark:bg-[#1f1c19] rounded" />
                   </div>
                 </div>
               ))}
@@ -322,18 +272,15 @@ const OrderList = () => {
 
           {/* Error banner */}
           {error && !loading && (
-            <div className="p-4 mb-6 bg-red-50/80 border border-red-200 text-red-700 text-xs rounded">
+            <div className="p-4 mb-6 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs rounded">
               {error}
             </div>
           )}
 
           {/* Empty state */}
           {!loading && pageLoaded && orders.length === 0 && (
-            <div className="bg-white border border-[#e8e2d8] rounded-[4px] p-12 sm:p-16 text-center flex flex-col items-center justify-center max-w-[620px] mx-auto shadow-sm">
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center mb-6"
-                style={{ backgroundColor: "rgba(201,169,110,0.1)" }}
-              >
+            <div className="bg-white dark:bg-[#141210] border border-[#e8e2d8] dark:border-[#292522] rounded-lg p-12 sm:p-16 text-center flex flex-col items-center justify-center max-w-[620px] mx-auto shadow-sm">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6 bg-[#C9A96E]/10">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -350,23 +297,20 @@ const OrderList = () => {
               </div>
 
               <h2
-                className="text-2xl sm:text-3xl font-light text-[#0d0d0b] m-0 mb-3"
+                className="text-2xl sm:text-3xl font-light text-[#0d0d0b] dark:text-white m-0 mb-3"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 No Orders Placed Yet
               </h2>
 
-              <p
-                className="text-[0.75rem] text-[#7a6e65] leading-relaxed max-w-[380px] mb-8 font-light"
-                style={{ fontFamily: "'Inter', sans-serif" }}
-              >
-                You have not placed any orders yet. Discover our latest seasonal edits, curated essentials, and signature silhouettes.
+              <p className="text-xs text-[#7a6e65] dark:text-[#a8a29e] leading-relaxed max-w-[380px] mb-8 font-light">
+                You have not placed any orders yet. Discover our latest seasonal
+                edits, curated essentials, and signature silhouettes.
               </p>
 
               <button
                 onClick={() => navigate("/")}
-                className="px-8 py-3.5 text-[0.65rem] tracking-[0.22em] uppercase font-medium bg-[#1a1410] text-[#fbf9f6] border-none cursor-pointer rounded-[2px] transition-all duration-300 hover:bg-[#C9A96E] hover:text-[#0d0d0b]"
-                style={{ fontFamily: "'Inter', sans-serif" }}
+                className="px-8 py-3.5 text-[0.65rem] tracking-[0.22em] uppercase font-semibold bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] rounded-full transition-all duration-300 hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] shadow-sm cursor-pointer"
               >
                 Explore Collection
               </button>

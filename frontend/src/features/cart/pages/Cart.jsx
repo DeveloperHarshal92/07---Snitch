@@ -33,14 +33,11 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
   }, [idx]);
 
   const product = item.product ?? {};
-  /* price = snapshotted price at time of adding to cart (the "display price") */
   const price = item.price ?? product.price ?? { amount: 0, currency: "INR" };
   const quantity = item.quantity ?? 1;
 
-  /* Pick the first image from product images array */
   const thumb = product.images?.[0]?.url ?? null;
 
-  /* Resolve the matched variant (if any) to get correct stock */
   const matchedVariant = item.variant
     ? ((Array.isArray(product.variants)
         ? product.variants
@@ -50,7 +47,6 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
       ).find((v) => v._id === item.variant) ?? null)
     : null;
 
-  /* Variant attributes label */
   const variantAttrs = matchedVariant?.attributes
     ? Object.entries(matchedVariant.attributes)
         .map(([k, v]) => `${k.replace(/_\d+$/, "")}: ${v}`)
@@ -59,26 +55,17 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
       ? "Variant Selected"
       : null;
 
-  /* Stock: prefer variant-level stock, fall back to product-level */
   const stock =
     matchedVariant != null ? (matchedVariant.stock ?? 0) : (product.stock ?? 0);
   const isOutOfStock = stock === 0;
 
-  /* ── Discount / Price-change system ────────────────────────────
-   * Compares:
-   *   cartPrice    = price.amount  (snapshotted when item was added)
-   *   currentPrice = live price from variant/product (what seller set now)
-   *
-   * If currentPrice < cartPrice  → seller lowered price  → show savings
-   * If currentPrice > cartPrice  → seller raised price   → warn user
-   * ─────────────────────────────────────────────────────────────── */
   const cartPrice = price.amount;
   const currentPrice =
     (matchedVariant?.price?.amount != null
       ? matchedVariant.price.amount
       : product.price?.amount) ?? cartPrice;
 
-  const priceDiff = cartPrice - currentPrice; // positive = saving, negative = increase
+  const priceDiff = cartPrice - currentPrice;
   const hasPriceChanged = Math.abs(priceDiff) > 0;
   const isPriceDrop = priceDiff > 0;
   const isPriceHike = priceDiff < 0;
@@ -89,7 +76,6 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
     ? Math.round((Math.abs(priceDiff) / cartPrice) * 100)
     : 0;
 
-  /* Use the live (current) price for line total so totals stay accurate */
   const effectiveUnitPrice = currentPrice;
   const lineTotal = effectiveUnitPrice * quantity;
 
@@ -97,66 +83,36 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        opacity: removing ? 0 : visible ? 1 : 0,
-        transform: removing
-          ? "translateX(-20px)"
+      className={`border-b border-[#e4e2df] dark:border-[#292522] py-7 flex gap-5 items-start transition-all duration-500 ${
+        removing
+          ? "opacity-0 -translate-x-5 pointer-events-none"
           : visible
-            ? "translateY(0)"
-            : "translateY(18px)",
-        transition: removing
-          ? "opacity 0.35s ease, transform 0.35s ease"
-          : `opacity 0.5s ease ${idx * 0.07}s, transform 0.5s ease ${idx * 0.07}s`,
-        borderBottom: "1px solid #e4e2df",
-        padding: "28px 0",
-        display: "flex",
-        gap: "20px",
-        alignItems: "flex-start",
-      }}
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4"
+      }`}
     >
       {/* Product image */}
       <div
         onClick={() => navigate(`/product/${product._id}`)}
-        style={{
-          width: "96px",
-          height: "120px",
-          flexShrink: 0,
-          backgroundColor: "#f0ede9",
-          borderRadius: "2px",
-          overflow: "hidden",
-          cursor: "pointer",
-          position: "relative",
-        }}
+        className="w-24 h-28 flex-shrink-0 bg-[#f0ede9] dark:bg-[#1f1c19] rounded-sm overflow-hidden cursor-pointer relative"
       >
         {thumb ? (
           <img
             src={thumb}
             alt={product.title}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              transition: "transform 0.55s ease",
-              transform: hovered ? "scale(1.06)" : "scale(1)",
-            }}
+            className={`w-full h-full object-cover transition-transform duration-500 ${
+              hovered ? "scale-105" : "scale-100"
+            }`}
           />
         ) : (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <div className="w-full h-full flex items-center justify-center text-[#a8a29e]">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1}
-              stroke="#d0c5b5"
-              style={{ width: 28, height: 28 }}
+              stroke="currentColor"
+              className="w-7 h-7"
             >
               <path
                 strokeLinecap="round"
@@ -169,29 +125,8 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
 
         {/* Out of stock overlay */}
         {isOutOfStock && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundColor: "rgba(251,249,246,0.7)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.5rem",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "#c0392b",
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 500,
-                backgroundColor: "rgba(255,255,255,0.9)",
-                padding: "3px 6px",
-                borderRadius: "1px",
-              }}
-            >
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <span className="text-[0.5rem] tracking-[0.15em] uppercase text-red-400 font-medium bg-black/80 px-2 py-1 rounded">
               Out of Stock
             </span>
           </div>
@@ -199,67 +134,29 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
       </div>
 
       {/* Product details */}
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          display: "flex",
-          flexDirection: "column",
-          gap: "6px",
-        }}
-      >
+      <div className="flex-1 min-w-0 flex flex-col gap-1.5">
         {/* Title */}
         <h3
           onClick={() => navigate(`/product/${product._id}`)}
-          style={{
-            margin: 0,
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "clamp(1rem, 2vw, 1.2rem)",
-            fontWeight: 400,
-            lineHeight: 1.25,
-            color: "#0d0d0b",
-            cursor: "pointer",
-            transition: "color 0.2s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#C9A96E")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#0d0d0b")}
+          className="m-0 text-base md:text-lg font-light text-[#0d0d0b] dark:text-[#fbf9f6] hover:text-[#C9A96E] dark:hover:text-[#C9A96E] cursor-pointer transition-colors leading-snug truncate"
+          style={{ fontFamily: "'Cormorant Garamond', serif" }}
         >
           {product.title ?? "—"}
         </h3>
 
         {/* Variant */}
         {variantAttrs && (
-          <p
-            style={{
-              margin: 0,
-              fontSize: "0.6rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              color: "#6b6158",
-              fontFamily: "'Inter', sans-serif",
-            }}
-          >
+          <p className="m-0 text-[0.6rem] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
             {variantAttrs}
           </p>
         )}
 
         {/* Stock badge */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            marginTop: "2px",
-          }}
-        >
+        <div className="flex items-center gap-2 mt-0.5">
           <span
-            style={{
-              fontSize: "0.55rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              fontFamily: "'Inter', sans-serif",
-              color: isOutOfStock ? "#c0392b" : "#4a7c59",
-            }}
+            className={`text-[0.55rem] tracking-[0.15em] uppercase font-medium ${
+              isOutOfStock ? "text-red-500" : "text-emerald-600 dark:text-emerald-400"
+            }`}
           >
             {isOutOfStock ? "Out of stock" : `${stock} in stock`}
           </span>
@@ -268,49 +165,24 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
           {["Authentic", "Easy Returns"].map((tag) => (
             <span
               key={tag}
-              style={{
-                fontSize: "0.5rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                padding: "2px 6px",
-                borderRadius: "1px",
-                backgroundColor: "#f0ede9",
-                color: "#6b6158",
-                fontFamily: "'Inter', sans-serif",
-              }}
+              className="text-[0.5rem] tracking-[0.12em] uppercase px-1.5 py-0.5 rounded bg-[#f0ede9] dark:bg-[#1c1916] text-[#6b6158] dark:text-[#a8a29e] border border-transparent dark:border-[#292522]"
             >
               {tag}
             </span>
           ))}
         </div>
 
-        {/* ── Discount badge (price dropped) ── */}
+        {/* ── Discount badge ── */}
         {isPriceDrop && (
-          <div style={{ marginTop: "4px" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                backgroundColor: "rgba(74, 124, 89, 0.1)",
-                color: "#4a7c59",
-                fontSize: "0.5rem",
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                padding: "3px 8px",
-                borderRadius: "2px",
-                border: "1px solid rgba(74,124,89,0.25)",
-              }}
-            >
+          <div className="mt-1">
+            <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[0.5rem] font-semibold tracking-wider uppercase px-2 py-0.5 rounded border border-emerald-500/20">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={2}
                 stroke="currentColor"
-                style={{ width: 10, height: 10 }}
+                className="w-2.5 h-2.5"
               >
                 <path
                   strokeLinecap="round"
@@ -329,36 +201,13 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
         )}
 
         {/* Qty row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            marginTop: "8px",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "0.6rem",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "#6b6158",
-              fontFamily: "'Inter', sans-serif",
-            }}
-          >
+        <div className="flex items-center gap-2.5 mt-2">
+          <span className="text-[0.6rem] tracking-[0.18em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
             Qty
           </span>
 
           {/* Stepper */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              border: "1px solid #e4e2df",
-              borderRadius: "2px",
-              overflow: "hidden",
-            }}
-          >
+          <div className="flex items-center border border-[#e4e2df] dark:border-[#292522] rounded overflow-hidden">
             {/* Decrease */}
             <button
               id={`qty-dec-${item._id}`}
@@ -369,51 +218,17 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
                 )
               }
               disabled={quantity <= 1}
-              style={{
-                width: "32px",
-                height: "32px",
-                border: "none",
-                borderRight: "1px solid #e4e2df",
-                backgroundColor: quantity <= 1 ? "#f5f3f0" : "#fbf9f6",
-                cursor: quantity <= 1 ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: quantity <= 1 ? "#c4bdb5" : "#3d342c",
-                fontSize: "1rem",
-                fontWeight: 300,
-                transition: "background-color 0.15s, color 0.15s",
-                flexShrink: 0,
-              }}
-              onMouseEnter={(e) => {
-                if (quantity > 1)
-                  e.currentTarget.style.backgroundColor = "#f0ede9";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  quantity <= 1 ? "#f5f3f0" : "#fbf9f6";
-              }}
+              className={`w-7 h-7 flex items-center justify-center border-r border-[#e4e2df] dark:border-[#292522] text-sm cursor-pointer transition-colors ${
+                quantity <= 1
+                  ? "bg-[#f5f3f0] dark:bg-[#161412] text-[#a8a29e] cursor-not-allowed"
+                  : "bg-[#fbf9f6] dark:bg-[#1f1c19] text-[#0d0d0b] dark:text-[#fbf9f6] hover:bg-[#e4e2df] dark:hover:bg-[#292522]"
+              }`}
             >
               −
             </button>
 
             {/* Count */}
-            <span
-              style={{
-                padding: "0 16px",
-                fontSize: "0.8rem",
-                fontFamily: "'Inter', sans-serif",
-                color: "#0d0d0b",
-                fontWeight: 500,
-                backgroundColor: "#f5f3f0",
-                height: "32px",
-                display: "flex",
-                alignItems: "center",
-                minWidth: "36px",
-                justifyContent: "center",
-                userSelect: "none",
-              }}
-            >
+            <span className="px-3 text-xs font-medium text-[#0d0d0b] dark:text-[#fbf9f6] bg-[#f5f3f0] dark:bg-[#161412] h-7 flex items-center justify-center min-w-[32px] select-none">
               {quantity}
             </span>
 
@@ -427,32 +242,11 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
                 )
               }
               disabled={stock > 0 && quantity >= stock}
-              style={{
-                width: "32px",
-                height: "32px",
-                border: "none",
-                borderLeft: "1px solid #e4e2df",
-                backgroundColor:
-                  stock > 0 && quantity >= stock ? "#f5f3f0" : "#fbf9f6",
-                cursor:
-                  stock > 0 && quantity >= stock ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: stock > 0 && quantity >= stock ? "#c4bdb5" : "#3d342c",
-                fontSize: "1rem",
-                fontWeight: 300,
-                transition: "background-color 0.15s, color 0.15s",
-                flexShrink: 0,
-              }}
-              onMouseEnter={(e) => {
-                if (!(stock > 0 && quantity >= stock))
-                  e.currentTarget.style.backgroundColor = "#f0ede9";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  stock > 0 && quantity >= stock ? "#f5f3f0" : "#fbf9f6";
-              }}
+              className={`w-7 h-7 flex items-center justify-center border-l border-[#e4e2df] dark:border-[#292522] text-sm cursor-pointer transition-colors ${
+                stock > 0 && quantity >= stock
+                  ? "bg-[#f5f3f0] dark:bg-[#161412] text-[#a8a29e] cursor-not-allowed"
+                  : "bg-[#fbf9f6] dark:bg-[#1f1c19] text-[#0d0d0b] dark:text-[#fbf9f6] hover:bg-[#e4e2df] dark:hover:bg-[#292522]"
+              }`}
             >
               +
             </button>
@@ -460,14 +254,7 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
 
           {/* Max stock hint */}
           {stock > 0 && stock <= 5 && (
-            <span
-              style={{
-                fontSize: "0.55rem",
-                letterSpacing: "0.1em",
-                color: "#b7791f",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
+            <span className="text-[0.55rem] tracking-wider text-amber-600 dark:text-amber-400">
               Only {stock} left
             </span>
           )}
@@ -475,78 +262,26 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
       </div>
 
       {/* Price + remove */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          gap: "8px",
-          flexShrink: 0,
-        }}
-      >
-        {/* ── Price hike badge ── */}
+      <div className="flex flex-col items-flex-end text-right gap-2 flex-shrink-0">
+        {/* Price hike badge */}
         {isPriceHike && (
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-              backgroundColor: "rgba(192, 57, 43, 0.08)",
-              color: "#c0392b",
-              fontSize: "0.5rem",
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              padding: "3px 8px",
-              borderRadius: "2px",
-              border: "1px solid rgba(192,57,43,0.2)",
-            }}
-          >
-            {/* Up arrow */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-              stroke="currentColor"
-              style={{ width: 9, height: 9 }}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.5 15.75l7.5-7.5 7.5 7.5"
-              />
-            </svg>
+          <span className="inline-flex items-center gap-1 bg-red-500/10 text-red-500 text-[0.5rem] font-semibold tracking-wider uppercase px-2 py-0.5 rounded border border-red-500/20">
             Price up {hikePct}%
           </span>
         )}
 
-        {/* ── Line total (current price) ── */}
+        {/* Line total */}
         <span
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: 500,
-            color: isPriceHike ? "#c0392b" : "#C9A96E",
-            fontFamily: "'Inter', sans-serif",
-            letterSpacing: "0.01em",
-            transition: "color 0.3s",
-          }}
+          className={`text-base md:text-lg font-medium ${
+            isPriceHike ? "text-red-500" : "text-[#C9A96E]"
+          }`}
         >
           {fmt(lineTotal, price.currency)}
         </span>
 
-        {/* ── Strikethrough original (snapshotted) price if changed ── */}
+        {/* Strikethrough original price if changed */}
         {hasPriceChanged && (
-          <span
-            style={{
-              fontSize: "0.65rem",
-              color: "#a89e94",
-              fontFamily: "'Inter', sans-serif",
-              letterSpacing: "0.05em",
-              textDecoration: "line-through",
-            }}
-          >
+          <span className="text-[0.65rem] text-[#a89e94] line-through tracking-wider">
             {fmt(cartPrice * quantity, price.currency)}
           </span>
         )}
@@ -558,26 +293,7 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
             onRemove({ productId: product._id, variantId: item.variant })
           }
           disabled={removing}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: removing ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            color: "#6b6158",
-            fontSize: "0.55rem",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            fontFamily: "'Inter', sans-serif",
-            padding: 0,
-            opacity: removing ? 0.4 : 1,
-            transition: "color 0.2s, opacity 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            if (!removing) e.currentTarget.style.color = "#c0392b";
-          }}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#6b6158")}
+          className="bg-transparent border-none cursor-pointer flex items-center gap-1 text-[#6b6158] dark:text-[#a8a29e] hover:text-red-500 dark:hover:text-red-400 text-[0.55rem] tracking-[0.18em] uppercase transition-colors p-0"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -585,7 +301,7 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            style={{ width: 13, height: 13 }}
+            className="w-3.5 h-3.5"
           >
             <path
               strokeLinecap="round"
@@ -604,15 +320,19 @@ const CartItemRow = ({ item, idx, onRemove, removing, onQtyChange }) => {
 const OrderSummary = ({ cart, visible }) => {
   const cartItems = cart?.items || [];
   const navigate = useNavigate();
-  const { error, isLoading , Razorpay } = useRazorpay();
+  const { error, isLoading, Razorpay } = useRazorpay();
   const [couponCode, setCouponCode] = useState("");
   const [isCouponApplied, setIsCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponError, setCouponError] = useState("");
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
-  const {user} = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
-  const { handleCreateCartOrder, handleVerifyCartOrder, handleValidateCoupon } = useCart();
+  const {
+    handleCreateCartOrder,
+    handleVerifyCartOrder,
+    handleValidateCoupon,
+  } = useCart();
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -634,7 +354,9 @@ const OrderSummary = ({ cart, visible }) => {
       setIsCouponApplied(false);
       setCouponDiscount(0);
       setCouponError(
-        err?.response?.data?.message || err.message || "Failed to validate coupon"
+        err?.response?.data?.message ||
+          err.message ||
+          "Failed to validate coupon"
       );
     } finally {
       setIsValidatingCoupon(false);
@@ -650,7 +372,6 @@ const OrderSummary = ({ cart, visible }) => {
 
   const subtotal = cart?.totalPrice || 0;
 
-  // Re-verify coupon discount if subtotal changes
   useEffect(() => {
     if (isCouponApplied && couponCode) {
       handleValidateCoupon(couponCode)
@@ -661,7 +382,9 @@ const OrderSummary = ({ cart, visible }) => {
           } else {
             setIsCouponApplied(false);
             setCouponDiscount(0);
-            setCouponError(res.message || "Coupon no longer valid for updated cart");
+            setCouponError(
+              res.message || "Coupon no longer valid for updated cart"
+            );
           }
         })
         .catch(() => {
@@ -671,7 +394,6 @@ const OrderSummary = ({ cart, visible }) => {
     }
   }, [subtotal]);
 
-  /* Total savings = sum of (cartPrice - currentPrice) * qty for items where price dropped */
   const totalSavings = cartItems.reduce((acc, item) => {
     const product = item.product ?? {};
     const matchedVariant = item.variant
@@ -703,31 +425,38 @@ const OrderSummary = ({ cart, visible }) => {
   const shipping = shippingFree ? 0 : 99;
 
   const total = Math.max(0, subtotal + shipping - couponDiscount);
-
   const progressPct = Math.min((subtotal / shippingThreshold) * 100, 100);
 
   const handleCheckout = async () => {
-    const codeToSend = isCouponApplied ? couponCode.trim().toUpperCase() : undefined;
+    const codeToSend = isCouponApplied
+      ? couponCode.trim().toUpperCase()
+      : undefined;
     const response = await handleCreateCartOrder(codeToSend);
-    console.log(response);
 
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: response.order.amount, // Server-calculated amount in paise
+      amount: response.order.amount,
       currency: response.order.currency,
       name: "LUXURISEN",
       description: "Test Transaction",
-      order_id: response.order.id, // Server-generated order ID
+      order_id: response.order.id,
       handler: async (response) => {
         const isValid = await handleVerifyCartOrder(response);
-        if(isValid) {
+        if (isValid) {
           navigate(`/orders-success?order_id=${response.razorpay_order_id}`, {
             state: {
               cartItems,
-              summary: { subtotal, total, couponDiscount, shipping, currency, totalSavings }
-            }
+              summary: {
+                subtotal,
+                total,
+                couponDiscount,
+                shipping,
+                currency,
+                totalSavings,
+              },
+            },
           });
-        } 
+        }
       },
       prefill: {
         name: user?.fullname,
@@ -735,7 +464,7 @@ const OrderSummary = ({ cart, visible }) => {
         contact: user?.contact,
       },
       theme: {
-        color: "#F37254",
+        color: "#C9A96E",
       },
     };
 
@@ -745,102 +474,43 @@ const OrderSummary = ({ cart, visible }) => {
 
   return (
     <aside
-      style={{
-        width: "320px",
-        flexShrink: 0,
-        alignSelf: "flex-start",
-        position: "sticky",
-        top: "88px",
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(20px)",
-        transition: "opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s",
-      }}
+      className={`w-full lg:w-[340px] flex-shrink-0 self-start lg:sticky lg:top-[88px] transition-all duration-500 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+      }`}
     >
-      <div
-        style={{
-          border: "1px solid #e4e2df",
-          borderRadius: "2px",
-          padding: "28px",
-          backgroundColor: "#fbf9f6",
-        }}
-      >
+      <div className="border border-[#e4e2df] dark:border-[#292522] rounded-lg p-6 sm:p-7 bg-[#fbf9f6] dark:bg-[#141210] shadow-sm">
         {/* Title */}
-        <p
-          style={{
-            margin: "0 0 24px",
-            fontSize: "0.6rem",
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: "#6b6158",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+        <p className="m-0 mb-6 text-[0.6rem] tracking-[0.28em] uppercase text-[#6b6158] dark:text-[#a8a29e] font-medium">
           Order Summary
         </p>
 
         {/* Free shipping progress */}
         {!shippingFree && (
-          <div style={{ marginBottom: "24px" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "8px",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.55rem",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: "#6b6158",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
+          <div className="mb-6">
+            <div className="flex justify-between mb-2">
+              <span className="text-[0.55rem] tracking-[0.12em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
                 Add {fmt(shippingThreshold - subtotal, currency)} for free
                 shipping
               </span>
             </div>
-            <div
-              style={{
-                height: "2px",
-                backgroundColor: "#e4e2df",
-                borderRadius: "1px",
-                overflow: "hidden",
-              }}
-            >
+            <div className="h-1 bg-[#e4e2df] dark:bg-[#292522] rounded-full overflow-hidden">
               <div
-                style={{
-                  height: "100%",
-                  width: `${progressPct}%`,
-                  backgroundColor: "#C9A96E",
-                  borderRadius: "1px",
-                  transition: "width 0.6s ease",
-                }}
+                style={{ width: `${progressPct}%` }}
+                className="h-full bg-[#C9A96E] rounded-full transition-all duration-500"
               />
             </div>
           </div>
         )}
 
         {shippingFree && (
-          <div
-            style={{
-              marginBottom: "20px",
-              padding: "10px 12px",
-              backgroundColor: "rgba(74,124,89,0.08)",
-              borderRadius: "2px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
+          <div className="mb-5 p-2.5 bg-emerald-500/10 dark:bg-emerald-500/15 rounded flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
-              stroke="#4a7c59"
-              style={{ width: 14, height: 14, flexShrink: 0 }}
+              stroke="currentColor"
+              className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0"
             >
               <path
                 strokeLinecap="round"
@@ -848,202 +518,86 @@ const OrderSummary = ({ cart, visible }) => {
                 d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
               />
             </svg>
-            <span
-              style={{
-                fontSize: "0.55rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "#4a7c59",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              You've unlocked free shipping!
+            <span className="text-[0.55rem] tracking-[0.12em] uppercase text-emerald-600 dark:text-emerald-400 font-medium">
+              You&apos;ve unlocked free shipping!
             </span>
           </div>
         )}
 
         {/* Line items */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.65rem",
-                letterSpacing: "0.08em",
-                color: "#3d342c",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
+        <div className="flex flex-col gap-3.5">
+          <div className="flex justify-between items-start">
+            <span className="text-[0.65rem] tracking-[0.08em] text-[#3d342c] dark:text-[#d6d3d1]">
               Subtotal ({cartItems.length}{" "}
               {cartItems.length === 1 ? "item" : "items"})
             </span>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end",
-                gap: "2px",
-              }}
-            >
+            <div className="flex flex-col items-end gap-0.5">
               {hasSavings && (
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: "gray",
-                    textDecoration: "line-through",
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                >
+                <span className="text-[11px] text-[#a8a29e] line-through">
                   {fmt(subtotal + totalSavings, currency)}
                 </span>
               )}
-              <span
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "black",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
+              <span className="text-sm font-semibold text-[#0d0d0b] dark:text-[#fbf9f6]">
                 {fmt(subtotal, currency)}
               </span>
               {hasSavings && (
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: "#4a7c59",
-                    fontFamily: "'Inter', sans-serif",
-                    marginTop: "2px",
-                  }}
-                >
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
                   ✓ Saving {fmt(totalSavings, currency)}
                 </span>
               )}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.65rem",
-                letterSpacing: "0.08em",
-                color: "#3d342c",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
+          <div className="flex justify-between items-center">
+            <span className="text-[0.65rem] tracking-[0.08em] text-[#3d342c] dark:text-[#d6d3d1]">
               Shipping
             </span>
             <span
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: shippingFree ? 400 : 500,
-                color: shippingFree ? "#4a7c59" : "#0d0d0b",
-                fontFamily: "'Inter', sans-serif",
-              }}
+              className={`text-xs ${
+                shippingFree
+                  ? "text-emerald-600 dark:text-emerald-400 font-normal"
+                  : "text-[#0d0d0b] dark:text-[#fbf9f6] font-medium"
+              }`}
             >
               {shippingFree ? "Free" : fmt(shipping, currency)}
             </span>
           </div>
 
           {/* Divider */}
-          <div style={{ borderTop: "1px solid #e4e2df", margin: "4px 0" }} />
+          <div className="border-t border-[#e4e2df] dark:border-[#292522] my-1" />
 
-          {/* Promo Code Input Section (Moved Above Total) */}
-          <div style={{ margin: "4px 0" }}>
-            <p
-              style={{
-                margin: "0 0 12px",
-                fontSize: "11px",
-                letterSpacing: "0.4px",
-                textTransform: "uppercase",
-                color: "gray",
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 500,
-              }}
-            >
+          {/* Promo Code Input Section */}
+          <div className="my-1">
+            <p className="m-0 mb-2 text-[0.6rem] tracking-wider uppercase text-[#6b6158] dark:text-[#a8a29e] font-medium">
               Have a promo code?
             </p>
             {!isCouponApplied ? (
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Enter code (e.g., LUX10)"
+                  placeholder="Enter code (e.g. LUX10)"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  style={{
-                    flex: 1,
-                    padding: "10px 12px",
-                    fontSize: "0.75rem",
-                    fontFamily: "'Inter', sans-serif",
-                    border: `1px solid ${couponError ? "#c0392b" : "#e4e2df"}`,
-                    borderRadius: "2px",
-                    outline: "none",
-                    backgroundColor: "#fff",
-                  }}
+                  className="flex-1 px-3 py-2 text-xs bg-white dark:bg-[#1a1715] border border-[#e4e2df] dark:border-[#292522] rounded text-[#0d0d0b] dark:text-[#fbf9f6] outline-none focus:border-[#C9A96E]"
                 />
                 <button
                   onClick={handleApplyCoupon}
                   disabled={isValidatingCoupon || !couponCode.trim()}
-                  style={{
-                    padding: "0 20px",
-                    backgroundColor: isValidatingCoupon || !couponCode.trim() ? "#8a8179" : "#3d342c",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "2px",
-                    cursor: isValidatingCoupon || !couponCode.trim() ? "not-allowed" : "pointer",
-                    fontSize: "0.65rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    fontFamily: "'Inter', sans-serif",
-                    transition: "background-color 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isValidatingCoupon && couponCode.trim()) {
-                      e.currentTarget.style.backgroundColor = "#0d0d0b";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isValidatingCoupon && couponCode.trim()) {
-                      e.currentTarget.style.backgroundColor = "#3d342c";
-                    }
-                  }}
+                  className="px-4 py-2 bg-[#3d342c] dark:bg-[#2a2622] hover:bg-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] text-white text-[0.62rem] tracking-wider uppercase font-medium rounded transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isValidatingCoupon ? "Checking..." : "Apply"}
+                  {isValidatingCoupon ? "..." : "Apply"}
                 </button>
               </div>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "10px 12px",
-                  backgroundColor: "rgba(74, 124, 89, 0.08)",
-                  border: "1px dashed rgba(74, 124, 89, 0.4)",
-                  borderRadius: "2px",
-                }}
-              >
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                >
+              <div className="flex items-center justify-between p-2.5 bg-emerald-500/10 dark:bg-emerald-500/15 border border-dashed border-emerald-500/30 rounded">
+                <div className="flex items-center gap-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth={2}
-                    stroke="#4a7c59"
-                    style={{ width: 14, height: 14 }}
+                    stroke="currentColor"
+                    className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
                   >
                     <path
                       strokeLinecap="round"
@@ -1051,44 +605,20 @@ const OrderSummary = ({ cart, visible }) => {
                       d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                     />
                   </svg>
-                  <span
-                    style={{
-                      fontSize: "0.7rem",
-                      fontFamily: "'Inter', sans-serif",
-                      color: "#4a7c59",
-                      fontWeight: 500,
-                      letterSpacing: "0.05em",
-                    }}
-                  >
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                     {couponCode} Applied
                   </span>
                 </div>
                 <button
                   onClick={removeCoupon}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    fontSize: "0.6rem",
-                    color: "#6b6158",
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                    fontFamily: "'Inter', sans-serif",
-                  }}
+                  className="bg-transparent border-none p-0 text-[0.6rem] text-[#6b6158] dark:text-[#a8a29e] hover:text-red-500 underline cursor-pointer"
                 >
                   Remove
                 </button>
               </div>
             )}
             {couponError && (
-              <p
-                style={{
-                  margin: "6px 0 0",
-                  fontSize: "0.6rem",
-                  color: "#c0392b",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
+              <p className="m-0 mt-1.5 text-xs text-red-500">
                 {couponError}
               </p>
             )}
@@ -1096,80 +626,29 @@ const OrderSummary = ({ cart, visible }) => {
 
           {/* Coupon Discount Row (if applied) */}
           {isCouponApplied && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.65rem",
-                  letterSpacing: "0.08em",
-                  color: "#4a7c59",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
+            <div className="flex justify-between items-center">
+              <span className="text-[0.65rem] tracking-[0.08em] text-emerald-600 dark:text-emerald-400">
                 Coupon ({couponCode})
               </span>
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 500,
-                  color: "#4a7c59",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 -{fmt(couponDiscount, currency)}
               </span>
             </div>
           )}
 
           {/* Divider */}
-          <div style={{ borderTop: "1px solid #e4e2df", margin: "4px 0" }} />
+          <div className="border-t border-[#e4e2df] dark:border-[#292522] my-1" />
 
           {/* Total */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.7rem",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#0d0d0b",
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 500,
-              }}
-            >
+          <div className="flex justify-between items-center">
+            <span className="text-[0.7rem] tracking-[0.18em] uppercase text-[#0d0d0b] dark:text-[#fbf9f6] font-semibold">
               Total
             </span>
-            <span
-              style={{
-                fontSize: "1.1rem",
-                fontWeight: 600,
-                color: "#C9A96E",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
+            <span className="text-lg font-semibold text-[#C9A96E]">
               {fmt(total, currency)}
             </span>
           </div>
-          <p
-            style={{
-              margin: "-6px 0 0",
-              fontSize: "0.55rem",
-              letterSpacing: "0.1em",
-              color: "#6b6158",
-              fontFamily: "'Inter', sans-serif",
-              textAlign: "right",
-            }}
-          >
+          <p className="m-0 -mt-1.5 text-[0.55rem] tracking-[0.1em] text-[#6b6158] dark:text-[#a8a29e] text-right">
             incl. of all taxes
           </p>
         </div>
@@ -1177,36 +656,8 @@ const OrderSummary = ({ cart, visible }) => {
         {/* Checkout button */}
         <button
           id="btn-checkout"
-          className="cart-checkout-btn"
-          style={{
-            marginTop: "24px",
-            width: "100%",
-            padding: "16px",
-            backgroundColor: "#0d0d0b",
-            color: "#fbf9f6",
-            border: "none",
-            borderRadius: "2px",
-            cursor: "pointer",
-            fontSize: "0.65rem",
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 500,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            transition: "background-color 0.3s, color 0.3s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#C9A96E";
-            e.currentTarget.style.color = "#0d0d0b";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#0d0d0b";
-            e.currentTarget.style.color = "#fbf9f6";
-          }}
           onClick={handleCheckout}
+          className="mt-6 w-full py-4 rounded-full bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] text-[0.65rem] tracking-[0.22em] uppercase font-semibold hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -1214,35 +665,24 @@ const OrderSummary = ({ cart, visible }) => {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            style={{ width: 15, height: 15 }}
+            className="w-4 h-4"
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+              d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25Z"
             />
           </svg>
           Proceed to Checkout
         </button>
 
         {/* Test Mode Disclaimer */}
-        <div
-          style={{
-            marginTop: "10px",
-            padding: "8px 12px",
-            backgroundColor: "#fef3c7",
-            border: "1px solid #fde68a",
-            borderRadius: "2px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
+        <div className="mt-3 p-2 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 rounded flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
-            fill="#b45309"
-            style={{ width: 15, height: 15, flexShrink: 0 }}
+            fill="currentColor"
+            className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0"
           >
             <path
               fillRule="evenodd"
@@ -1250,15 +690,7 @@ const OrderSummary = ({ cart, visible }) => {
               clipRule="evenodd"
             />
           </svg>
-          <span
-            style={{
-              fontSize: "0.65rem",
-              color: "#92400e",
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: 500,
-              lineHeight: 1.3,
-            }}
-          >
+          <span className="text-[0.62rem] text-amber-700 dark:text-amber-300 font-medium">
             Test Mode Only. Do not enter real payment details.
           </span>
         </div>
@@ -1266,44 +698,13 @@ const OrderSummary = ({ cart, visible }) => {
         {/* Continue shopping */}
         <button
           onClick={() => navigate("/")}
-          style={{
-            marginTop: "12px",
-            width: "100%",
-            padding: "12px",
-            backgroundColor: "transparent",
-            color: "#3d342c",
-            border: "1px solid #e4e2df",
-            borderRadius: "2px",
-            cursor: "pointer",
-            fontSize: "0.6rem",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            fontFamily: "'Inter', sans-serif",
-            transition: "border-color 0.2s, color 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = "#3d342c";
-            e.currentTarget.style.color = "#0d0d0b";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = "#e4e2df";
-            e.currentTarget.style.color = "#3d342c";
-          }}
+          className="mt-3 w-full py-3 bg-transparent text-[#3d342c] dark:text-[#d6d3d1] border border-[#e4e2df] dark:border-[#292522] rounded-full hover:border-[#0d0d0b] dark:hover:border-white hover:text-[#0d0d0b] dark:hover:text-white transition-all text-[0.62rem] tracking-[0.18em] uppercase font-medium cursor-pointer"
         >
           Continue Shopping
         </button>
 
         {/* Trust badges */}
-        <div
-          style={{
-            marginTop: "20px",
-            paddingTop: "20px",
-            borderTop: "1px solid #e4e2df",
-            display: "flex",
-            justifyContent: "center",
-            gap: "20px",
-          }}
-        >
+        <div className="mt-5 pt-4 border-t border-[#e4e2df] dark:border-[#292522] flex justify-center gap-5 text-[#6b6158] dark:text-[#a8a29e]">
           {[
             {
               icon: (
@@ -1313,7 +714,7 @@ const OrderSummary = ({ cart, visible }) => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  style={{ width: 14, height: 14 }}
+                  className="w-3.5 h-3.5"
                 >
                   <path
                     strokeLinecap="round"
@@ -1332,7 +733,7 @@ const OrderSummary = ({ cart, visible }) => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  style={{ width: 14, height: 14 }}
+                  className="w-3.5 h-3.5"
                 >
                   <path
                     strokeLinecap="round"
@@ -1351,7 +752,7 @@ const OrderSummary = ({ cart, visible }) => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  style={{ width: 14, height: 14 }}
+                  className="w-3.5 h-3.5"
                 >
                   <path
                     strokeLinecap="round"
@@ -1365,25 +766,10 @@ const OrderSummary = ({ cart, visible }) => {
           ].map(({ icon, label }) => (
             <div
               key={label}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "5px",
-                color: "#6b6158",
-              }}
+              className="flex flex-col items-center gap-1 text-[0.5rem] tracking-[0.12em] uppercase font-sans"
             >
               {icon}
-              <span
-                style={{
-                  fontSize: "0.5rem",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
-                {label}
-              </span>
+              <span>{label}</span>
             </div>
           ))}
         </div>
@@ -1394,134 +780,27 @@ const OrderSummary = ({ cart, visible }) => {
 
 /* ── Loading Skeleton ─────────────────────────────────────────── */
 const LoadingSkeleton = () => (
-  <div
-    className="max-w-[1200px] mx-auto px-6 lg:px-12 py-12"
-    style={{ display: "flex", gap: "48px", alignItems: "flex-start" }}
-  >
-    {/* Cart items skeleton */}
-    <div
-      style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0" }}
-    >
+  <div className="max-w-[1200px] mx-auto px-6 lg:px-12 py-12 flex gap-12 items-start">
+    <div className="flex-1 flex flex-col gap-0">
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          style={{
-            display: "flex",
-            gap: "20px",
-            padding: "28px 0",
-            borderBottom: "1px solid #e4e2df",
-          }}
+          className="flex gap-5 py-7 border-b border-[#e4e2df] dark:border-[#292522] animate-pulse"
         >
-          <div
-            className="animate-pulse"
-            style={{
-              width: "96px",
-              height: "120px",
-              flexShrink: 0,
-              backgroundColor: "#e4e2df",
-              borderRadius: "2px",
-            }}
-          />
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: "10px",
-              paddingTop: "4px",
-            }}
-          >
-            <div
-              className="animate-pulse"
-              style={{
-                height: "18px",
-                width: "60%",
-                backgroundColor: "#e4e2df",
-                borderRadius: "2px",
-              }}
-            />
-            <div
-              className="animate-pulse"
-              style={{
-                height: "10px",
-                width: "30%",
-                backgroundColor: "#e4e2df",
-                borderRadius: "2px",
-              }}
-            />
-            <div
-              className="animate-pulse"
-              style={{
-                height: "10px",
-                width: "20%",
-                backgroundColor: "#e4e2df",
-                borderRadius: "2px",
-                marginTop: "8px",
-              }}
-            />
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: "12px",
-            }}
-          >
-            <div
-              className="animate-pulse"
-              style={{
-                height: "22px",
-                width: "80px",
-                backgroundColor: "#e4e2df",
-                borderRadius: "2px",
-              }}
-            />
-            <div
-              className="animate-pulse"
-              style={{
-                height: "10px",
-                width: "50px",
-                backgroundColor: "#e4e2df",
-                borderRadius: "2px",
-              }}
-            />
+          <div className="w-24 h-28 bg-[#e4e2df] dark:bg-[#1f1c19] rounded" />
+          <div className="flex-1 flex flex-col gap-2.5">
+            <div className="h-4 w-48 bg-[#e4e2df] dark:bg-[#1f1c19] rounded" />
+            <div className="h-3 w-28 bg-[#e4e2df] dark:bg-[#1f1c19] rounded" />
+            <div className="h-3 w-16 bg-[#e4e2df] dark:bg-[#1f1c19] rounded" />
           </div>
         </div>
       ))}
     </div>
-    {/* Summary skeleton */}
-    <div style={{ width: "320px", flexShrink: 0 }}>
-      <div
-        style={{
-          border: "1px solid #e4e2df",
-          borderRadius: "2px",
-          padding: "28px",
-        }}
-      >
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="animate-pulse"
-            style={{
-              height: i === 3 ? "1px" : "14px",
-              width: i === 0 ? "50%" : "100%",
-              backgroundColor: i === 3 ? "#e4e2df" : "#e4e2df",
-              borderRadius: "2px",
-              marginBottom: "16px",
-            }}
-          />
-        ))}
-        <div
-          className="animate-pulse"
-          style={{
-            height: "48px",
-            width: "100%",
-            backgroundColor: "#e4e2df",
-            borderRadius: "2px",
-          }}
-        />
-      </div>
+    <div className="hidden lg:block w-[340px] p-7 border border-[#e4e2df] dark:border-[#292522] rounded-lg bg-[#fbf9f6] dark:bg-[#141210] animate-pulse">
+      <div className="h-4 w-32 bg-[#e4e2df] dark:bg-[#1f1c19] rounded mb-6" />
+      <div className="h-3 w-full bg-[#e4e2df] dark:bg-[#1f1c19] rounded mb-4" />
+      <div className="h-3 w-full bg-[#e4e2df] dark:bg-[#1f1c19] rounded mb-4" />
+      <div className="h-10 w-full bg-[#e4e2df] dark:bg-[#1f1c19] rounded mt-6" />
     </div>
   </div>
 );
@@ -1536,18 +815,9 @@ const EmptyCart = ({ navigate }) => {
 
   return (
     <div
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "96px 24px",
-        gap: "20px",
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(24px)",
-        transition: "opacity 0.6s ease, transform 0.6s ease",
-      }}
+      className={`flex-1 flex flex-col items-center justify-center py-24 px-6 gap-5 transition-all duration-500 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      }`}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -1555,7 +825,7 @@ const EmptyCart = ({ navigate }) => {
         viewBox="0 0 24 24"
         strokeWidth={0.75}
         stroke="#d0c5b5"
-        style={{ width: 64, height: 64 }}
+        className="w-16 h-16 text-[#C9A96E]"
       >
         <path
           strokeLinecap="round"
@@ -1564,37 +834,14 @@ const EmptyCart = ({ navigate }) => {
         />
       </svg>
 
-      <div
-        style={{
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }}
-      >
+      <div className="text-center flex flex-col gap-2">
         <h2
-          style={{
-            margin: 0,
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "clamp(1.8rem, 4vw, 2.6rem)",
-            fontWeight: 300,
-            color: "#0d0d0b",
-            lineHeight: 1.15,
-          }}
+          className="m-0 text-3xl sm:text-4xl font-light text-[#0d0d0b] dark:text-white"
+          style={{ fontFamily: "'Cormorant Garamond', serif" }}
         >
           Your bag is empty
         </h2>
-        <p
-          style={{
-            margin: 0,
-            fontSize: "0.75rem",
-            color: "#6b6158",
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 300,
-            lineHeight: 1.7,
-            maxWidth: "320px",
-          }}
-        >
+        <p className="m-0 text-xs text-[#6b6158] dark:text-[#a8a29e] font-light max-w-xs leading-relaxed">
           Explore the collection and add pieces you love.
         </p>
       </div>
@@ -1602,29 +849,7 @@ const EmptyCart = ({ navigate }) => {
       <button
         id="btn-explore-collection"
         onClick={() => navigate("/")}
-        style={{
-          marginTop: "8px",
-          padding: "14px 40px",
-          backgroundColor: "#0d0d0b",
-          color: "#fbf9f6",
-          border: "none",
-          borderRadius: "2px",
-          cursor: "pointer",
-          fontSize: "0.65rem",
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 500,
-          transition: "background-color 0.3s, color 0.3s",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "#C9A96E";
-          e.currentTarget.style.color = "#0d0d0b";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "#0d0d0b";
-          e.currentTarget.style.color = "#fbf9f6";
-        }}
+        className="mt-2 px-8 py-3.5 rounded-full bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] text-[0.65rem] tracking-[0.22em] uppercase font-semibold hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] transition-all cursor-pointer shadow-sm"
       >
         Explore Collection
       </button>
@@ -1632,7 +857,7 @@ const EmptyCart = ({ navigate }) => {
   );
 };
 
-/* ── Cart ─────────────────────────────────────────────────────── */
+/* ── Cart Page ────────────────────────────────────────────────── */
 const Cart = () => {
   const cart = useSelector((state) => state.cart);
   const cartItems = cart.items;
@@ -1657,7 +882,6 @@ const Cart = () => {
   }, []);
 
   const handleRemove = async ({ productId, variantId }) => {
-    // Find the itemId for local state manipulation
     const item = cartItems.find((i) => {
       const matchProduct =
         i.product?._id === productId || i.product === productId;
@@ -1669,8 +893,6 @@ const Cart = () => {
     if (itemId) setRemovingIds((prev) => new Set([...prev, itemId]));
     try {
       await handleRemoveFromCart({ productId, variantId });
-      // Let handleGetCart (called by handleRemoveFromCart) sync Redux,
-      // but also locally dispatch for immediate visual feedback if desired
       if (itemId) dispatch(removeFromCart(itemId));
     } catch (err) {
       console.error(err);
@@ -1690,7 +912,6 @@ const Cart = () => {
   const handleQtyChange = async ({ productId, variantId }, newQty) => {
     if (newQty < 1) return;
 
-    // Find current qty to know if it's inc or dec
     const item = cartItems.find((i) => {
       const matchProduct =
         i.product?._id === productId || i.product === productId;
@@ -1703,7 +924,6 @@ const Cart = () => {
     const delta = newQty - item.quantity;
     if (delta === 0) return;
 
-    // Optimistic UI update
     const updated = cartItems.map((cartItem) =>
       cartItem._id === itemId ? { ...cartItem, quantity: newQty } : cartItem,
     );
@@ -1711,19 +931,16 @@ const Cart = () => {
 
     try {
       if (delta > 0) {
-        // Increment
         for (let i = 0; i < delta; i++) {
           await handleIncrementCartItem({ productId, variantId });
         }
       } else {
-        // Decrement
         for (let i = 0; i < Math.abs(delta); i++) {
           await handleDecrementCartItem({ productId, variantId });
         }
       }
     } catch (err) {
       console.error(err);
-      // Revert on error (could be refetched by handleGetCart again as a fallback)
       handleGetCart();
     }
   };
@@ -1731,16 +948,7 @@ const Cart = () => {
   return (
     <>
       <FontLink />
-      <div
-        style={{
-          minHeight: "100vh",
-          backgroundColor: "#fbf9f6",
-          fontFamily: "'Inter', sans-serif",
-          color: "#0d0d0b",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <div className="min-h-screen bg-[#fbf9f6] dark:bg-[#0a0908] text-[#0d0d0b] dark:text-[#fbf9f6] transition-colors duration-300 flex flex-col font-sans">
         {/* Loading */}
         {isLoading && <LoadingSkeleton />}
 
@@ -1751,147 +959,74 @@ const Cart = () => {
 
         {/* Cart content */}
         {!isLoading && cartItems.length > 0 && (
-          <main
-            style={{
-              maxWidth: "1200px",
-              margin: "0 auto",
-              padding: "48px 32px 96px",
-              width: "100%",
-              boxSizing: "border-box",
-              flex: 1,
-            }}
-          >
+          <main className="max-w-[1200px] mx-auto px-6 lg:px-12 py-10 pb-24 w-full flex-1">
             {/* Page header */}
             <div
-              style={{
-                opacity: visible ? 1 : 0,
-                transform: visible ? "translateY(0)" : "translateY(16px)",
-                transition: "opacity 0.55s ease, transform 0.55s ease",
-                marginBottom: "40px",
-              }}
+              className={`mb-10 transition-all duration-500 ${
+                visible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
             >
               {/* Breadcrumb */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "16px",
-                }}
-              >
+              <div className="flex items-center gap-2 mb-4">
                 <button
                   onClick={() => navigate("/")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "0.6rem",
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: "#6b6158",
-                    fontFamily: "'Inter', sans-serif",
-                    padding: 0,
-                  }}
+                  className="bg-transparent border-none cursor-pointer text-[0.6rem] tracking-[0.2em] uppercase text-[#6b6158] dark:text-[#a8a29e] hover:text-[#C9A96E] p-0"
                 >
                   Collection
                 </button>
-                <span style={{ fontSize: "0.6rem", color: "#d0c5b5" }}>/</span>
-                <span
-                  style={{
-                    fontSize: "0.6rem",
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: "#3d342c",
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                >
+                <span className="text-[0.6rem] text-[#d0c5b5] dark:text-[#38332e]">
+                  /
+                </span>
+                <span className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3d342c] dark:text-[#d6d3d1]">
                   Your Bag
                 </span>
               </div>
 
               <h1
-                style={{
-                  margin: 0,
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: "clamp(2rem, 5vw, 3.2rem)",
-                  fontWeight: 300,
-                  lineHeight: 1.08,
-                  color: "#0d0d0b",
-                }}
+                className="m-0 text-3xl sm:text-5xl font-light text-[#0d0d0b] dark:text-white leading-tight"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 Your Bag
               </h1>
-              <p
-                style={{
-                  margin: "8px 0 0",
-                  fontSize: "0.7rem",
-                  color: "#6b6158",
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 300,
-                }}
-              >
+              <p className="m-0 mt-2 text-xs text-[#6b6158] dark:text-[#a8a29e] font-light">
                 {cartItems.length} {cartItems.length === 1 ? "item" : "items"}{" "}
                 selected
               </p>
             </div>
 
             {/* Two-column layout */}
-            <div
-              style={{
-                display: "flex",
-                gap: "48px",
-                alignItems: "flex-start",
-                flexWrap: "wrap",
-              }}
-            >
+            <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 items-start">
               {/* LEFT: Cart items list */}
-              <div style={{ flex: 1, minWidth: "280px" }}>
+              <div className="flex-1 w-full min-w-0">
                 {/* Column header */}
                 <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto",
-                    paddingBottom: "12px",
-                    borderBottom: "1px solid #e4e2df",
-                    opacity: visible ? 1 : 0,
-                    transition: "opacity 0.5s ease 0.15s",
-                  }}
+                  className={`grid grid-cols-[1fr_auto] pb-3 border-b border-[#e4e2df] dark:border-[#292522] transition-opacity duration-500 ${
+                    visible ? "opacity-100" : "opacity-0"
+                  }`}
                 >
-                  <span
-                    style={{
-                      fontSize: "0.55rem",
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      color: "#6b6158",
-                      fontFamily: "'Inter', sans-serif",
-                    }}
-                  >
+                  <span className="text-[0.55rem] tracking-[0.2em] uppercase text-[#6b6158] dark:text-[#a8a29e] font-medium">
                     Product
                   </span>
-                  <span
-                    style={{
-                      fontSize: "0.55rem",
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      color: "#6b6158",
-                      fontFamily: "'Inter', sans-serif",
-                    }}
-                  >
+                  <span className="text-[0.55rem] tracking-[0.2em] uppercase text-[#6b6158] dark:text-[#a8a29e] font-medium">
                     Total
                   </span>
                 </div>
 
                 {/* Items */}
-                {cartItems.map((item, idx) => (
-                  <CartItemRow
-                    key={item._id}
-                    item={item}
-                    idx={idx}
-                    onRemove={handleRemove}
-                    removing={removingIds.has(item._id)}
-                    onQtyChange={handleQtyChange}
-                  />
-                ))}
+                <div className="divide-y divide-[#e4e2df] dark:divide-[#292522]">
+                  {cartItems.map((item, idx) => (
+                    <CartItemRow
+                      key={item._id}
+                      item={item}
+                      idx={idx}
+                      onRemove={handleRemove}
+                      removing={removingIds.has(item._id)}
+                      onQtyChange={handleQtyChange}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* RIGHT: Order summary */}
@@ -1901,42 +1036,15 @@ const Cart = () => {
         )}
 
         {/* Footer */}
-        <footer
-          style={{
-            borderTop: "1px solid #e4e2df",
-            maxWidth: "1200px",
-            width: "100%",
-            margin: "0 auto",
-            padding: "40px 32px",
-            boxSizing: "border-box",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "16px",
-          }}
-        >
+        <footer className="border-t border-[#e4e2df] dark:border-[#292522] max-w-[1200px] w-full mx-auto px-6 lg:px-12 py-10 flex items-center justify-between flex-wrap gap-4">
           <span
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "0.9rem",
-              letterSpacing: "0.35em",
-              textTransform: "uppercase",
-              color: "#C9A96E",
-            }}
+            className="text-[0.9rem] tracking-[0.35em] uppercase text-[#C9A96E] cursor-pointer"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            onClick={() => navigate("/")}
           >
             Luxurisen
           </span>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "0.6rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              color: "#6b6158",
-              fontFamily: "'Inter', sans-serif",
-            }}
-          >
+          <p className="m-0 text-[0.6rem] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e]">
             © {new Date().getFullYear()} Luxurisen — All rights reserved
           </p>
         </footer>

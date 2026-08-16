@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useProduct } from "../hooks/useProduct";
+import { useCart } from "../../cart/hooks/useCart";
 import { useNavigate } from "react-router";
 import HeroSlider from "../../Shared/components/HeroSlider";
 import LuxurisenFooter from "../../Shared/components/LuxurisenFooter";
+import EditorialBento from "../../Shared/components/EditorialBento";
+import Marquee from "../../Shared/components/Marquee";
+import gsap from "gsap";
 
 /* ── Google Fonts ─────────────────────────────────────────────── */
 const FontLink = () => (
@@ -21,7 +25,15 @@ const fmt = (amount, currency = "INR") =>
     maximumFractionDigits: 0,
   }).format(amount);
 
-/* ── Home ─────────────────────────────────────────────────────── */
+const CATEGORIES = [
+  "All Items",
+  "Tailoring & Suits",
+  "Shirts & Knits",
+  "Trousers",
+  "Outerwear",
+];
+
+/* ── Home Page ────────────────────────────────────────────────── */
 const Home = () => {
   const products = useSelector((state) => state.product.products);
   const { handleGetAllProducts } = useProduct();
@@ -29,28 +41,58 @@ const Home = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Items");
   const [sortBy, setSortBy] = useState("default");
-  const [heroVisible, setHeroVisible] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(-1);
+
   const heroRef = useRef(null);
   const searchRef = useRef(null);
+  const gridRef = useRef(null);
 
   useEffect(() => {
     handleGetAllProducts().finally(() => setIsLoading(false));
   }, []);
 
+  // Hero entrance animation with GSAP
   useEffect(() => {
-    const t = setTimeout(() => setHeroVisible(true), 80);
-    return () => clearTimeout(t);
+    if (heroRef.current) {
+      gsap.fromTo(
+        heroRef.current.children,
+        { opacity: 0, y: 25 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: "power3.out",
+        }
+      );
+    }
   }, []);
 
+  // Filter & Sort Logic
   const filtered = products
-    .filter(
-      (p) =>
+    .filter((p) => {
+      const matchSearch =
         p.title?.toLowerCase().includes(search.toLowerCase()) ||
-        p.description?.toLowerCase().includes(search.toLowerCase()),
-    )
+        p.description?.toLowerCase().includes(search.toLowerCase());
+
+      if (selectedCategory === "All Items") return matchSearch;
+
+      const categoryKeywords = {
+        "Tailoring & Suits": ["suit", "blazer", "tuxedo", "formal", "coat"],
+        "Shirts & Knits": ["shirt", "knit", "sweater", "polo", "t-shirt", "silk", "cashmere"],
+        "Trousers": ["trouser", "pant", "chino", "denim", "jean"],
+        "Outerwear": ["jacket", "coat", "trench", "outerwear", "parka"],
+      };
+
+      const keywords = categoryKeywords[selectedCategory] || [];
+      const titleAndDesc = `${p.title} ${p.description}`.toLowerCase();
+      const matchCat = keywords.some((kw) => titleAndDesc.includes(kw));
+
+      return matchSearch && matchCat;
+    })
     .sort((a, b) => {
       if (sortBy === "price-asc") return a.price.amount - b.price.amount;
       if (sortBy === "price-desc") return b.price.amount - a.price.amount;
@@ -59,18 +101,19 @@ const Home = () => {
       return 0;
     });
 
-  /* Suggestions: top 6 products matching the query */
-  const suggestions = search.trim().length > 0
-    ? products
-        .filter(
-          (p) =>
-            p.title?.toLowerCase().includes(search.toLowerCase()) ||
-            p.description?.toLowerCase().includes(search.toLowerCase()),
-        )
-        .slice(0, 6)
-    : [];
+  // Autocomplete Suggestions
+  const suggestions =
+    search.trim().length > 0
+      ? products
+          .filter(
+            (p) =>
+              p.title?.toLowerCase().includes(search.toLowerCase()) ||
+              p.description?.toLowerCase().includes(search.toLowerCase())
+          )
+          .slice(0, 6)
+      : [];
 
-  /* Click outside → close suggestions */
+  // Close suggestions on outside click
   useEffect(() => {
     const handler = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -82,7 +125,7 @@ const Home = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* Keyboard navigation inside the suggestion list */
+  // Keyboard navigation for suggestions
   const handleSearchKeyDown = useCallback(
     (e) => {
       if (!showSuggestions || suggestions.length === 0) return;
@@ -92,7 +135,7 @@ const Home = () => {
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setHighlightedIdx((i) =>
-          i <= 0 ? suggestions.length - 1 : i - 1,
+          i <= 0 ? suggestions.length - 1 : i - 1
         );
       } else if (e.key === "Enter" && highlightedIdx >= 0) {
         e.preventDefault();
@@ -106,653 +149,475 @@ const Home = () => {
         setHighlightedIdx(-1);
       }
     },
-    [showSuggestions, suggestions, highlightedIdx, navigate],
+    [showSuggestions, suggestions, highlightedIdx, navigate]
   );
 
   return (
     <>
       <FontLink />
-      <style>{`
-        @keyframes marquee {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-track { animation: marquee 28s linear infinite; }
-        .card-hover { transition: box-shadow 0.35s ease, transform 0.35s ease; }
-        .card-hover:hover { box-shadow: 0 12px 48px rgba(27,24,20,0.10); transform: translateY(-4px); }
-        ::selection { background: rgba(201,169,110,0.28); }
-        .search-input:focus { border-bottom-color: #C9A96E !important; }
-
-        /* ── Search suggestions dropdown ── */
-        @keyframes suggestionFadeIn {
-          from { opacity: 0; transform: translateY(-6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .suggestions-dropdown {
-          animation: suggestionFadeIn 0.18s ease-out forwards;
-        }
-        .suggestion-item {
-          transition: background-color 0.15s ease;
-        }
-        .suggestion-item:hover,
-        .suggestion-item.highlighted {
-          background-color: #f5f3f0;
-        }
-        .suggestion-thumb {
-          width: 44px;
-          height: 55px;
-          object-fit: cover;
-          flex-shrink: 0;
-          border-radius: 2px;
-        }
-        .suggestion-thumb-placeholder {
-          width: 44px;
-          height: 55px;
-          flex-shrink: 0;
-          background: #e4e2df;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 2px;
-        }
-        .suggestion-highlight {
-          color: #C9A96E;
-          font-weight: 500;
-        }
-      `}</style>
 
       <div
-        className="min-h-screen text-[#0d0d0b]"
+        className="min-h-screen bg-[#fbf9f6] dark:bg-[#0a0908] text-[#0d0d0b] dark:text-[#fbf9f6] selection:bg-[#C9A96E]/30 transition-colors duration-300"
         style={{
-          backgroundColor: "#fbf9f6",
           fontFamily: "'Inter', sans-serif",
         }}
       >
-        {/* ── Hero ────────────────────────────────────────────────── */}
-        <section
-          ref={heroRef}
-          className="max-w-[1400px] mx-auto px-8 pt-10 pb-10 flex flex-row items-center justify-between gap-6 transition-all duration-[800ms] ease-out overflow-hidden"
-          style={{
-            opacity: heroVisible ? 1 : 0,
-            transform: heroVisible ? "translateY(0)" : "translateY(20px)",
-          }}
-        >
-          {/* ── Left: text ─────────────────────────────── */}
-          <div className="flex flex-col gap-5 flex-1 min-w-0">
-            <p
-              className="text-[0.6rem] tracking-[0.25em] uppercase font-medium"
-              style={{ color: "#C9A96E" }}
-            >
-              New Season — SS&apos;26
-            </p>
-            <h1
-              className="m-0 font-light leading-[1.04] text-[clamp(3rem,7vw,6rem)]"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                color: "#0d0d0b",
-              }}
-            >
-              The Edits
-            </h1>
-            <p
-              className="text-sm max-w-[420px] leading-[1.75] font-light"
-              style={{ color: "#3d342c" }}
-            >
-              Curated essentials for the considered wardrobe. Each piece selected
-              for its craft, finish, and enduring relevance.
-            </p>
-          </div>
+        {/* ── Hero Section ────────────────────────────────────────── */}
+        <section className="max-w-[1400px] mx-auto px-6 md:px-8 pt-8 md:pt-14 pb-12 md:pb-16">
+          <div
+            ref={heroRef}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center"
+          >
+            {/* Left: Editorial Hero Headline & CTA */}
+            <div className="lg:col-span-6 flex flex-col gap-6">
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-[#C9A96E] animate-ping" />
+                <p className="text-[0.62rem] tracking-[0.28em] uppercase font-semibold text-[#C9A96E]">
+                  New Season Collection — SS&apos;26
+                </p>
+              </div>
 
-          {/* ── Right: auto-sliding product ad slider ──── */}
-          <div className="relative flex-shrink-0 w-[65%] max-w-[680px] h-[390px] hidden sm:block">
-            <HeroSlider interval={3800} />
+              <h1
+                className="font-light leading-[1.02] text-4xl sm:text-6xl md:text-7xl text-[#0d0d0b] dark:text-white"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                The Defined Silhouettes
+              </h1>
+
+              <p className="text-sm md:text-base text-[#524941] dark:text-[#d6d3d1] leading-relaxed font-light max-w-lg">
+                Curated essentials for the considered wardrobe. Every piece is crafted
+                with classical sartorial proportion and quiet luxury finish.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <button
+                  onClick={() => {
+                    const el = document.getElementById("catalogue-heading");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="btn-pill-primary"
+                >
+                  <span>Explore Collection</span>
+                  <span className="btn-pill-icon">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="w-3.5 h-3.5"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                </button>
+
+                <div className="hidden sm:flex items-center gap-2 text-xs text-[#6b6158] dark:text-[#a8a29e]">
+                  <span className="w-1 h-1 rounded-full bg-[#C9A96E]" />
+                  <span>Complimentary Pan-India Delivery on Orders ₹999+</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Dynamic Hero Banner Slider */}
+            <div className="lg:col-span-6 w-full h-[320px] sm:h-[400px] md:h-[440px] relative">
+              <HeroSlider interval={4200} />
+            </div>
           </div>
         </section>
 
-        {/* ── Divider ─────────────────────────────────────────────── */}
-        <div className="border-t" style={{ borderColor: "#e4e2df" }} />
+        {/* ── Marquee Ribbon ──────────────────────────────────────── */}
+        <Marquee />
 
-        {/* ── Filter bar ──────────────────────────────────────────── */}
-        <div className="max-w-[1400px] mx-auto px-8 py-5 flex items-center justify-between gap-4 flex-wrap">
-          {/* Search */}
-          <div
-            ref={searchRef}
-            className="relative flex-1 min-w-[220px] max-w-[360px]"
-          >
-            <div 
-              className="flex items-center gap-2 border-b" 
-              style={{ 
-                borderColor: "#d0c5b5", 
-                paddingBottom: "8px",
-                transition: "border-color 0.2s"
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
-              onBlur={(e) => e.currentTarget.style.borderColor = "#d0c5b5"}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="#6b6158"
-                className="w-3.5 h-3.5 flex-shrink-0"
+        {/* ── Editorial Story Bento ───────────────────────────────── */}
+        <EditorialBento
+          onExplore={() => {
+            setSelectedCategory("All Items");
+          }}
+        />
+
+        {/* ── Divider ─────────────────────────────────────────────── */}
+        <div className="border-t border-[#e4e2df] dark:border-[#292522] max-w-[1400px] mx-auto px-6 md:px-8" />
+
+        {/* ── Category Chips & Search Bar ─────────────────────────── */}
+        <section
+          id="catalogue-heading"
+          className="max-w-[1400px] mx-auto px-6 md:px-8 pt-12 pb-6 flex flex-col gap-6"
+        >
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span className="text-[0.58rem] tracking-[0.24em] uppercase font-semibold text-[#C9A96E] block mb-1">
+                The Catalogue
+              </span>
+              <h2
+                className="text-2xl md:text-4xl font-light text-[#0d0d0b] dark:text-white"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                />
-              </svg>
-              <input
-                id="search-input"
-                type="text"
-                placeholder="Search products…"
-                value={search}
-                autoComplete="off"
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setShowSuggestions(true);
-                  setHighlightedIdx(-1);
-                }}
-                onFocus={() => {
-                  if (search.trim().length > 0) setShowSuggestions(true);
-                }}
-                onKeyDown={handleSearchKeyDown}
-                className="w-full bg-transparent border-0 outline-none text-xs text-[#0d0d0b]"
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              />
+                Curated Garments ({filtered.length})
+              </h2>
             </div>
 
-            {/* ── Suggestion Dropdown ──────────────────────────── */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div
-                className="suggestions-dropdown"
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 10px)",
-                  left: 0,
-                  right: 0,
-                  backgroundColor: "#fbf9f6",
-                  border: "1px solid #e4e2df",
-                  boxShadow: "0 16px 48px rgba(27,24,20,0.12)",
-                  zIndex: 200,
-                  borderRadius: "2px",
-                  overflow: "hidden",
-                  minWidth: "320px",
-                }}
-              >
-                {/* Header */}
-                <div
-                  style={{
-                    padding: "8px 14px 6px",
-                    borderBottom: "1px solid #e4e2df",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
+            {/* Search Input with Live Suggestions */}
+            <div
+              ref={searchRef}
+              className="relative w-full md:w-80"
+            >
+              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#f5f3f0] dark:bg-[#191715] border border-[#e4e2df] dark:border-[#292522] focus-within:border-[#C9A96E] transition-all">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="#6b6158"
+                  className="w-4 h-4 flex-shrink-0"
                 >
-                  <span
-                    style={{
-                      fontSize: "0.55rem",
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      color: "#6b6158",
-                      fontFamily: "'Inter', sans-serif",
-                    }}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search silhouettes..."
+                  value={search}
+                  autoComplete="off"
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setShowSuggestions(true);
+                    setHighlightedIdx(-1);
+                  }}
+                  onFocus={() => {
+                    if (search.trim().length > 0) setShowSuggestions(true);
+                  }}
+                  onKeyDown={handleSearchKeyDown}
+                  className="w-full bg-transparent border-0 outline-none text-xs text-[#0d0d0b] dark:text-[#fbf9f6] placeholder:text-[#a8a29e]"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="text-[#a8a29e] hover:text-[#0d0d0b] dark:hover:text-white text-xs cursor-pointer p-0.5"
                   >
-                    Suggestions
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "0.55rem",
-                      letterSpacing: "0.15em",
-                      textTransform: "uppercase",
-                      color: "#C9A96E",
-                      fontFamily: "'Inter', sans-serif",
-                    }}
-                  >
-                    {suggestions.length} found
-                  </span>
-                </div>
+                    ✕
+                  </button>
+                )}
+              </div>
 
-                {/* Suggestion items */}
-                <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-                  {suggestions.map((product, i) => {
-                    const thumb = product.images?.[0]?.url;
-                    const titleLower = product.title?.toLowerCase() ?? "";
-                    const queryLower = search.toLowerCase();
-                    const matchIdx = titleLower.indexOf(queryLower);
-
-                    /* Highlight matched portion in title */
-                    let titleNode;
-                    if (matchIdx >= 0 && search.trim()) {
-                      titleNode = (
-                        <>
-                          {product.title.slice(0, matchIdx)}
-                          <span className="suggestion-highlight">
-                            {product.title.slice(matchIdx, matchIdx + search.length)}
-                          </span>
-                          {product.title.slice(matchIdx + search.length)}
-                        </>
-                      );
-                    } else {
-                      titleNode = product.title;
-                    }
-
-                    return (
+              {/* Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full mt-2 left-0 right-0 bg-[#fbf9f6] dark:bg-[#141210] border border-[#e4e2df] dark:border-[#292522] shadow-2xl rounded-xl z-30 overflow-hidden">
+                  <div className="p-2.5 px-3 bg-[#f5f3f0] dark:bg-[#191715] border-b border-[#e4e2df] dark:border-[#292522] flex items-center justify-between">
+                    <span className="text-[0.55rem] tracking-[0.2em] uppercase text-[#6b6158] dark:text-[#a8a29e] font-medium">
+                      Matched Pieces
+                    </span>
+                    <span className="text-[0.55rem] text-[#C9A96E] font-semibold">
+                      {suggestions.length} found
+                    </span>
+                  </div>
+                  <ul className="divide-y divide-[#f0ede8] dark:divide-[#292522] max-h-64 overflow-y-auto">
+                    {suggestions.map((item, i) => (
                       <li
-                        key={product._id}
-                        className={`suggestion-item${
-                          i === highlightedIdx ? " highlighted" : ""
-                        }`}
+                        key={item._id}
                         onMouseEnter={() => setHighlightedIdx(i)}
-                        onMouseLeave={() => setHighlightedIdx(-1)}
                         onMouseDown={(e) => {
-                          e.preventDefault(); // prevent blur before click
-                          navigate(`/product/${product._id}`);
+                          e.preventDefault();
+                          navigate(`/product/${item._id}`);
                           setShowSuggestions(false);
                           setSearch("");
-                          setHighlightedIdx(-1);
                         }}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "10px 14px",
-                          cursor: "pointer",
-                          borderBottom: i < suggestions.length - 1 ? "1px solid #f0ede8" : "none",
-                        }}
+                        className={`p-2.5 px-3 flex items-center gap-3 cursor-pointer transition-colors ${
+                          i === highlightedIdx
+                            ? "bg-[#f0ece5] dark:bg-[#262320]"
+                            : "hover:bg-[#f5f3f0] dark:hover:bg-[#191715]"
+                        }`}
                       >
-                        {/* Thumbnail */}
-                        {thumb ? (
+                        {item.images?.[0]?.url && (
                           <img
-                            src={thumb}
-                            alt={product.title}
-                            className="suggestion-thumb"
+                            src={item.images[0].url}
+                            alt={item.title}
+                            className="w-9 h-11 object-cover rounded"
                           />
-                        ) : (
-                          <div className="suggestion-thumb-placeholder">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1}
-                              stroke="#d0c5b5"
-                              style={{ width: 18, height: 18 }}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                              />
-                            </svg>
-                          </div>
                         )}
-
-                        {/* Text info */}
-                        <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="min-w-0 flex-1">
                           <p
-                            style={{
-                              margin: 0,
-                              fontSize: "0.8rem",
-                              fontFamily: "'Cormorant Garamond', serif",
-                              color: "#0d0d0b",
-                              fontWeight: 400,
-                              lineHeight: 1.3,
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
+                            className="text-sm text-[#0d0d0b] dark:text-[#fbf9f6] truncate font-light"
+                            style={{ fontFamily: "'Cormorant Garamond', serif" }}
                           >
-                            {titleNode}
+                            {item.title}
                           </p>
-                          {product.description && (
-                            <p
-                              style={{
-                                margin: "3px 0 0",
-                                fontSize: "0.6rem",
-                                color: "#6b6158",
-                                fontFamily: "'Inter', sans-serif",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {product.description}
-                            </p>
-                          )}
+                          <p className="text-[0.62rem] text-[#C9A96E] font-medium">
+                            {fmt(item.price?.amount || 0, item.price?.currency)}
+                          </p>
                         </div>
-
                       </li>
-                    );
-                  })}
-                </ul>
-
-                {/* Footer: view all */}
-                <div
-                  style={{
-                    padding: "8px 14px",
-                    borderTop: "1px solid #e4e2df",
-                    textAlign: "right",
-                  }}
-                >
-                  <button
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      setShowSuggestions(false);
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "0.55rem",
-                      letterSpacing: "0.15em",
-                      textTransform: "uppercase",
-                      color: "#3d342c",
-                      fontFamily: "'Inter', sans-serif",
-                      textDecoration: "underline",
-                      textUnderlineOffset: "3px",
-                    }}
-                  >
-                    See all {filtered.length} results ↓
-                  </button>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Count + Sort */}
-          <div className="flex items-center gap-6">
-            <span
-              className="text-[0.6rem] tracking-[0.18em] uppercase"
-              style={{ color: "#6b6158" }}
-            >
-              {filtered.length} {filtered.length === 1 ? "item" : "items"}
-            </span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent border-0 outline-none text-[0.6rem] tracking-[0.15em] uppercase pb-1 cursor-pointer"
-              style={{
-                borderBottom: "1px solid #d0c5b5",
-                color: "#3d342c",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              <option value="default">Sort: Default</option>
-              <option value="newest">Sort: Newest</option>
-              <option value="price-asc">Price: Low → High</option>
-              <option value="price-desc">Price: High → Low</option>
-            </select>
-          </div>
-        </div>
+          {/* Category Filter Chips & Sort Selector */}
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-1.5 rounded-full text-[0.62rem] tracking-[0.16em] uppercase whitespace-nowrap transition-all duration-300 cursor-pointer font-medium ${
+                    selectedCategory === cat
+                      ? "bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] shadow-sm"
+                      : "bg-[#f5f3f0] dark:bg-[#191715] text-[#6b6158] dark:text-[#a8a29e] hover:text-[#0d0d0b] dark:hover:text-white border border-[#e4e2df] dark:border-[#292522]"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
 
-        <div className="border-t" style={{ borderColor: "#e4e2df" }} />
+            <div className="flex items-center gap-3">
+              <span className="text-[0.6rem] tracking-[0.15em] uppercase text-[#78716c]">
+                Sort By:
+              </span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent text-xs text-[#0d0d0b] dark:text-[#fbf9f6] border-b border-[#d0c5b5] dark:border-[#38332e] pb-0.5 outline-none cursor-pointer"
+              >
+                <option value="default" className="dark:bg-[#141210]">Featured</option>
+                <option value="newest" className="dark:bg-[#141210]">New Arrivals</option>
+                <option value="price-asc" className="dark:bg-[#141210]">Price: Low to High</option>
+                <option value="price-desc" className="dark:bg-[#141210]">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+        </section>
 
         {/* ── Product Grid ────────────────────────────────────────── */}
-        <main className="max-w-[1400px] mx-auto px-8 py-12 pb-24">
-          {/* Loading skeleton */}
+        <main
+          ref={gridRef}
+          className="max-w-[1400px] mx-auto px-6 md:px-8 pb-24"
+        >
+          {/* Skeleton Loader */}
           {isLoading && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} style={{ backgroundColor: "#f5f3f0" }}>
-                  <div
-                    className="aspect-[4/5] animate-pulse"
-                    style={{ backgroundColor: "#e4e2df" }}
-                  />
-                  <div className="p-5 flex flex-col gap-3">
-                    <div
-                      className="h-2.5 rounded"
-                      style={{ backgroundColor: "#e4e2df", width: "65%" }}
-                    />
-                    <div
-                      className="h-2 rounded"
-                      style={{ backgroundColor: "#e4e2df", width: "40%" }}
-                    />
-                  </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl p-2 bg-[#f5f3f0] animate-pulse border border-[#e4e2df]"
+                >
+                  <div className="aspect-[4/5] bg-[#e4e2df] rounded-xl mb-4" />
+                  <div className="h-3 bg-[#e4e2df] rounded w-3/4 mb-2" />
+                  <div className="h-2.5 bg-[#e4e2df] rounded w-1/2" />
                 </div>
               ))}
             </div>
           )}
 
-          {/* Empty state */}
+          {/* Empty State */}
           {!isLoading && filtered.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-32 gap-5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1}
-                stroke="#d0c5b5"
-                className="w-11 h-11"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
-                />
-              </svg>
-              <p
-                className="text-[0.6rem] tracking-[0.2em] uppercase"
-                style={{ color: "#6b6158" }}
-              >
-                {search
-                  ? "No products match your search"
-                  : "No products available"}
-              </p>
-              {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="bg-transparent border-none cursor-none text-[0.65rem] tracking-[0.15em] uppercase underline underline-offset-4 cursor-pointer"
-                  style={{ color: "#C9A96E" }}
+            <div className="py-24 text-center flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-[#f5f3f0] flex items-center justify-center text-[#C9A96E] mb-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-8 h-8"
                 >
-                  Clear search
-                </button>
-              )}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                  />
+                </svg>
+              </div>
+              <h3
+                className="text-2xl font-light text-[#0d0d0b]"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                No garments found in this curation
+              </h3>
+              <p className="text-xs text-[#6b6158] max-w-sm">
+                Try searching for another piece or reset category filters.
+              </p>
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setSelectedCategory("All Items");
+                }}
+                className="mt-2 text-xs uppercase tracking-widest text-[#C9A96E] underline underline-offset-4 cursor-pointer"
+              >
+                Reset all filters
+              </button>
             </div>
           )}
 
-          {/* Product cards */}
+          {/* Product Cards Grid */}
           {!isLoading && filtered.length > 0 && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filtered.map((product, idx) => (
-                <ProductCard key={product._id} product={product} idx={idx} />
+                <LuxuryProductCard
+                  key={product._id}
+                  product={product}
+                  idx={idx}
+                />
               ))}
             </div>
           )}
         </main>
 
+        {/* ── Footer ──────────────────────────────────────────────── */}
         <LuxurisenFooter />
       </div>
     </>
   );
 };
 
-/* ── ProductCard ──────────────────────────────────────────────── */
-const ProductCard = ({ product, idx }) => {
+/* ── Luxury Product Card Component ────────────────────────────── */
+const LuxuryProductCard = ({ product, idx }) => {
   const [activeImg, setActiveImg] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [added, setAdded] = useState(false);
+  const navigate = useNavigate();
+  const { handleAddToCart } = useCart();
+  const user = useSelector((state) => state.auth.user);
+
   const images = product.images ?? [];
   const hasMultiple = images.length > 1;
-  const navigate = useNavigate();
-  useEffect(() => {
-    const t = setTimeout(() => setIsVisible(true), idx * 80);
-    return () => clearTimeout(t);
-  }, [idx]);
+
+  const onQuickAdd = async (e) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    try {
+      await handleAddToCart({ productId: product._id, quantity: 1 });
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div
-      className="card-hover flex flex-col cursor-pointer"
-      style={{
-        backgroundColor: "#f5f3f0",
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "translateY(0)" : "translateY(20px)",
-        transition: `opacity 0.55s ease ${idx * 0.06}s, transform 0.55s ease ${idx * 0.06}s`,
-      }}
+      onClick={() => navigate(`/product/${product._id}`)}
+      className="group bezel-outer flex flex-col cursor-pointer"
     >
-      {/* Image zone */}
-      <div
-        onClick={() => navigate(`/product/${product._id}`)}
-        className="relative aspect-[4/5] overflow-hidden"
-        style={{ backgroundColor: "#e4e2df" }}
-      >
-        {images.length > 0 ? (
-          <img
-            src={images[activeImg]?.url}
-            alt={product.title}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out"
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "scale(1.05)")
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
+      <div className="bezel-inner flex flex-col flex-1 overflow-hidden">
+        {/* Product Image Stage */}
+        <div className="relative aspect-[4/5] overflow-hidden bg-[#e4e2df] dark:bg-[#201d1a]">
+          {images.length > 0 ? (
+            <img
+              src={images[activeImg]?.url}
+              alt={product.title}
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-[#a8a29e]">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1}
+                stroke="currentColor"
+                className="w-10 h-10"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m2.25 15.75 5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0Z"
+                />
+              </svg>
+            </div>
+          )}
+
+          {/* Wishlist Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsWishlisted((prev) => !prev);
+            }}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#fbf9f6]/90 dark:bg-[#141210]/90 backdrop-blur-md flex items-center justify-center shadow-sm hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer z-10 border border-transparent dark:border-white/10"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              fill="none"
               viewBox="0 0 24 24"
-              strokeWidth={1}
-              stroke="#d0c5b5"
-              className="w-10 h-10"
+              fill={isWishlisted ? "#C9A96E" : "none"}
+              stroke={isWishlisted ? "#C9A96E" : "#6b6158"}
+              strokeWidth={1.5}
+              className="w-4 h-4 transition-colors"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
               />
             </svg>
-          </div>
-        )}
+          </button>
 
-        {/* Wishlist button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsWishlisted((w) => !w);
-          }}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer transition-transform duration-200 hover:scale-110"
-          style={{
-            background: "rgba(251,249,246,0.88)",
-            color: isWishlisted ? "#C9A96E" : "#6b6158",
-            transition: "color 0.25s, transform 0.2s",
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill={isWishlisted ? "currentColor" : "none"}
-            stroke="currentColor"
-            strokeWidth={1.5}
-            className="w-3.5 h-3.5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-            />
-          </svg>
-        </button>
-
-        {/* Image count badge */}
-        {hasMultiple && (
-          <span
-            className="absolute bottom-3 left-3 text-[0.55rem] tracking-[0.15em] px-2 py-0.5"
-            style={{
-              backgroundColor: "rgba(251,249,246,0.85)",
-              color: "#3d342c",
-            }}
-          >
-            {activeImg + 1} / {images.length}
-          </span>
-        )}
-
-        {/* Thumbnail scrubber */}
-        {hasMultiple && (
-          <div
-            className="absolute bottom-0 left-0 right-0 flex gap-[3px] px-3 pb-3 pt-6"
-            style={{
-              background:
-                "linear-gradient(to top, rgba(27,24,20,0.35) 0%, transparent 100%)",
-            }}
-          >
-            {images.map((img, i) => (
-              <button
-                key={img._id ?? i}
-                onMouseEnter={() => setActiveImg(i)}
-                onClick={() => setActiveImg(i)}
-                className="flex-1 h-0.5 border-none cursor-pointer transition-colors duration-200"
-                style={{
-                  backgroundColor:
-                    i === activeImg ? "#C9A96E" : "rgba(255,255,255,0.45)",
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="p-5 flex flex-col gap-2.5 flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <h2
-            className="m-0 flex-1 text-[1.05rem] font-light leading-snug line-clamp-2"
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              color: "#0d0d0b",
-            }}
-          >
-            {product.title}
-          </h2>
-          <span
-            className="text-sm font-medium whitespace-nowrap"
-            style={{ color: "#C9A96E" }}
-          >
-            {fmt(product.price.amount, product.price.currency)}
-          </span>
+          {/* Image Scrubber Indicators */}
+          {hasMultiple && (
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onMouseEnter={(e) => {
+                    e.stopPropagation();
+                    setActiveImg(i);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImg(i);
+                  }}
+                  className={`h-1 rounded-full transition-all duration-200 cursor-pointer ${
+                    i === activeImg ? "w-4 bg-[#C9A96E]" : "w-1 bg-white/60"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {product.description && (
-          <p
-            className="m-0 text-[0.7rem] leading-[1.7] font-light line-clamp-2"
-            style={{ color: "#3d342c" }}
-          >
-            {product.description}
-          </p>
-        )}
+        {/* Product Details Section */}
+        <div className="p-4 md:p-5 flex flex-col gap-2 flex-1 justify-between">
+          <div>
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3
+                className="text-base font-light text-[#0d0d0b] dark:text-white line-clamp-1 group-hover:text-[#C9A96E] transition-colors"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                {product.title}
+              </h3>
+            </div>
+            <p className="text-[0.68rem] text-[#6b6158] dark:text-[#a8a29e] line-clamp-2 leading-relaxed font-light">
+              {product.description || "Refined tailored craftsmanship."}
+            </p>
+          </div>
 
-        {/* Footer row */}
-        <div
-          className="mt-auto pt-4 border-t flex items-center justify-between"
-          style={{ borderColor: "#e4e2df" }}
-        >
-          <button
-            className="text-[0.55rem] tracking-[0.2em] uppercase px-4 py-2 border-none cursor-pointer font-medium transition-all duration-300"
-            style={{
-              backgroundColor: "#0d0d0b",
-              color: "#fbf9f6",
-              fontFamily: "'Inter', sans-serif",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#C9A96E";
-              e.currentTarget.style.color = "#0d0d0b";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#0d0d0b";
-              e.currentTarget.style.color = "#fbf9f6";
-            }}
-          >
-            Add to Bag
-          </button>
-          <span
-            className="text-[0.55rem] tracking-[0.15em] uppercase"
-            style={{ color: "#6b6158" }}
-          >
-            {images.length} {images.length === 1 ? "photo" : "photos"}
-          </span>
+          {/* Price & Action Row */}
+          <div className="pt-3 mt-2 border-t border-[#e4e2df] dark:border-[#292522] flex items-center justify-between">
+            <span className="text-xs font-semibold text-[#0d0d0b] dark:text-[#fbf9f6]">
+              {fmt(product.price?.amount || 0, product.price?.currency)}
+            </span>
+
+            <button
+              onClick={onQuickAdd}
+              className={`px-3 py-1.5 rounded-full text-[0.58rem] tracking-[0.16em] uppercase font-semibold transition-all duration-300 cursor-pointer ${
+                added
+                  ? "bg-[#C9A96E] text-[#0d0d0b]"
+                  : "bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b]"
+              }`}
+            >
+              {added ? "Added ✓" : "Add +"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

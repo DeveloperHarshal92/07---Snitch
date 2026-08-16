@@ -13,11 +13,7 @@ const FontLink = () => (
 const AnimatedCheck = ({ visible }) => (
   <svg
     viewBox="0 0 52 52"
-    style={{
-      width: 52,
-      height: 52,
-      display: "block",
-    }}
+    className="w-12 h-12 block"
   >
     <circle
       cx="26"
@@ -63,23 +59,16 @@ const Particles = ({ visible }) => {
   });
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        pointerEvents: "none",
-      }}
-    >
+    <div className="absolute top-1/2 left-1/2 pointer-events-none">
       {dots.map((d, i) => (
         <div
           key={i}
+          className="absolute rounded-full"
           style={{
-            position: "absolute",
             width: d.size,
             height: d.size,
-            borderRadius: "50%",
-            backgroundColor: i % 3 === 0 ? "#C9A96E" : i % 3 === 1 ? "#e4d5b7" : "#3d342c",
+            backgroundColor:
+              i % 3 === 0 ? "#C9A96E" : i % 3 === 1 ? "#e4d5b7" : "#3d342c",
             transform: visible
               ? `translate(calc(${d.x}px - 50%), calc(${d.y}px - 50%)) scale(1)`
               : `translate(-50%, -50%) scale(0)`,
@@ -94,24 +83,16 @@ const Particles = ({ visible }) => {
 
 /* ── Step tracker ───────────────────────────────────────────────── */
 const Step = ({ label, done, active, isLast }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+  <div className="flex items-center">
+    <div className="flex flex-col items-center gap-1.5">
       <div
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: "50%",
-          border: done
-            ? "none"
+        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
+          done
+            ? "bg-[#C9A96E] border-none"
             : active
-            ? "1.5px solid #C9A96E"
-            : "1.5px solid #d5cfc8",
-          backgroundColor: done ? "#C9A96E" : active ? "rgba(201,169,110,0.08)" : "transparent",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "all 0.4s ease",
-        }}
+              ? "border border-[#C9A96E] bg-[#C9A96E]/10"
+              : "border border-[#d5cfc8] dark:border-[#38332e] bg-transparent"
+        }`}
       >
         {done ? (
           <svg viewBox="0 0 16 16" width={12} height={12} fill="none">
@@ -125,39 +106,27 @@ const Step = ({ label, done, active, isLast }) => (
           </svg>
         ) : (
           <div
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              backgroundColor: active ? "#C9A96E" : "#d5cfc8",
-            }}
+            className={`w-1.5 h-1.5 rounded-full ${
+              active ? "bg-[#C9A96E]" : "bg-[#d5cfc8] dark:bg-[#38332e]"
+            }`}
           />
         )}
       </div>
       <span
-        style={{
-          fontSize: "0.5rem",
-          letterSpacing: "0.15em",
-          textTransform: "uppercase",
-          fontFamily: "'Inter', sans-serif",
-          color: done || active ? "#3d342c" : "#a09890",
-          fontWeight: done || active ? 500 : 400,
-          whiteSpace: "nowrap",
-        }}
+        className={`text-[0.5rem] tracking-[0.15em] uppercase font-sans whitespace-nowrap ${
+          done || active
+            ? "text-[#3d342c] dark:text-[#fbf9f6] font-medium"
+            : "text-[#a09890] dark:text-[#78716c] font-normal"
+        }`}
       >
         {label}
       </span>
     </div>
     {!isLast && (
       <div
-        style={{
-          width: 60,
-          height: 1,
-          backgroundColor: done ? "#C9A96E" : "#e4e2df",
-          margin: "0 4px",
-          marginBottom: 20,
-          transition: "background-color 0.6s ease",
-        }}
+        className={`w-10 sm:w-14 h-[1px] mx-1 -mt-4 transition-colors duration-500 ${
+          done ? "bg-[#C9A96E]" : "bg-[#e4e2df] dark:bg-[#292522]"
+        }`}
       />
     )}
   </div>
@@ -165,41 +134,21 @@ const Step = ({ label, done, active, isLast }) => (
 
 /* ── Info row ───────────────────────────────────────────────────── */
 const InfoRow = ({ label, value, mono }) => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "12px 0",
-      borderBottom: "1px solid #f0ede9",
-    }}
-  >
-    <span
-      style={{
-        fontSize: "0.6rem",
-        letterSpacing: "0.12em",
-        textTransform: "uppercase",
-        color: "#a09890",
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
+  <div className="flex justify-between items-center py-3 border-b border-[#f0ede9] dark:border-[#292522]">
+    <span className="text-[0.6rem] tracking-[0.12em] uppercase text-[#a09890] dark:text-[#78716c] font-medium font-sans">
       {label}
     </span>
     <span
-      style={{
-        fontSize: "0.75rem",
-        fontFamily: mono ? "'Courier New', monospace" : "'Inter', sans-serif",
-        color: "#1a1410",
-        fontWeight: 500,
-        letterSpacing: mono ? "0.04em" : "normal",
-      }}
+      className={`text-xs font-medium text-[#1a1410] dark:text-[#fbf9f6] ${
+        mono ? "font-mono tracking-wider" : "font-sans"
+      }`}
     >
       {value}
     </span>
   </div>
 );
 
-/* ── Main page ─────────────────────────────────────────────────── */
+/* ── Order Item Row ───────────────────────────────────────────── */
 const OrderItemRow = ({ item, currency }) => {
   const product = item.product || {};
   const thumb = product.images?.[0]?.url;
@@ -215,26 +164,40 @@ const OrderItemRow = ({ item, currency }) => {
 
   const price = item.price?.amount || product.price?.amount || 0;
   const qty = item.quantity || 1;
-
-  const fmt = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: currency || 'INR' }).format(val);
+  const fmt = (val) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currency || "INR",
+    }).format(val);
 
   return (
-    <div style={{ display: 'flex', gap: '16px', padding: '12px 0', borderBottom: '1px solid #f0ede9' }}>
-      <div style={{ width: '64px', height: '80px', backgroundColor: '#f0ede9', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
-        {thumb && <img src={thumb} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+    <div className="flex gap-4 py-3 border-b border-[#f0ede9] dark:border-[#292522]">
+      <div className="w-14 h-16 bg-[#f0ede9] dark:bg-[#1f1c19] rounded overflow-hidden flex-shrink-0 border border-[#e8e2d8] dark:border-[#292522]">
+        {thumb && (
+          <img
+            src={thumb}
+            alt={product.title}
+            className="w-full h-full object-cover"
+          />
+        )}
       </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <h4 style={{ margin: 0, fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 400, color: '#1a1410' }}>
+      <div className="flex-1 flex flex-col justify-between">
+        <h4
+          className="m-0 text-sm md:text-base font-light text-[#1a1410] dark:text-[#fbf9f6] leading-snug"
+          style={{ fontFamily: "'Cormorant Garamond', serif" }}
+        >
           {product.title}
         </h4>
         {variantAttrs && (
-          <p style={{ margin: 0, fontSize: '0.6rem', color: '#6b6158', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase' }}>
+          <p className="m-0 text-[0.6rem] text-[#6b6158] dark:text-[#a8a29e] uppercase font-sans">
             {variantAttrs}
           </p>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-          <span style={{ fontSize: '0.65rem', color: '#6b6158', fontFamily: "'Inter', sans-serif" }}>Qty: {qty}</span>
-          <span style={{ fontSize: '0.75rem', color: '#1a1410', fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>
+        <div className="flex justify-between items-center mt-1 font-sans">
+          <span className="text-xs text-[#6b6158] dark:text-[#a8a29e]">
+            Qty: {qty}
+          </span>
+          <span className="text-xs font-semibold text-[#1a1410] dark:text-[#fbf9f6]">
             {fmt(price * qty)}
           </span>
         </div>
@@ -243,6 +206,7 @@ const OrderItemRow = ({ item, currency }) => {
   );
 };
 
+/* ── Main OrderSuccess ─────────────────────────────────────────── */
 const OrderSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -267,7 +231,6 @@ const OrderSuccess = () => {
     };
   }, []);
 
-  // Format orderId nicely
   const displayId = orderId
     ? orderId.length > 20
       ? `${orderId.slice(0, 10)}…${orderId.slice(-8)}`
@@ -285,53 +248,30 @@ const OrderSuccess = () => {
     });
   })();
 
+  const fmt = (val) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: summary.currency || "INR",
+    }).format(val || 0);
+
   return (
     <>
       <FontLink />
 
       {/* ── Page background ── */}
-      <div
-        style={{
-          minHeight: "100vh",
-          backgroundColor: "#fbf9f6",
-          fontFamily: "'Inter', sans-serif",
-          color: "#0d0d0b",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "40px 20px",
-        }}
-      >
+      <div className="min-h-screen bg-[#fbf9f6] dark:bg-[#0a0908] text-[#0d0d0b] dark:text-[#fbf9f6] transition-colors duration-300 font-sans flex flex-col items-center justify-center p-6 sm:p-10">
         {/* ── Hero card ── */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: 520,
-            opacity: 1,
-          }}
-        >
+        <div className="w-full max-w-[520px]">
           {/* ── Icon block ── */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              marginBottom: 48,
-              position: "relative",
-            }}
-          >
+          <div className="flex flex-col items-center mb-10 relative">
             {/* Ambient glow ring */}
             <div
+              className={`absolute w-36 h-36 rounded-full transition-transform duration-1000 ${
+                checkVisible ? "scale-100" : "scale-0"
+              }`}
               style={{
-                position: "absolute",
-                width: 140,
-                height: 140,
-                borderRadius: "50%",
                 background:
-                  "radial-gradient(circle, rgba(201,169,110,0.18) 0%, transparent 70%)",
-                transform: checkVisible ? "scale(1)" : "scale(0)",
-                transition: "transform 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s",
+                  "radial-gradient(circle, rgba(201,169,110,0.2) 0%, transparent 70%)",
               }}
             />
 
@@ -340,76 +280,42 @@ const OrderSuccess = () => {
 
             {/* Check circle */}
             <div
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: "50%",
-                backgroundColor: "#fff",
-                border: "1px solid #e8e2d8",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 4px 24px rgba(201,169,110,0.12), 0 1px 4px rgba(0,0,0,0.04)",
-                position: "relative",
-                zIndex: 1,
-                transform: checkVisible ? "scale(1)" : "scale(0.6)",
-                transition:
-                  "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s",
-              }}
+              className={`w-20 h-20 rounded-full bg-white dark:bg-[#141210] border border-[#e8e2d8] dark:border-[#292522] flex items-center justify-center shadow-lg relative z-10 transition-transform duration-700 ${
+                checkVisible ? "scale-100" : "scale-50"
+              }`}
             >
               <AnimatedCheck visible={checkVisible} />
             </div>
 
             {/* Headline */}
             <div
-              style={{
-                marginTop: 28,
-                textAlign: "center",
-                opacity: contentVisible ? 1 : 0,
-                transform: contentVisible ? "translateY(0)" : "translateY(12px)",
-                transition: "opacity 0.6s ease, transform 0.6s ease",
-              }}
+              className={`mt-7 text-center transition-all duration-700 ${
+                contentVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
             >
               <h1
-                style={{
-                  margin: "0 0 8px",
-                  fontSize: "clamp(1.4rem, 4vw, 1.9rem)",
-                  fontWeight: 500,
-                  letterSpacing: "0.04em",
-                  color: "#1a1410",
-                  fontFamily: "'Cormorant Garamond', serif",
-                }}
+                className="m-0 mb-2 text-3xl sm:text-4xl font-light text-[#1a1410] dark:text-white"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 Order Confirmed
               </h1>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "0.72rem",
-                  color: "#7a6e65",
-                  letterSpacing: "0.06em",
-                  fontFamily: "'Inter', sans-serif",
-                  lineHeight: 1.6,
-                }}
-              >
+              <p className="m-0 text-xs text-[#7a6e65] dark:text-[#a8a29e] leading-relaxed font-light">
                 Thank you for shopping with Luxurisen.
                 <br />
-                Your order is on its way.
+                Your order is being prepared with utmost care.
               </p>
             </div>
           </div>
 
           {/* ── Step tracker ── */}
           <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "flex-start",
-              marginBottom: 40,
-              opacity: contentVisible ? 1 : 0,
-              transform: contentVisible ? "translateY(0)" : "translateY(10px)",
-              transition: "opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s",
-            }}
+            className={`flex justify-center items-start mb-8 transition-all duration-700 ${
+              contentVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
+            }`}
           >
             <Step label="Order Placed" done active={false} isLast={false} />
             <Step label="Processing" done={false} active isLast={false} />
@@ -419,27 +325,13 @@ const OrderSuccess = () => {
 
           {/* ── Details card ── */}
           <div
-            style={{
-              backgroundColor: "#fff",
-              border: "1px solid #e8e2d8",
-              borderRadius: 4,
-              padding: "28px 32px",
-              marginBottom: 24,
-              opacity: contentVisible ? 1 : 0,
-              transform: contentVisible ? "translateY(0)" : "translateY(10px)",
-              transition: "opacity 0.6s ease 0.15s, transform 0.6s ease 0.15s",
-            }}
+            className={`bg-white dark:bg-[#141210] border border-[#e8e2d8] dark:border-[#292522] rounded-lg p-6 sm:p-8 mb-6 shadow-sm transition-all duration-700 ${
+              contentVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
+            }`}
           >
-            <p
-              style={{
-                margin: "0 0 16px",
-                fontSize: "0.55rem",
-                letterSpacing: "0.3em",
-                textTransform: "uppercase",
-                color: "#a09890",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
+            <p className="m-0 mb-4 text-[0.55rem] tracking-[0.3em] uppercase text-[#a09890] dark:text-[#78716c] font-medium">
               Order Details
             </p>
 
@@ -454,22 +346,17 @@ const OrderSuccess = () => {
 
             {/* Items Summary */}
             {cartItems.length > 0 && (
-              <div style={{ marginTop: '24px', marginBottom: '8px' }}>
-                <p
-                  style={{
-                    margin: "0 0 12px",
-                    fontSize: "0.55rem",
-                    letterSpacing: "0.3em",
-                    textTransform: "uppercase",
-                    color: "#a09890",
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                >
-                  Items
+              <div className="mt-6 mb-2">
+                <p className="m-0 mb-3 text-[0.55rem] tracking-[0.3em] uppercase text-[#a09890] dark:text-[#78716c] font-medium">
+                  Items In Package ({cartItems.length})
                 </p>
-                <div style={{ borderTop: '1px solid #f0ede9' }}>
-                  {cartItems.map((item) => (
-                    <OrderItemRow key={item._id || Math.random()} item={item} currency={summary.currency} />
+                <div className="border-t border-[#f0ede9] dark:border-[#292522]">
+                  {cartItems.map((item, i) => (
+                    <OrderItemRow
+                      key={item._id || i}
+                      item={item}
+                      currency={summary.currency}
+                    />
                   ))}
                 </div>
               </div>
@@ -477,39 +364,38 @@ const OrderSuccess = () => {
 
             {/* Price Summary */}
             {summary.total !== undefined && (
-              <div style={{ marginTop: '16px', borderTop: '1px solid #e8e2d8', paddingTop: '8px' }}>
-                <InfoRow label="Subtotal" value={new Intl.NumberFormat('en-IN', { style: 'currency', currency: summary.currency || 'INR' }).format(summary.subtotal)} />
+              <div className="mt-4 border-t border-[#e8e2d8] dark:border-[#292522] pt-2">
+                <InfoRow label="Subtotal" value={fmt(summary.subtotal)} />
                 {summary.couponDiscount > 0 && (
-                  <InfoRow label="Discount" value={`-${new Intl.NumberFormat('en-IN', { style: 'currency', currency: summary.currency || 'INR' }).format(summary.couponDiscount)}`} />
+                  <InfoRow
+                    label="Discount"
+                    value={`-${fmt(summary.couponDiscount)}`}
+                  />
                 )}
-                <InfoRow label="Shipping" value={summary.shipping === 0 ? "Free" : new Intl.NumberFormat('en-IN', { style: 'currency', currency: summary.currency || 'INR' }).format(summary.shipping)} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '16px', borderTop: '1px dashed #e8e2d8' }}>
-                  <span style={{ fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1410', fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>Total</span>
-                  <span style={{ fontSize: '0.9rem', color: '#1a1410', fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>{new Intl.NumberFormat('en-IN', { style: 'currency', currency: summary.currency || 'INR' }).format(summary.total)}</span>
+                <InfoRow
+                  label="Shipping"
+                  value={summary.shipping === 0 ? "Free" : fmt(summary.shipping)}
+                />
+                <div className="flex justify-between items-center mt-3 pt-3 border-t border-dashed border-[#e8e2d8] dark:border-[#292522]">
+                  <span className="text-[0.65rem] tracking-[0.15em] uppercase font-semibold text-[#1a1410] dark:text-[#fbf9f6]">
+                    Total Paid
+                  </span>
+                  <span className="text-base font-semibold text-[#1a1410] dark:text-[#C9A96E]">
+                    {fmt(summary.total)}
+                  </span>
                 </div>
               </div>
             )}
 
             {/* Confirmation note */}
-            <div
-              style={{
-                marginTop: 20,
-                padding: "12px 14px",
-                backgroundColor: "rgba(201,169,110,0.06)",
-                border: "1px dashed rgba(201,169,110,0.35)",
-                borderRadius: 2,
-                display: "flex",
-                gap: 10,
-                alignItems: "flex-start",
-              }}
-            >
+            <div className="mt-5 p-3.5 bg-[#C9A96E]/10 border border-[#C9A96E]/30 rounded flex gap-2.5 items-start">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="#C9A96E"
-                style={{ width: 15, height: 15, flexShrink: 0, marginTop: 1 }}
+                className="w-4 h-4 flex-shrink-0 mt-0.5"
               >
                 <path
                   strokeLinecap="round"
@@ -517,109 +403,42 @@ const OrderSuccess = () => {
                   d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
                 />
               </svg>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "0.65rem",
-                  color: "#6b5e50",
-                  fontFamily: "'Inter', sans-serif",
-                  lineHeight: 1.6,
-                  letterSpacing: "0.02em",
-                }}
-              >
-                A confirmation email has been sent to your registered address.
-                You'll receive tracking updates once your order ships.
+              <p className="m-0 text-xs text-[#6b5e50] dark:text-[#d6d3d1] leading-relaxed font-light">
+                A confirmation receipt has been generated. You will receive
+                tracking updates as your items move through delivery.
               </p>
             </div>
           </div>
 
           {/* ── CTA buttons ── */}
           <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              opacity: contentVisible ? 1 : 0,
-              transform: contentVisible ? "translateY(0)" : "translateY(10px)",
-              transition: "opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s",
-            }}
+            className={`flex flex-col gap-3 transition-all duration-700 ${
+              contentVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
+            }`}
           >
             <button
               onClick={() => navigate("/")}
-              style={{
-                width: "100%",
-                padding: "14px 0",
-                backgroundColor: "#1a1410",
-                color: "#fbf9f6",
-                border: "none",
-                borderRadius: 2,
-                cursor: "pointer",
-                fontSize: "0.6rem",
-                letterSpacing: "0.25em",
-                textTransform: "uppercase",
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 500,
-                transition: "background-color 0.2s ease, transform 0.15s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#3d342c";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#1a1410";
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = "scale(0.985)";
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-              }}
+              className="w-full py-4 bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] text-[0.65rem] tracking-[0.25em] uppercase font-semibold rounded-full hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] transition-all cursor-pointer shadow-sm"
             >
               Continue Shopping
             </button>
 
             <button
-              onClick={() => navigate("/cart")}
-              style={{
-                width: "100%",
-                padding: "13px 0",
-                backgroundColor: "transparent",
-                color: "#3d342c",
-                border: "1px solid #d5cfc8",
-                borderRadius: 2,
-                cursor: "pointer",
-                fontSize: "0.6rem",
-                letterSpacing: "0.25em",
-                textTransform: "uppercase",
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 400,
-                transition: "border-color 0.2s ease, color 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "#1a1410";
-                e.currentTarget.style.color = "#0d0d0b";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "#d5cfc8";
-                e.currentTarget.style.color = "#3d342c";
-              }}
+              onClick={() => navigate("/orders")}
+              className="w-full py-3.5 bg-transparent text-[#3d342c] dark:text-[#d6d3d1] border border-[#d5cfc8] dark:border-[#38332e] text-[0.65rem] tracking-[0.25em] uppercase font-semibold rounded-full hover:border-[#0d0d0b] dark:hover:border-white hover:text-[#0d0d0b] dark:hover:text-white transition-all cursor-pointer"
             >
-              View Cart
+              View Order History
             </button>
           </div>
 
           {/* ── Brand watermark ── */}
           <p
-            style={{
-              textAlign: "center",
-              marginTop: 40,
-              fontSize: "0.65rem",
-              letterSpacing: "0.3em",
-              textTransform: "uppercase",
-              fontFamily: "'Cormorant Garamond', serif",
-              color: "#C9A96E",
-              opacity: contentVisible ? 0.8 : 0,
-              transition: "opacity 0.8s ease 0.3s",
-            }}
+            className={`text-center mt-8 text-[0.7rem] tracking-[0.3em] uppercase text-[#C9A96E] transition-opacity duration-700 ${
+              contentVisible ? "opacity-90" : "opacity-0"
+            }`}
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
             Luxurisen
           </p>

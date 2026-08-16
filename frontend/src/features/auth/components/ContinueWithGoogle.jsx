@@ -5,9 +5,9 @@ const ContinueWithGoogle = () => {
     <a href="/api/auth/google" className="w-full block">
       <button     
         type="button"
-        className="w-full bg-white text-black font-semibold tracking-wide py-3.5 px-4 rounded flex items-center justify-center gap-3 hover:bg-gray-200 transition-colors duration-300"
+        className="w-full bg-[#f5f3f0] hover:bg-[#eae6e1] text-[#0d0d0b] border border-[#e4e2df] hover:border-[#C9A96E] text-xs font-medium tracking-wider py-3.5 px-4 rounded-full flex items-center justify-center gap-3 transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.99]"
       >
-        <svg viewBox="0 0 24 24" className="w-5 h-5">
+        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0">
           <path
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
             fill="#4285F4"
@@ -25,7 +25,9 @@ const ContinueWithGoogle = () => {
             fill="#EA4335"
           />
         </svg>
-        Continue with Google
+        <span className="uppercase text-[0.62rem] tracking-[0.16em]">
+          Continue with Google
+        </span>
       </button>
     </a>
   );

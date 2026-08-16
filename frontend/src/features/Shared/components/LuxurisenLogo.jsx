@@ -1,39 +1,52 @@
 import React from "react";
 
-export const LuxurisenIcon = ({ size = 28, color = "currentColor", className = "" }) => (
+export const LuxurisenIcon = ({ size = 26, color = "#C9A96E", className = "" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 250 200"
+    viewBox="0 0 250 250"
     width={size}
-    height={(size * 200) / 250}
+    height={size}
     className={className}
     style={{ display: "inline-block", verticalAlign: "middle" }}
   >
     <g
       fill="none"
       stroke={color}
-      strokeWidth="13"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
+      {/* Outer Faceted Diamond */}
       <path
-        d="M 65 95 C 45 95 30 75 40 55 C 45 40 65 35 75 45 C 85 25 115 20 135 35 C 150 20 180 25 190 45 C 205 35 220 50 215 68 C 225 80 220 95 200 95"
-        opacity="0.9"
+        d="M 125 15 L 215 80 L 235 170 L 125 240 L 15 170 L 35 80 Z"
+        strokeWidth="5"
+        strokeOpacity="0.4"
       />
-      <path d="M 15 35 C 10 75 40 115 95 125 C 120 128 135 110 135 90 C 135 75 115 65 90 75 C 60 85 35 65 30 45 Z" />
-      <path d="M 25 35 C 40 70 80 95 125 95" />
-      <path d="M 20 95 C 35 125 75 145 120 142" />
-
-      <path d="M 225 35 C 230 75 200 115 145 125 C 120 128 105 110 105 90 C 105 75 125 65 150 75 C 180 85 205 65 210 45 Z" />
-      <path d="M 215 35 C 200 70 160 95 115 95" />
-      <path d="M 220 95 C 205 125 165 145 120 142" />
-      <path d="M 85 160 C 95 185 115 185 120 168 C 125 185 145 185 155 160" />
+      {/* Inner Concentric Frame */}
+      <path
+        d="M 125 32 L 200 87 L 218 162 L 125 222 L 32 162 L 50 87 Z"
+        strokeWidth="3"
+        strokeOpacity="0.75"
+      />
+      {/* Central Monogram 'L' */}
+      <path
+        d="M 100 75 L 100 175 L 160 175"
+        strokeWidth="11"
+        stroke={color}
+      />
+      {/* Serif accents */}
+      <path d="M 88 75 L 114 75" strokeWidth="9" stroke={color} />
+      <path d="M 160 163 L 160 187" strokeWidth="8" stroke={color} />
+      {/* Diagonal Sartorial Facet */}
+      <path d="M 148 85 L 108 165" strokeWidth="7" stroke={color} strokeOpacity="0.9" />
+      {/* Top & Bottom Accents */}
+      <polygon points="125,52 130,60 125,68 120,60" fill={color} stroke="none" />
+      <polygon points="125,188 130,196 125,204 120,196" fill={color} stroke="none" />
     </g>
   </svg>
 );
 
 export const LuxurisenLogo = ({
-  iconSize = 28,
+  iconSize = 26,
   textSize = "1.2rem",
   color = "#C9A96E",
   textColor = "inherit",
@@ -43,15 +56,19 @@ export const LuxurisenLogo = ({
 }) => {
   return (
     <div
-      className={`inline-flex items-center gap-2.5 cursor-pointer select-none ${className}`}
+      className={`inline-flex items-center gap-2.5 cursor-pointer select-none group ${className}`}
       onClick={onClick}
       style={{ color: textColor }}
     >
-      {showIcon && <LuxurisenIcon size={iconSize} color={color} />}
+      {showIcon && (
+        <div className="transition-transform duration-300 group-hover:scale-105">
+          <LuxurisenIcon size={iconSize} color={color} />
+        </div>
+      )}
       <span
         style={{
-          fontFamily: "'Cormorant Garamond', 'Inter', serif",
-          letterSpacing: "0.22em",
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          letterSpacing: "0.24em",
           textTransform: "uppercase",
           fontWeight: 600,
           fontSize: textSize,

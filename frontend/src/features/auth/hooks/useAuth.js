@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux";
-import { register, login, getMe } from "../services/auth.api";
-import { setLoading, setUser } from "../state/auth.slice";
+import { register, login, getMe, logout } from "../services/auth.api";
+import { setLoading, setUser, clearUser } from "../state/auth.slice";
+import { clearCart } from "../../cart/state/cart.slice";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -47,5 +48,17 @@ export const useAuth = () => {
     }
   }
 
-  return { handleRegister, handleLogin, handleGetMe };
+  async function handleLogout() {
+    try {
+      await logout();
+    } catch (error) {
+      console.log("Error during logout:", error);
+    } finally {
+      dispatch(clearUser());
+      dispatch(clearCart());
+    }
+  }
+
+  return { handleRegister, handleLogin, handleGetMe, handleLogout };
 };
+

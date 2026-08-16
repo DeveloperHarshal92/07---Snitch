@@ -4,6 +4,7 @@ import {
   googleCallback,
   login,
   register,
+  logout,
 } from "../controllers/auth.controller.js";
 import {
   validateLoginUser,
@@ -27,6 +28,13 @@ router.post("/register", validateRegisterUser, register);
  * @access Public
  */
 router.post("/login", validateLoginUser, login);
+
+/**
+ * @route POST /api/auth/logout
+ * @desc Logout user and clear auth cookie
+ * @access Public
+ */
+router.post("/logout", logout);
 
 /**
  * @route GET /api/auth/google
@@ -60,3 +68,4 @@ router.get(
 router.get("/me", authenticateUser, getMe);
 
 export default router;
+

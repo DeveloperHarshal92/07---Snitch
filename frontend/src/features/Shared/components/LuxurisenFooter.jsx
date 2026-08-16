@@ -102,10 +102,8 @@ const NavColumn = ({ title, links }) => (
         <li key={l.label}>
           <a
             href={l.href}
-            className="text-[0.72rem] leading-relaxed transition-colors duration-200"
-            style={{ color: "#6b6158", fontFamily: "'Inter', sans-serif" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#0d0d0b")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#6b6158")}
+            className="text-[0.72rem] leading-relaxed transition-colors duration-200 text-[#6b6158] dark:text-[#a8a29e] hover:text-[#0d0d0b] dark:hover:text-[#fbf9f6]"
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {l.label}
           </a>
@@ -124,18 +122,7 @@ const SocialRow = () => (
         target="_blank"
         rel="noopener noreferrer"
         aria-label={s.name}
-        className="w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-200"
-        style={{ borderColor: "#e4e2df", color: "#6b6158" }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = "#C9A96E";
-          e.currentTarget.style.color = "#C9A96E";
-          e.currentTarget.style.background = "rgba(201,169,110,0.08)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = "#e4e2df";
-          e.currentTarget.style.color = "#6b6158";
-          e.currentTarget.style.background = "transparent";
-        }}
+        className="w-8 h-8 rounded-full flex items-center justify-center border border-[#e4e2df] dark:border-[#292522] text-[#6b6158] dark:text-[#a8a29e] hover:border-[#C9A96E] dark:hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all duration-200"
       >
         {s.icon}
       </a>
@@ -163,7 +150,7 @@ const Newsletter = () => {
       >
         Stay in the loop
       </p>
-      <p className="text-[0.72rem] leading-relaxed" style={{ color: "#6b6158" }}>
+      <p className="text-[0.72rem] leading-relaxed text-[#6b6158] dark:text-[#a8a29e]">
         New drops, exclusive offers, and curated edits — straight to your inbox.
       </p>
       {sent ? (
@@ -181,33 +168,16 @@ const Newsletter = () => {
             placeholder="your@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 text-[0.7rem] px-3 py-2 border outline-none bg-transparent min-w-0"
+            className="flex-1 text-[0.7rem] px-3 py-2 border border-[#d0c5b5] dark:border-[#38332e] outline-none bg-transparent min-w-0 text-[#0d0d0b] dark:text-[#fbf9f6] focus:border-[#C9A96E]"
             style={{
-              borderColor: "#d0c5b5",
-              color: "#0d0d0b",
               fontFamily: "'Inter', sans-serif",
             }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = "#C9A96E")}
-            onBlur={(e) => (e.currentTarget.style.borderColor = "#d0c5b5")}
           />
           <button
             type="submit"
-            className="px-4 py-2 text-[0.6rem] tracking-[0.18em] uppercase font-medium border border-l-0 transition-all duration-200 cursor-pointer"
+            className="px-4 py-2 text-[0.6rem] tracking-[0.18em] uppercase font-medium border border-l-0 border-[#d0c5b5] dark:border-[#38332e] text-[#0d0d0b] dark:text-[#fbf9f6] bg-transparent hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] transition-all duration-200 cursor-pointer"
             style={{
-              borderColor: "#d0c5b5",
-              color: "#0d0d0b",
-              background: "transparent",
               fontFamily: "'Inter', sans-serif",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#C9A96E";
-              e.currentTarget.style.borderColor = "#C9A96E";
-              e.currentTarget.style.color = "#fbf9f6";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.borderColor = "#d0c5b5";
-              e.currentTarget.style.color = "#0d0d0b";
             }}
           >
             Subscribe
@@ -221,8 +191,7 @@ const Newsletter = () => {
 /* ── LuxurisenFooter ───────────────────────────────────────────── */
 const LuxurisenFooter = () => (
   <footer
-    className="w-full border-t mt-0"
-    style={{ backgroundColor: "#fbf9f6", borderColor: "#e4e2df" }}
+    className="w-full border-t mt-0 bg-[#fbf9f6] dark:bg-[#0a0908] border-[#e4e2df] dark:border-[#292522] transition-colors duration-300"
   >
     {/* ── Main grid ─── */}
     <div className="max-w-[1400px] mx-auto px-8 py-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-12">
@@ -232,8 +201,8 @@ const LuxurisenFooter = () => (
         <div className="flex flex-col gap-2">
           <LuxurisenLogo iconSize={26} textSize="1.25rem" />
           <p
-            className="text-[0.7rem] leading-relaxed max-w-[280px]"
-            style={{ color: "#6b6158", fontFamily: "'Inter', sans-serif" }}
+            className="text-[0.7rem] leading-relaxed max-w-[280px] text-[#6b6158] dark:text-[#a8a29e]"
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             Curated luxury essentials for the considered wardrobe. Craft, finish, and
             enduring elegance.
@@ -257,12 +226,11 @@ const LuxurisenFooter = () => (
 
     {/* ── Bottom bar ─── */}
     <div
-      className="border-t max-w-[1400px] mx-auto px-8 py-5 flex flex-wrap items-center justify-between gap-3"
-      style={{ borderColor: "#e4e2df" }}
+      className="border-t border-[#e4e2df] dark:border-[#292522] max-w-[1400px] mx-auto px-8 py-5 flex flex-wrap items-center justify-between gap-3"
     >
       <p
-        className="text-[0.6rem] tracking-[0.14em] uppercase"
-        style={{ color: "#9b9089", fontFamily: "'Inter', sans-serif" }}
+        className="text-[0.6rem] tracking-[0.14em] uppercase text-[#9b9089] dark:text-[#78716c]"
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
         © {new Date().getFullYear()} Luxurisen — All rights reserved
       </p>
@@ -271,10 +239,8 @@ const LuxurisenFooter = () => (
           <a
             key={t}
             href="/"
-            className="text-[0.6rem] tracking-[0.12em] uppercase transition-colors duration-150"
-            style={{ color: "#9b9089", fontFamily: "'Inter', sans-serif" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#C9A96E")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#9b9089")}
+            className="text-[0.6rem] tracking-[0.12em] uppercase text-[#9b9089] dark:text-[#78716c] hover:text-[#C9A96E] transition-colors duration-150"
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {t}
           </a>

@@ -310,11 +310,9 @@ const ProductDetail = () => {
       `}</style>
 
       <div
-        className="min-h-screen"
+        className="min-h-screen bg-[#fbf9f6] dark:bg-[#0a0908] text-[#0d0d0b] dark:text-[#fbf9f6] transition-colors duration-300"
         style={{
-          backgroundColor: "#fbf9f6",
           fontFamily: "'Inter', sans-serif",
-          color: "#0d0d0b",
         }}
       >
 
@@ -329,17 +327,15 @@ const ProductDetail = () => {
         >
           <button
             onClick={() => navigate("/")}
-            className="text-[0.6rem] tracking-[0.2em] uppercase bg-transparent border-none cursor-pointer"
-            style={{ color: "#6b6158" }}
+            className="text-[0.6rem] tracking-[0.2em] uppercase bg-transparent border-none cursor-pointer text-[#6b6158] dark:text-[#a8a29e] hover:text-[#C9A96E]"
           >
             Collection
           </button>
-          <span className="text-[0.6rem]" style={{ color: "#d0c5b5" }}>
+          <span className="text-[0.6rem] text-[#d0c5b5] dark:text-[#38332e]">
             /
           </span>
           <span
-            className="text-[0.6rem] tracking-[0.2em] uppercase"
-            style={{ color: "#3d342c" }}
+            className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3d342c] dark:text-[#d6d3d1]"
           >
             {product.title}
           </span>
@@ -347,19 +343,19 @@ const ProductDetail = () => {
 
         {/* ── Main grid ──────────────────────────────────────────── */}
         <main
-          className="max-w-[1200px] mx-auto px-6 lg:px-12 py-8 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20"
+          className="max-w-[1200px] mx-auto px-5 sm:px-6 lg:px-12 py-6 md:py-8 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(20px)",
             transition: "opacity 0.6s ease 0.08s, transform 0.6s ease 0.08s",
           }}
         >
-          {/* ── LEFT: Image gallery ──────────────────────────────── */}
-          <div className="flex flex-row gap-3">
-            {/* Vertical thumbnail rail */}
+          {/* ── LEFT: Image gallery (Responsive) ─────────────────── */}
+          <div className="flex flex-col-reverse sm:flex-row gap-3">
+            {/* Thumbnail rail: horizontal on mobile, vertical on sm+ */}
             {images.length > 1 && (
               <div
-                className="no-scrollbar flex flex-col gap-2.5 overflow-y-auto"
+                className="no-scrollbar flex flex-row sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto pb-2 sm:pb-0"
                 style={{ maxHeight: "600px" }}
               >
                 {images.map((img, i) => (
@@ -367,18 +363,18 @@ const ProductDetail = () => {
                     key={img._id ?? i}
                     onClick={() => setActiveImg(i)}
                     aria-label={`View image ${i + 1}`}
-                    className="thumb-btn flex-shrink-0 overflow-hidden rounded-sm border-[1.5px] bg-transparent p-0 cursor-pointer"
+                    className="thumb-btn flex-shrink-0 overflow-hidden rounded-md border-[1.5px] bg-[#f5f3f0] p-0 cursor-pointer transition-all"
                     style={{
-                      width: "68px",
-                      height: "86px",
+                      width: "60px",
+                      height: "76px",
                       borderColor: i === activeImg ? "#C9A96E" : "#e4e2df",
-                      opacity: i === activeImg ? 1 : 0.55,
+                      opacity: i === activeImg ? 1 : 0.65,
                     }}
                   >
                     <img
                       src={img.url}
                       alt={`Thumbnail ${i + 1}`}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover"
                     />
                   </button>
                 ))}
@@ -387,8 +383,8 @@ const ProductDetail = () => {
 
             {/* Hero image */}
             <div
-              className="relative flex-1 rounded-sm"
-              style={{ backgroundColor: "#f5f3f0", minHeight: "420px" }}
+              className="relative flex-1 rounded-xl overflow-hidden shadow-sm"
+              style={{ backgroundColor: "#f5f3f0", minHeight: "360px" }}
               onMouseEnter={() => setImgHovered(true)}
               onMouseLeave={() => setImgHovered(false)}
             >
@@ -519,22 +515,11 @@ const ProductDetail = () => {
                   <button
                     onClick={() => setActiveImg((i) => (i + 1) % images.length)}
                     aria-label="Next image"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer bg-[#fbf9f6]/90 dark:bg-[#141210]/90 text-[#0d0d0b] dark:text-[#fbf9f6] hover:bg-[#C9A96E] hover:text-[#0d0d0b] transition-all shadow-sm"
                     style={{
-                      background: "rgba(251,249,246,0.82)",
-                      color: "#0d0d0b",
-                      transition: "background 0.2s, opacity 0.25s",
                       opacity: imgHovered ? 1 : 0,
                       pointerEvents: imgHovered ? "auto" : "none",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(201,169,110,0.92)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(251,249,246,0.82)")
-                    }
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -560,18 +545,16 @@ const ProductDetail = () => {
           <div className="flex flex-col gap-6 lg:pt-2">
             {/* Label */}
             <p
-              className="text-[0.6rem] tracking-[0.28em] uppercase m-0"
-              style={{ color: "#C9A96E" }}
+              className="text-[0.6rem] tracking-[0.28em] uppercase m-0 text-[#C9A96E]"
             >
               New Season · SS&apos;26
             </p>
 
             {/* Title */}
             <h1
-              className="m-0 font-light leading-[1.1] text-[clamp(2rem,4vw,2.8rem)]"
+              className="m-0 font-light leading-[1.1] text-[clamp(2rem,4vw,2.8rem)] text-[#0d0d0b] dark:text-white"
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
-                color: "#0d0d0b",
               }}
             >
               {product.title}
@@ -580,14 +563,12 @@ const ProductDetail = () => {
             {/* Price */}
             <div className="flex items-baseline gap-3">
               <span
-                className="text-2xl font-medium"
-                style={{ color: "#C9A96E" }}
+                className="text-2xl font-medium text-[#C9A96E]"
               >
                 {fmt(displayPrice.amount, displayPrice.currency)}
               </span>
               <span
-                className="text-[0.6rem] tracking-[0.15em] uppercase"
-                style={{ color: "#6b6158" }}
+                className="text-[0.6rem] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e]"
               >
                 incl. of all taxes
               </span>
@@ -599,8 +580,7 @@ const ProductDetail = () => {
                 {/* ── Main row ───────────────────────────────────── */}
                 <div className="flex flex-col gap-2">
                   <p
-                    className="m-0 text-[0.6rem] tracking-[0.22em] uppercase"
-                    style={{ color: "#6b6158" }}
+                    className="m-0 text-[0.6rem] tracking-[0.22em] uppercase text-[#6b6158] dark:text-[#a8a29e]"
                   >
                     View
                   </p>
@@ -611,19 +591,11 @@ const ProductDetail = () => {
                         setChosenAttrs({});
                         setActiveImg(0);
                       }}
-                      className="text-[0.6rem] tracking-[0.12em] uppercase px-3.5 py-2 rounded-sm border cursor-pointer transition-all duration-200"
-                      style={{
-                        backgroundColor:
-                          selectedVariantId === null
-                            ? "#C9A96E"
-                            : "transparent",
-                        color:
-                          selectedVariantId === null ? "#0d0d0b" : "#6b6158",
-                        borderColor:
-                          selectedVariantId === null ? "#C9A96E" : "#d0c5b5",
-                        fontFamily: "'Inter', sans-serif",
-                        fontWeight: selectedVariantId === null ? 500 : 400,
-                      }}
+                      className={`text-[0.6rem] tracking-[0.12em] uppercase px-3.5 py-2 rounded-sm border cursor-pointer transition-all duration-200 ${
+                        selectedVariantId === null
+                          ? "bg-[#C9A96E] text-[#0d0d0b] border-[#C9A96E] font-medium"
+                          : "bg-transparent text-[#6b6158] dark:text-[#d6d3d1] border-[#d0c5b5] dark:border-[#38332e] hover:border-[#C9A96E]"
+                      }`}
                     >
                       Original
                     </button>
@@ -635,15 +607,13 @@ const ProductDetail = () => {
                   <div key={attrKey} className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <p
-                        className="m-0 text-[0.6rem] tracking-[0.22em] uppercase"
-                        style={{ color: "#6b6158" }}
+                        className="m-0 text-[0.6rem] tracking-[0.22em] uppercase text-[#6b6158] dark:text-[#a8a29e]"
                       >
                         {attrKey}
                       </p>
                       {chosenAttrs[attrKey] && (
                         <span
-                          className="text-[0.6rem] tracking-[0.1em]"
-                          style={{ color: "#3d342c" }}
+                          className="text-[0.6rem] tracking-[0.1em] text-[#3d342c] dark:text-[#d6d3d1]"
                         >
                           {chosenAttrs[attrKey]}
                         </span>
@@ -661,27 +631,13 @@ const ProductDetail = () => {
                           <button
                             key={val}
                             onClick={() => pickAttrValue(attrKey, val)}
-                            className="text-[0.6rem] tracking-[0.12em] uppercase px-3.5 py-2 rounded-sm border cursor-pointer transition-all duration-200"
-                            style={{
-                              backgroundColor: isActive
-                                ? "#0d0d0b"
-                                : "transparent",
-                              color: isActive
-                                ? "#fbf9f6"
+                            className={`text-[0.6rem] tracking-[0.12em] uppercase px-3.5 py-2 rounded-sm border cursor-pointer transition-all duration-200 ${
+                              isActive
+                                ? "bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] border-[#0d0d0b] dark:border-white font-medium shadow-sm"
                                 : outOfStock
-                                  ? "#c4bdb5"
-                                  : "#0d0d0b",
-                              borderColor: isActive
-                                ? "#0d0d0b"
-                                : outOfStock
-                                  ? "#e4e2df"
-                                  : "#d0c5b5",
-                              fontFamily: "'Inter', sans-serif",
-                              textDecoration:
-                                outOfStock && !isActive
-                                  ? "line-through"
-                                  : "none",
-                            }}
+                                  ? "bg-transparent text-[#a8a29e] dark:text-[#78716c] border-[#e4e2df] dark:border-[#292522] line-through"
+                                  : "bg-transparent text-[#0d0d0b] dark:text-[#fbf9f6] border-[#d0c5b5] dark:border-[#38332e] hover:border-[#C9A96E]"
+                            }`}
                           >
                             {val}
                           </button>
@@ -698,10 +654,10 @@ const ProductDetail = () => {
                     style={{
                       color:
                         displayStock === 0
-                          ? "#c0392b"
+                          ? "#ef4444"
                           : displayStock <= 5
-                            ? "#b7791f"
-                            : "#4a7c59",
+                            ? "#eab308"
+                            : "#22c55e",
                     }}
                   >
                     {displayStock === 0
@@ -715,13 +671,12 @@ const ProductDetail = () => {
             )}
 
             {/* Divider */}
-            <div className="border-t" style={{ borderColor: "#e4e2df" }} />
+            <div className="border-t border-[#e4e2df] dark:border-[#292522]" />
 
             {/* Description */}
             {product.description && (
               <p
-                className="m-0 text-sm leading-[1.85] font-light"
-                style={{ color: "#3d342c" }}
+                className="m-0 text-sm leading-[1.85] font-light text-[#3d342c] dark:text-[#d6d3d1]"
               >
                 {product.description}
               </p>
@@ -732,8 +687,7 @@ const ProductDetail = () => {
               {["Free Shipping", "Easy Returns", "Authentic"].map((tag) => (
                 <span
                   key={tag}
-                  className="text-[0.55rem] tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm"
-                  style={{ backgroundColor: "#f0ede9", color: "#3d342c" }}
+                  className="text-[0.55rem] tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm bg-[#f0ede9] dark:bg-[#1c1916] text-[#3d342c] dark:text-[#d6d3d1] border border-transparent dark:border-[#292522]"
                 >
                   {tag}
                 </span>
@@ -741,7 +695,7 @@ const ProductDetail = () => {
             </div>
 
             {/* Divider */}
-            <div className="border-t" style={{ borderColor: "#e4e2df" }} />
+            <div className="border-t border-[#e4e2df] dark:border-[#292522]" />
 
             {/* ── CTA buttons ───────────────────────────────────── */}
             <div className="flex flex-col sm:flex-row gap-3">
@@ -769,13 +723,11 @@ const ProductDetail = () => {
                 }}
                 disabled={isAdding}
                 id="btn-add-to-cart"
-                className="pdp-btn-outline flex-1 flex items-center justify-center gap-2 py-4 text-[0.65rem] tracking-[0.22em] uppercase font-medium rounded-sm border cursor-pointer transition-colors"
-                style={{
-                  backgroundColor: addSuccess ? "#16a34a" : "transparent",
-                  color: addSuccess ? "#ffffff" : "#0d0d0b",
-                  borderColor: addSuccess ? "#16a34a" : "#0d0d0b",
-                  fontFamily: "'Inter', sans-serif",
-                }}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 text-[0.65rem] tracking-[0.22em] uppercase font-medium rounded-sm border cursor-pointer transition-all duration-300 ${
+                  addSuccess
+                    ? "bg-[#16a34a] text-white border-[#16a34a]"
+                    : "bg-transparent text-[#0d0d0b] dark:text-[#fbf9f6] border-[#0d0d0b] dark:border-white/40 hover:border-[#C9A96E] hover:text-[#C9A96E] dark:hover:border-[#C9A96E] dark:hover:text-[#C9A96E]"
+                }`}
               >
                 {addSuccess ? (
                   <>
@@ -839,12 +791,7 @@ const ProductDetail = () => {
                 }}
                 disabled={isAdding}
                 id="btn-buy-now"
-                className="pdp-btn-dark flex-1 flex items-center justify-center gap-2 py-4 text-[0.65rem] tracking-[0.22em] uppercase font-medium rounded-sm border-none cursor-pointer"
-                style={{
-                  backgroundColor: "#0d0d0b",
-                  color: "#fbf9f6",
-                  fontFamily: "'Inter', sans-serif",
-                }}
+                className="flex-1 flex items-center justify-center gap-2 py-4 text-[0.65rem] tracking-[0.22em] uppercase font-medium rounded-sm border-none cursor-pointer bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] transition-all duration-300 shadow-sm"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -866,8 +813,7 @@ const ProductDetail = () => {
 
             {/* Product meta */}
             <div
-              className="flex flex-col gap-2 pt-2 border-t"
-              style={{ borderColor: "#e4e2df" }}
+              className="flex flex-col gap-2 pt-2 border-t border-[#e4e2df] dark:border-[#292522]"
             >
               <MetaRow label="Product ID" value={product._id} mono />
               <MetaRow
@@ -892,12 +838,7 @@ const ProductDetail = () => {
         {/* ── You May Also Like ────────────────────────────────────── */}
         {recommendations.length > 0 && (
           <section
-            className="rec-section"
-            style={{
-              borderTop: "1px solid #e4e2df",
-              paddingTop: "56px",
-              paddingBottom: "64px",
-            }}
+            className="rec-section border-t border-[#e4e2df] dark:border-[#292522] py-14"
           >
             <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
               {/* Header */}
@@ -906,25 +847,14 @@ const ProductDetail = () => {
               >
                 <div className="flex flex-col gap-1">
                   <p
-                    style={{
-                      margin: 0,
-                      fontSize: "0.6rem",
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                      color: "#C9A96E",
-                      fontFamily: "'Inter', sans-serif",
-                    }}
+                    className="m-0 text-[0.6rem] tracking-[0.28em] uppercase text-[#C9A96E]"
                   >
                     Curated for you
                   </p>
                   <h2
+                    className="m-0 text-3xl md:text-4xl font-light text-[#0d0d0b] dark:text-white leading-tight"
                     style={{
-                      margin: 0,
-                      fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
                       fontFamily: "'Cormorant Garamond', serif",
-                      fontWeight: 300,
-                      color: "#0d0d0b",
-                      lineHeight: 1.1,
                     }}
                   >
                     You May Also Like
@@ -932,20 +862,7 @@ const ProductDetail = () => {
                 </div>
                 <button
                   onClick={() => navigate("/")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "0.6rem",
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    color: "#6b6158",
-                    fontFamily: "'Inter', sans-serif",
-                    textDecoration: "underline",
-                    textUnderlineOffset: "4px",
-                    whiteSpace: "nowrap",
-                    paddingBottom: "4px",
-                  }}
+                  className="bg-transparent border-none cursor-pointer text-[0.6rem] tracking-[0.18em] uppercase text-[#6b6158] dark:text-[#a8a29e] hover:text-[#C9A96E] underline underline-offset-4"
                 >
                   View all →
                 </button>
@@ -953,35 +870,23 @@ const ProductDetail = () => {
 
               {/* Card rail */}
               <div
-                className="no-scrollbar"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                  gap: "20px",
-                }}
+                className="no-scrollbar grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5"
               >
                 {recommendations.map((rec, idx) => {
                   const thumb = rec.images?.[0]?.url;
                   return (
                     <div
                       key={rec._id}
-                      className="rec-card"
+                      className="rec-card bg-[#f5f3f0] dark:bg-[#161412] border border-[#e4e2df] dark:border-[#292522] rounded-lg overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:border-[#C9A96E]"
                       onClick={() => navigate(`/product/${rec._id}`)}
                       style={{
-                        backgroundColor: "#f5f3f0",
-                        display: "flex",
-                        flexDirection: "column",
                         opacity: 0,
                         animation: `recFadeIn 0.5s ease ${0.1 + idx * 0.1}s forwards`,
                       }}
                     >
                       {/* Image zone */}
                       <div
-                        className="relative overflow-hidden"
-                        style={{
-                          aspectRatio: "4/5",
-                          backgroundColor: "#e4e2df",
-                        }}
+                        className="relative overflow-hidden aspect-[4/5] bg-[#e4e2df] dark:bg-[#201d1a]"
                       >
                         {thumb ? (
                           <img
@@ -991,20 +896,20 @@ const ProductDetail = () => {
                           />
                         ) : (
                           <div
-                            className="w-full h-full flex items-center justify-center"
+                            className="w-full h-full flex items-center justify-center text-[#a8a29e]"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
                               viewBox="0 0 24 24"
                               strokeWidth={1}
-                              stroke="#d0c5b5"
-                              style={{ width: 32, height: 32 }}
+                              stroke="currentColor"
+                              className="w-8 h-8"
                             >
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0Z"
                               />
                             </svg>
                           </div>
@@ -1013,14 +918,7 @@ const ProductDetail = () => {
                         {/* Hover CTA overlay */}
                         <div className="rec-cta">
                           <span
-                            style={{
-                              fontSize: "0.55rem",
-                              letterSpacing: "0.2em",
-                              textTransform: "uppercase",
-                              color: "#fbf9f6",
-                              fontFamily: "'Inter', sans-serif",
-                              fontWeight: 500,
-                            }}
+                            className="text-[0.55rem] tracking-[0.2em] uppercase text-[#fbf9f6] font-medium"
                           >
                             View Product
                           </span>
@@ -1029,36 +927,18 @@ const ProductDetail = () => {
 
                       {/* Info */}
                       <div
-                        style={{
-                          padding: "14px 16px 16px",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "6px",
-                        }}
+                        className="p-3.5 flex flex-col gap-1.5"
                       >
                         <p
+                          className="m-0 text-sm md:text-base font-light text-[#0d0d0b] dark:text-[#fbf9f6] line-clamp-1"
                           style={{
-                            margin: 0,
-                            fontSize: "1rem",
                             fontFamily: "'Cormorant Garamond', serif",
-                            fontWeight: 400,
-                            color: "#0d0d0b",
-                            lineHeight: 1.25,
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
                           }}
                         >
                           {rec.title}
                         </p>
                         <span
-                          style={{
-                            fontSize: "0.8rem",
-                            fontFamily: "'Inter', sans-serif",
-                            fontWeight: 500,
-                            color: "#C9A96E",
-                          }}
+                          className="text-xs font-medium text-[#C9A96E]"
                         >
                           {fmt(rec.price?.amount, rec.price?.currency)}
                         </span>
@@ -1071,24 +951,63 @@ const ProductDetail = () => {
           </section>
         )}
 
+        {/* ── Mobile Sticky Bottom Action Bar ───────────────────── */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 p-3 bg-[#fbf9f6]/95 dark:bg-[#0d0d0b]/95 backdrop-blur-md border-t border-[#e4e2df] dark:border-[#292522] shadow-[0_-4px_20px_rgba(0,0,0,0.2)] flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p
+              className="text-xs font-light truncate text-[#0d0d0b] dark:text-[#fbf9f6]"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {product.title}
+            </p>
+            <p className="text-xs font-semibold text-[#C9A96E]">
+              {fmt(displayPrice.amount, displayPrice.currency)}
+            </p>
+          </div>
+
+          <button
+            onClick={async () => {
+              if (!user) {
+                navigate("/login");
+                return;
+              }
+              if (isAdding) return;
+              try {
+                setIsAdding(true);
+                await handleAddToCart({
+                  productId: product._id,
+                  variantId: selectedVariantId,
+                });
+                setAddSuccess(true);
+                setTimeout(() => setAddSuccess(false), 2000);
+              } catch (err) {
+                console.error(err);
+              } finally {
+                setIsAdding(false);
+              }
+            }}
+            disabled={isAdding}
+            className="px-5 py-2.5 rounded-full text-[0.62rem] tracking-[0.16em] uppercase font-semibold bg-[#0d0d0b] dark:bg-[#fbf9f6] text-[#fbf9f6] dark:text-[#0d0d0b] hover:bg-[#C9A96E] hover:text-[#0d0d0b] dark:hover:bg-[#C9A96E] dark:hover:text-[#0d0d0b] transition-all cursor-pointer whitespace-nowrap shadow-sm"
+          >
+            {addSuccess ? "Added ✓" : isAdding ? "Adding..." : "Add to Bag"}
+          </button>
+        </div>
+
         {/* ── Footer ─────────────────────────────────────────────── */}
         <footer
-          className="border-t max-w-[1200px] mx-auto px-6 lg:px-12 py-10 flex items-center justify-between flex-wrap gap-4"
-          style={{ borderColor: "#e4e2df" }}
+          className="border-t border-[#e4e2df] dark:border-[#292522] max-w-[1200px] mx-auto px-6 lg:px-12 py-10 flex items-center justify-between flex-wrap gap-4"
         >
           <span
-            className="text-[0.9rem] tracking-[0.35em] uppercase cursor-pointer"
+            className="text-[0.9rem] tracking-[0.35em] uppercase cursor-pointer text-[#C9A96E]"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
-              color: "#C9A96E",
             }}
             onClick={() => navigate("/")}
           >
             Luxurisen
           </span>
           <p
-            className="text-[0.6rem] tracking-[0.15em] uppercase m-0"
-            style={{ color: "#6b6158" }}
+            className="text-[0.6rem] tracking-[0.15em] uppercase m-0 text-[#6b6158] dark:text-[#a8a29e]"
           >
             © {new Date().getFullYear()} Luxurisen — All rights reserved
           </p>
@@ -1103,14 +1022,13 @@ const ProductDetail = () => {
 const MetaRow = ({ label, value, mono = false }) => (
   <div className="flex items-center justify-between gap-4">
     <span
-      className="text-[0.6rem] tracking-[0.15em] uppercase"
-      style={{ color: "#6b6158" }}
+      className="text-[0.6rem] tracking-[0.15em] uppercase text-[#6b6158] dark:text-[#a8a29e]"
     >
       {label}
     </span>
     <span
-      className={`text-[0.65rem] ${mono ? "font-mono" : ""} text-right`}
-      style={{ color: "#3d342c", maxWidth: "60%" }}
+      className={`text-[0.65rem] ${mono ? "font-mono" : ""} text-right text-[#3d342c] dark:text-[#d6d3d1]`}
+      style={{ maxWidth: "60%" }}
     >
       {value}
     </span>
@@ -1118,3 +1036,4 @@ const MetaRow = ({ label, value, mono = false }) => (
 );
 
 export default ProductDetail;
+
