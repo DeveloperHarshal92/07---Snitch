@@ -383,8 +383,8 @@ const ProductDetail = () => {
 
             {/* Hero image */}
             <div
-              className="relative flex-1 rounded-xl overflow-hidden shadow-sm"
-              style={{ backgroundColor: "#f5f3f0", minHeight: "360px" }}
+              className="relative flex-1 rounded-xl overflow-hidden shadow-sm aspect-[3/4] sm:aspect-[4/5] bg-[#f5f3f0] dark:bg-[#141210]"
+              style={{ minHeight: "380px" }}
               onMouseEnter={() => setImgHovered(true)}
               onMouseLeave={() => setImgHovered(false)}
             >
@@ -393,7 +393,7 @@ const ProductDetail = () => {
                   key={activeImg}
                   src={images[activeImg]?.url}
                   alt={`${product.title} — view ${activeImg + 1}`}
-                  className="zoom-img w-full h-full object-contain rounded-sm"
+                  className="zoom-img w-full h-full object-cover object-top rounded-sm"
                   style={{
                     animation: "fadeIn 0.35s ease",
                     display: "block",
