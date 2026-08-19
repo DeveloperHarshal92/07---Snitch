@@ -50,14 +50,44 @@ export const getProductDetails = async (productId) => {
 
 export const addProductVariant = async (productId, newProductVariant) => {
   try {
-    const formData = new FormData();
-    newProductVariant.images.forEach((image) => {
-      formData.append(`images`, image.file);
-    });
-    formData.append("stock", newProductVariant.stock);
-    formData.append("price", newProductVariant.price.amount);
-    formData.append("currency", newProductVariant.price.currency);
-    formData.append("attributes", JSON.stringify(newProductVariant.attributes));
+    let formData;
+    if (newProductVariant instanceof FormData) {
+      formData = newProductVariant;
+    } else {
+      formData = new FormData();
+      if (Array.isArray(newProductVariant?.images)) {
+        newProductVariant.images.forEach((image) => {
+          const file = image?.file || image;
+          if (file instanceof Blob || file instanceof File) {
+            formData.append("images", file);
+          }
+        });
+      }
+      formData.append("stock", newProductVariant?.stock ?? 0);
+      const priceVal =
+        newProductVariant?.price?.amount ??
+        newProductVariant?.priceAmount ??
+        newProductVariant?.price ??
+        0;
+      formData.append("price", priceVal);
+      formData.append("priceAmount", priceVal);
+      const currencyVal =
+        newProductVariant?.price?.currency ??
+        newProductVariant?.priceCurrency ??
+        newProductVariant?.currency ??
+        "INR";
+      formData.append("currency", currencyVal);
+      formData.append("priceCurrency", currencyVal);
+      if (newProductVariant?.attributes) {
+        formData.append(
+          "attributes",
+          typeof newProductVariant.attributes === "string"
+            ? newProductVariant.attributes
+            : JSON.stringify(newProductVariant.attributes)
+        );
+      }
+    }
+
     const response = await productApiInstance.post(
       `/${productId}/variants`,
       formData,
@@ -65,6 +95,7 @@ export const addProductVariant = async (productId, newProductVariant) => {
     return response.data;
   } catch (error) {
     console.error("Error adding product variant:", error);
+    throw error;
   }
 };
 

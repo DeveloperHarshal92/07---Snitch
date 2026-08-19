@@ -119,11 +119,12 @@ const SellerProductDetails = () => {
       const priceToSend = newVariant.price.amount
         ? newVariant.price.amount
         : (product.price?.amount ?? 0);
+      payload.append("price", priceToSend);
       payload.append("priceAmount", priceToSend);
-      payload.append(
-        "priceCurrency",
-        newVariant.price.currency || (product.price?.currency ?? "INR"),
-      );
+      const currencyToSend =
+        newVariant.price.currency || (product.price?.currency ?? "INR");
+      payload.append("currency", currencyToSend);
+      payload.append("priceCurrency", currencyToSend);
 
       const attrObj = {};
       newVariant.attributes.forEach((a) => {

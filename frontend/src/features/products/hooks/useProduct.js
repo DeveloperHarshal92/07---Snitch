@@ -49,7 +49,7 @@ export const useProduct = () => {
 
   const handleAddProductVariant = async (productId, newProductVariant) => {
     const data = await addProductVariant(productId, newProductVariant);
-    return data?.variant;
+    return data?.product || data?.variant || data;
   };
 
   const handleGetProductReviews = async (productId) => {

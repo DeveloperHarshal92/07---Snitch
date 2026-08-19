@@ -140,8 +140,11 @@ export const addProductVariant = async (req, res) => {
       images.push(...uploadedImages);
     }
 
-    const priceAmount = Number(req.body.price);
-    const priceCurrency = req.body.currency || "INR";
+    const rawPrice = req.body.price !== undefined && req.body.price !== "" ? req.body.price : req.body.priceAmount;
+    const priceAmount = rawPrice !== undefined && rawPrice !== "" && !isNaN(Number(rawPrice))
+      ? Number(rawPrice)
+      : (product.price?.amount ?? 0);
+    const priceCurrency = req.body.currency || req.body.priceCurrency || (product.price?.currency ?? "INR");
     const stock = Number(req.body.stock) || 0;
     const attributes = req.body.attributes
       ? JSON.parse(req.body.attributes)
