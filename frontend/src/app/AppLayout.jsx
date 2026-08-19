@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import Nav from "../features/Shared/components/Nav";
 import LuxurisenPreloader from "../features/Shared/components/LuxurisenPreloader";
 import BackToTop from "../features/Shared/components/BackToTop";
 
 const AppLayout = () => {
   const [showBanner, setShowBanner] = useState(true);
+  const location = useLocation();
+  const isSellerRoute = location.pathname.startsWith("/seller");
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fbf9f6] dark:bg-[#0a0908] text-[#0d0d0b] dark:text-[#fbf9f6] transition-colors duration-300">
@@ -46,8 +48,8 @@ const AppLayout = () => {
         </aside>
       )}
 
-      {/* Main Navigation */}
-      <Nav />
+      {/* Main Storefront Navigation (Hidden on Seller Portal) */}
+      {!isSellerRoute && <Nav />}
 
       {/* Page Content */}
       <main className="flex-1">
