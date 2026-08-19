@@ -34,10 +34,6 @@ export const globalLimiter = rateLimit({
     success: false,
     message: "Too many requests from this IP, please try again after 15 minutes.",
   },
-  skip: (req) => {
-    // Skip rate limiting for static assets or health checks if needed
-    return !req.path.startsWith("/api");
-  },
 });
 
 /**
