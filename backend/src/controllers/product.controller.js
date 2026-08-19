@@ -1,5 +1,6 @@
 import productModel from "../models/product.model.js";
 import { uploadFile } from "../services/storage.service.js";
+import { invalidateCache } from "../middlewares/cache.middleware.js";
 
 export const createProduct = async (req, res) => {
   const { title, description, priceAmount, priceCurrency } = req.body;
@@ -31,6 +32,9 @@ export const createProduct = async (req, res) => {
       images,
       seller: seller._id,
     });
+
+    // Invalidate cached product listings
+    await invalidateCache("cache:products:*");
 
     res.status(201).json({
       message: "Product created successfully",
@@ -156,6 +160,9 @@ export const addProductVariant = async (req, res) => {
     product.variants.push(newVariant);
 
     await product.save();
+
+    // Invalidate cached product listings and the specific product detail
+    await invalidateCache("cache:products:*");
 
     res.status(201).json({
       message: "Variant added successfully",

@@ -11,12 +11,16 @@ import cors from "cors";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { config } from "./config/config.js";
+import { globalLimiter } from "./middlewares/rateLimiter.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const publicPath = path.join(__dirname, "../public");
 
 const app = express();
+
+// Enable trust proxy for accurate client IP detection behind reverse proxies (e.g. Render, Nginx)
+app.set("trust proxy", 1);
 
 // Middleware
 app.use(morgan("dev"));
@@ -64,6 +68,9 @@ passport.use(
     },
   ),
 );
+
+// API Rate Limiting
+app.use("/api", globalLimiter);
 
 // API Routes
 app.use("/api/auth", authRouter);

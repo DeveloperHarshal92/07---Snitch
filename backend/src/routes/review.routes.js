@@ -10,15 +10,16 @@ import {
   addReviewValidator,
   editReviewValidator,
 } from "../validator/review.validator.js";
+import { cacheResponse } from "../middlewares/cache.middleware.js";
 
 const router = Router();
 
 /**
  * @route GET /api/reviews/:productId
- * @desc Get all reviews + stats for a product
+ * @desc Get all reviews + stats for a product (Cached for 5 minutes)
  * @access Public
  */
-router.get("/:productId", getProductReviews);
+router.get("/:productId", cacheResponse(300, "reviews"), getProductReviews);
 
 /**
  * @route POST /api/reviews/:productId

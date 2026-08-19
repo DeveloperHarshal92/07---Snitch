@@ -12,6 +12,7 @@ import {
 } from "../validator/auth.validator.js";
 import passport from "passport";
 import { authenticateUser } from "../middlewares/auth.middleware.js";
+import { authLimiter } from "../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
@@ -20,14 +21,14 @@ const router = Router();
  * @desc Register a new user
  * @access Public
  */
-router.post("/register", validateRegisterUser, register);
+router.post("/register", authLimiter, validateRegisterUser, register);
 
 /**
  * @route POST /api/auth/login
  * @desc Login a user and return a JWT token
  * @access Public
  */
-router.post("/login", validateLoginUser, login);
+router.post("/login", authLimiter, validateLoginUser, login);
 
 /**
  * @route POST /api/auth/logout

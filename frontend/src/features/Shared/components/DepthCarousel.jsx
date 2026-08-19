@@ -4,36 +4,31 @@ import gsap from "gsap";
 
 const DEFAULT_ITEMS = [
   {
-    image:
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&h=900&fit=crop&q=85",
+    image: "/edits/edit-1.jpg",
     alt: "New Season Collection",
     label: "New Season — SS'26",
     sub: "Wear the narrative",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1400&h=900&fit=crop&q=85",
+    image: "/edits/edit-2.jpg",
     alt: "Curated Essentials",
     label: "Curated Essentials",
     sub: "Considered wardrobe pieces",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1400&h=900&fit=crop&q=85",
+    image: "/edits/edit-3.jpg",
     alt: "Exclusive Drops",
     label: "Exclusive Drops",
     sub: "Limited. Bold. Yours.",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1400&h=900&fit=crop&q=85",
+    image: "/edits/edit-4.jpg",
     alt: "Street to Studio",
     label: "Street to Studio",
     sub: "Versatile silhouettes for every setting",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1400&h=900&fit=crop&q=85",
+    image: "/edits/edit-5.jpg",
     alt: "Craft & Finish",
     label: "Craft & Finish",
     sub: "Selected for enduring relevance",

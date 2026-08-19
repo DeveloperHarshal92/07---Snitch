@@ -9,6 +9,7 @@ import {
 } from "../controllers/product.controller.js";
 import multer from "multer";
 import { createProductValidator } from "../validator/product.validator.js";
+import { cacheResponse } from "../middlewares/cache.middleware.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -39,17 +40,17 @@ router.get("/seller", authenticateSeller, getSellerProducts);
 
 /**
  * @route GET /api/products
- * @desc Get all products
+ * @desc Get all products (Cached for 5 minutes)
  * @access Public
  */
-router.get("/", getAllProducts);
+router.get("/", cacheResponse(300, "products:all"), getAllProducts);
 
 /**
- * @route GET /api/products/:id
- * @desc Get a product by ID
+ * @route GET /api/products/detail/:id
+ * @desc Get a product by ID (Cached for 10 minutes)
  * @access Public
  */
-router.get("/detail/:id", getProductDetails);
+router.get("/detail/:id", cacheResponse(600, "products:detail"), getProductDetails);
 
 /**
  * @route POST /api/products/:productId/variants

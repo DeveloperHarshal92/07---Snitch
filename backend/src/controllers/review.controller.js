@@ -7,6 +7,7 @@ import {
   deleteReview,
   getAverageRating,
 } from "../dao/review.dao.js";
+import { invalidateCache } from "../middlewares/cache.middleware.js";
 
 // POST /api/reviews/:productId
 export const addReview = async (req, res) => {
@@ -25,6 +26,9 @@ export const addReview = async (req, res) => {
 
     const review = await createReview({ productId, userId, rating, title, body });
     await review.populate("user", "fullname");
+
+    // Invalidate cached reviews for this product
+    await invalidateCache("cache:reviews:*");
 
     res.status(201).json({
       message: "Review added successfully",
@@ -84,6 +88,9 @@ export const editReview = async (req, res) => {
 
     await updated.populate("user", "fullname");
 
+    // Invalidate cached reviews for this product
+    await invalidateCache("cache:reviews:*");
+
     res.status(200).json({
       message: "Review updated successfully",
       success: true,
@@ -113,6 +120,9 @@ export const removeReview = async (req, res) => {
         success: false,
       });
     }
+
+    // Invalidate cached reviews
+    await invalidateCache("cache:reviews:*");
 
     res.status(200).json({
       message: "Review deleted successfully",
