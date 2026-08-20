@@ -276,6 +276,7 @@ export const createOrderController = async (req, res) => {
         title: item.product.title,
         productId: item.product._id,
         variantId: item.variant || null,
+        seller: item.product.seller || null,
         quantity: item.quantity,
         images: itemImages,
         description: item.product.description,
@@ -388,3 +389,39 @@ export const getOrderDetails = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+
+export const getSellerOrders = async (req, res) => {
+  try {
+    const orders = await paymentDao.getOrdersBySeller(req.user._id);
+    return res.status(200).json({
+      message: "Seller orders retrieved successfully",
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    console.error("Error retrieving seller orders:", error);
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+export const getSellerOrderDetails = async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    const order = await paymentDao.getSellerOrderById(req.user._id, orderId);
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+        success: false,
+      });
+    }
+    return res.status(200).json({
+      message: "Seller order details retrieved successfully",
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("Error retrieving seller order details:", error);
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+

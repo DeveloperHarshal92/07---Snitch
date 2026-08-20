@@ -103,6 +103,7 @@ export const getCartDetails = async (userId) => {
         images: product.images,
         variants: product.variants,
         stock: product.stock,
+        seller: product.seller,
       },
       variant: item.variant || null,
       quantity: item.quantity || 1,

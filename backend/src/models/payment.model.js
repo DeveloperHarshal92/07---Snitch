@@ -26,6 +26,10 @@ const paymentSchema = new mongoose.Schema({
       title: String,
       productId: mongoose.Schema.Types.ObjectId,
       variantId: mongoose.Schema.Types.ObjectId,
+      seller: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
       quantity: Number,
       images: [{ url: String }],
       description: String,

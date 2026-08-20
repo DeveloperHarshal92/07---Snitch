@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { authenticateUser } from "../middlewares/auth.middleware.js";
+import {
+  authenticateUser,
+  authenticateSeller,
+} from "../middlewares/auth.middleware.js";
 import {
   validateAddToCart,
   validateCartProductParams,
@@ -14,6 +17,8 @@ import {
   verifyOrderController,
   getUserOrders,
   getOrderDetails,
+  getSellerOrders,
+  getSellerOrderDetails,
 } from "../controllers/cart.controller.js";
 import { validateCouponController } from "../controllers/coupon.controller.js";
 
@@ -118,6 +123,20 @@ router.get("/orders", authenticateUser, getUserOrders);
  * @access Private
  */
 router.get("/orders/:orderId", authenticateUser, getOrderDetails);
+
+/**
+ * @route GET /api/cart/seller/orders
+ * @desc Get all customer orders containing products from the authenticated seller
+ * @access Private (Sellers only)
+ */
+router.get("/seller/orders", authenticateSeller, getSellerOrders);
+
+/**
+ * @route GET /api/cart/seller/orders/:orderId
+ * @desc Get detailed customer order info for a specific order belonging to the seller
+ * @access Private (Sellers only)
+ */
+router.get("/seller/orders/:orderId", authenticateSeller, getSellerOrderDetails);
 
 /**
  * @route POST /api/cart/coupon/validate

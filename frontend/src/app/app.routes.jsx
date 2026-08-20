@@ -7,6 +7,8 @@ import Protected from "../features/auth/components/Protected";
 import Home from "../features/products/pages/Home";
 import ProductDetail from "../features/products/pages/ProductDetail";
 import SellerProductDetails from "../features/products/pages/SellerProductDetails";
+import SellerOrders from "../features/orders/pages/SellerOrders";
+import SellerOrderDetail from "../features/orders/pages/SellerOrderDetail";
 import Cart from "../features/cart/pages/Cart";
 import OrderSuccess from "../features/cart/pages/OrderSuccess";
 import OrderList from "../features/orders/pages/OrderList";
@@ -46,6 +48,22 @@ export const routes = createBrowserRouter([
             element: (
               <Protected role="seller">
                 <Dashboard />
+              </Protected>
+            ),
+          },
+          {
+            path: "/seller/orders",
+            element: (
+              <Protected role="seller">
+                <SellerOrders />
+              </Protected>
+            ),
+          },
+          {
+            path: "/seller/orders/:orderId",
+            element: (
+              <Protected role="seller">
+                <SellerOrderDetail />
               </Protected>
             ),
           },

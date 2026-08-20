@@ -5,6 +5,11 @@ const ordersApiInstance = axios.create({
   withCredentials: true,
 });
 
+const sellerOrdersApiInstance = axios.create({
+  baseURL: "/api/cart/seller/orders",
+  withCredentials: true,
+});
+
 export const getOrders = async () => {
   try {
     const response = await ordersApiInstance.get("/");
@@ -24,3 +29,24 @@ export const getOrderById = async (orderId) => {
     throw error;
   }
 };
+
+export const getSellerOrders = async () => {
+  try {
+    const response = await sellerOrdersApiInstance.get("/");
+    return response.data;
+  } catch (error) {
+    console.log("Error while fetching seller orders: ", error);
+    throw error;
+  }
+};
+
+export const getSellerOrderById = async (orderId) => {
+  try {
+    const response = await sellerOrdersApiInstance.get(`/${orderId}`);
+    return response.data;
+  } catch (error) {
+    console.log("Error while fetching seller order details: ", error);
+    throw error;
+  }
+};
+

@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { getOrders, getOrderById } from "../services/orders.api";
+import {
+  getOrders,
+  getOrderById,
+  getSellerOrders,
+  getSellerOrderById,
+} from "../services/orders.api";
 
 export const useOrders = () => {
   const [loading, setLoading] = useState(false);
@@ -35,10 +40,43 @@ export const useOrders = () => {
     }
   };
 
+  const handleGetSellerOrders = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getSellerOrders();
+      return data.orders ?? [];
+    } catch (err) {
+      console.log("Error while fetching seller orders: ", err);
+      setError(err?.response?.data?.message || err.message || "Failed to load seller orders");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGetSellerOrderDetails = async (orderId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getSellerOrderById(orderId);
+      return data.order ?? null;
+    } catch (err) {
+      console.log("Error while fetching seller order details: ", err);
+      setError(err?.response?.data?.message || err.message || "Failed to load seller order details");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     error,
     handleGetOrders,
     handleGetOrderDetails,
+    handleGetSellerOrders,
+    handleGetSellerOrderDetails,
   };
 };
+
